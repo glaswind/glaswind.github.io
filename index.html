@@ -1,128 +1,106 @@
-
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glaswind | Roblox Игра</title>
+  <title>Glaswind Support</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f4f4f4;
-    }
-    header {
-      background: #2c3e50;
-      padding: 20px;
-      color: white;
-      text-align: center;
-    }
-    header img {
-      max-height: 80px;
-    }
-    nav a {
-      margin: 0 15px;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    section {
-      padding: 30px;
-      max-width: 900px;
-      margin: auto;
-    }
-    .item {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .item img {
-      max-width: 100%;
-      border-radius: 8px;
-    }
-    .item button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
+    header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+    main { padding: 20px; max-width: 800px; margin: auto; }
+    form, .complaint { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    .hidden { display: none; }
+    .admin-login, .admin-panel { margin-top: 40px; }
   </style>
 </head>
 <body>
-
 <header>
-  <img src="logo.png" alt="Glaswind Logo">
-  <h1>Glaswind — Roblox Игра</h1>
-  <nav>
-    <a href="#about">Об игре</a>
-    <a href="#donate">Донат</a>
-    <a href="#video">Видео</a>
-    <a href="#support">Поддержка</a>
-  </nav>
+  <h1>Поддержка Glaswind</h1>
 </header>
+<main>
+  <section>
+    <h2>Отправить жалобу</h2>
+    <form id="complaintForm">
+      <input type="email" placeholder="Твоя почта" name="email" required>
+      <textarea name="message" placeholder="Опиши проблему..." required></textarea>
+      <input type="file" name="attachment">
+      <input type="text" name="botcheck" class="hidden" placeholder="Оставь это пустым">
+      <button type="submit">Отправить</button>
+    </form>
+    <div id="formStatus"></div>
+  </section>
 
-<section id="about">
-  <h2>О проекте</h2>
-  <p>Это будущая игра в Roblox от команды Glaswind. Скоро вы сможете исследовать, сражаться, развиваться и становиться легендой! Следите за обновлениями.</p>
-  <p><i>В скором времени будет доступно больше информации, трейлер и внутриигровые события!</i></p>
-</section>
+  <section class="admin-login">
+    <h2>Админка</h2>
+    <input type="password" id="adminPass" placeholder="Пароль админки">
+    <button onclick="loginAdmin()">Войти</button>
+  </section>
 
-<section id="donate">
-  <h2>Поддержи игру</h2>
-  <div class="item">
-    <h3>VIP Доступ</h3>
-    <button onclick="window.open('https://www.roblox.com/game-pass/677095628/50')">Купить за 50₽</button>
-  </div>
-  <div class="item">
-    <h3>Меч героя</h3>
-    <button onclick="window.open('https://www.roblox.com/game-pass/676970952/40')">Купить за 40₽</button>
-  </div>
-  <div class="item">
-    <h3>Стартовый бонус</h3>
-    <button onclick="window.open('https://www.roblox.com/game-pass/677365119/30')">Купить за 30₽</button>
-  </div>
-</section>
+  <section class="admin-panel hidden" id="adminPanel">
+    <h2>Жалобы</h2>
+    <div id="complaintsList">Загрузка жалоб...</div>
+  </section>
+</main>
 
-<section id="video">
-  <h2>Видео</h2>
-  <p>Трейлер игры появится здесь скоро. Следите за обновлениями!</p>
-  <iframe width="100%" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
-</section>
+<script>
+const PASSWORD = "fghjkl0uio89iuolhkj4";
+const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
 
-<section id="support">
-  <h2>Поддержка и жалобы</h2>
-  <form action="mailto:glaswind71@gmail.com" method="post" enctype="multipart/form-data">
-    <label>Твоя почта (чтобы мы могли ответить):</label>
-    <input type="email" name="user_email" required>
+// Отправка жалобы
+const form = document.getElementById("complaintForm");
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const data = new FormData(form);
+  if (data.get("botcheck")) return alert("Бот замечен!");
 
-    <label>Опиши проблему или вопрос:</label>
-    <textarea name="message" rows="5" required></textarea>
+  const complaint = {
+    email: data.get("email"),
+    message: data.get("message"),
+    time: new Date().toLocaleString(),
+  };
 
-    <label>Загрузить фото или видео (до 10 МБ):</label>
-    <input type="file" name="attachment" accept="image/*,video/*">
+  complaints.push(complaint);
+  localStorage.setItem("complaints", JSON.stringify(complaints));
+  document.getElementById("formStatus").innerText = "Жалоба отправлена!";
+  form.reset();
+});
 
-    <button type="submit">Отправить</button>
-  </form>
-</section>
+// Вход в админку
+function loginAdmin() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass === PASSWORD) {
+    document.getElementById("adminPanel").classList.remove("hidden");
+    loadComplaints();
+  } else {
+    alert("Неверный пароль");
+  }
+}
 
+// Загрузка жалоб в админке
+function loadComplaints() {
+  const container = document.getElementById("complaintsList");
+  container.innerHTML = "";
+  if (complaints.length === 0) return container.innerHTML = "Нет жалоб.";
+  complaints.forEach((c, i) => {
+    const div = document.createElement("div");
+    div.className = "complaint";
+    div.innerHTML = `
+      <p><b>Почта:</b> ${c.email}</p>
+      <p><b>Время:</b> ${c.time}</p>
+      <p><b>Сообщение:</b> ${c.message}</p>
+      <button onclick="resolveComplaint(${i})">Пометить как решено</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function resolveComplaint(index) {
+  complaints.splice(index, 1);
+  localStorage.setItem("complaints", JSON.stringify(complaints));
+  loadComplaints();
+}
+</script>
 </body>
 </html>
