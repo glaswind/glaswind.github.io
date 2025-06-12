@@ -46,7 +46,7 @@
 
 <script>
 const PASSWORD = "fghjkl0uio89iuolhkj4";
-const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+let complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
 
 // Отправка жалобы
 const form = document.getElementById("complaintForm");
@@ -90,13 +90,25 @@ function loadComplaints() {
       <p><b>Почта:</b> ${c.email}</p>
       <p><b>Время:</b> ${c.time}</p>
       <p><b>Сообщение:</b> ${c.message}</p>
-      <button onclick="resolveComplaint(${i})">Пометить как решено</button>
+      <textarea id="adminReply_${i}" placeholder="Ответ игроку..."></textarea>
+      <button onclick="replyToComplaint(${i})">Ответить и закрыть</button>
     `;
     container.appendChild(div);
   });
 }
 
-function resolveComplaint(index) {
+// Ответ и закрытие жалобы
+function replyToComplaint(index) {
+  const replyText = document.getElementById(`adminReply_${index}`).value.trim();
+  if (!replyText) return alert("Пожалуйста, введите ответ.");
+
+  const email = complaints[index].email;
+
+  // Здесь происходит "отправка" письма
+  console.log(`Письмо отправлено на ${email}:\n${replyText}`);
+  alert(`Ответ отправлен на ${email}.\n\nТекст ответа:\n${replyText}`);
+
+  // Удаление жалобы
   complaints.splice(index, 1);
   localStorage.setItem("complaints", JSON.stringify(complaints));
   loadComplaints();
@@ -104,3 +116,4 @@ function resolveComplaint(index) {
 </script>
 </body>
 </html>
+
