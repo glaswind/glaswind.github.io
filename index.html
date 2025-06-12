@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glaswind | Roblox Игра</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background: #2c3e50;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+    header img {
+      max-height: 80px;
+    }
+    nav a {
+      margin: 0 15px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    section {
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .item {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .item img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .item button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="Glaswind Logo">
+  <h1>Glaswind — Roblox Игра</h1>
+  <nav>
+    <a href="#about">Об игре</a>
+    <a href="#donate">Донат</a>
+    <a href="#video">Видео</a>
+    <a href="#support">Поддержка</a>
+  </nav>
+</header>
+
+<section id="about">
+  <h2>О проекте</h2>
+  <p>Это будущая игра в Roblox от команды Glaswind. Скоро вы сможете исследовать, сражаться, развиваться и становиться легендой! Следите за обновлениями.</p>
+  <p><i>В скором времени будет доступно больше информации, трейлер и внутриигровые события!</i></p>
+</section>
+
+<section id="donate">
+  <h2>Поддержи игру</h2>
+  <div class="item">
+    <h3>VIP Доступ</h3>
+    <button onclick="window.open('https://www.roblox.com/game-pass/677095628/50')">Купить за 50₽</button>
+  </div>
+  <div class="item">
+    <h3>Меч героя</h3>
+    <button onclick="window.open('https://www.roblox.com/game-pass/676970952/40')">Купить за 40₽</button>
+  </div>
+  <div class="item">
+    <h3>Стартовый бонус</h3>
+    <button onclick="window.open('https://www.roblox.com/game-pass/677365119/30')">Купить за 30₽</button>
+  </div>
+</section>
+
+<section id="video">
+  <h2>Видео</h2>
+  <p>Трейлер игры появится здесь скоро. Следите за обновлениями!</p>
+  <iframe width="100%" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+</section>
+
+<section id="support">
+  <h2>Поддержка и жалобы</h2>
+  <form action="mailto:glaswind71@gmail.com" method="post" enctype="multipart/form-data">
+    <label>Твоя почта (чтобы мы могли ответить):</label>
+    <input type="email" name="user_email" required>
+
+    <label>Опиши проблему или вопрос:</label>
+    <textarea name="message" rows="5" required></textarea>
+
+    <label>Загрузить фото или видео (до 10 МБ):</label>
+    <input type="file" name="attachment" accept="image/*,video/*">
+
+    <button type="submit">Отправить</button>
+  </form>
+</section>
+
+</body>
+</html>
