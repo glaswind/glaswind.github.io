@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Glaswind Support</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
@@ -12,6 +12,7 @@
     input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
     .hidden { display: none; }
     .file-link { display: inline-block; margin-top: 10px; color: blue; text-decoration: underline; }
+    textarea { resize: vertical; }
   </style>
 </head>
 <body>
@@ -19,7 +20,7 @@
   <h1>Поддержка Glaswind</h1>
 </header>
 <main>
-  <!-- Отправка жалобы -->
+  <!-- Жалоба игрока -->
   <section>
     <h2>Отправить жалобу</h2>
     <form id="complaintForm">
@@ -32,9 +33,9 @@
     <div id="formStatus"></div>
   </section>
 
-  <!-- Мои жалобы -->
+  <!-- Посмотреть свои жалобы -->
   <section>
-    <h2>Мои жалобы</h2>
+    <h2>Мои жалобы и ответы</h2>
     <input type="text" id="playerName" placeholder="Введи свой ник">
     <button onclick="loadPlayerComplaints()">Показать</button>
     <div id="playerComplaints"></div>
@@ -53,10 +54,25 @@
 </main>
 
 <script>
-const PASSWORD = "admin123"; // ЗАМЕНИ на свой пароль
-let complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+const PASSWORD = "admin123"; // замени на свой
+const MAX_AGE = 24 * 60 * 60 * 1000; // 24 часа в мс
 
-// Преобразовать файл в base64
+function loadComplaints() {
+  const raw = localStorage.getItem('complaints');
+  if (!raw) return [];
+  return JSON.parse(raw).filter(c => Date.now() - c.timestamp < MAX_AGE);
+}
+
+function saveComplaints(list) {
+  localStorage.setItem("complaints", JSON.stringify(list));
+}
+
+function cleanOldComplaints() {
+  const valid = loadComplaints();
+  saveComplaints(valid);
+}
+
+// Загружает вложение в base64
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -84,16 +100,19 @@ document.getElementById("complaintForm").addEventListener("submit", async (e) =>
     message: data.get("message"),
     file: fileData,
     time: new Date().toLocaleString(),
+    timestamp: Date.now(),
     reply: null
   };
 
-  complaints.push(newComplaint);
-  localStorage.setItem("complaints", JSON.stringify(complaints));
+  const list = loadComplaints();
+  list.push(newComplaint);
+  saveComplaints(list);
+
   document.getElementById("formStatus").innerText = "Жалоба отправлена!";
   form.reset();
 });
 
-// Админ логин
+// Админ вход
 function loginAdmin() {
   const input = document.getElementById("adminPass").value;
   if (input === PASSWORD) {
@@ -104,74 +123,69 @@ function loginAdmin() {
   }
 }
 
-// Показывать жалобы в админке
+// Показ жалоб в админке
 function showAdminComplaints() {
+  cleanOldComplaints();
+  const list = loadComplaints();
   const container = document.getElementById("complaintsList");
-  container.innerHTML = "";
-  if (complaints.length === 0) {
-    container.innerHTML = "Жалоб нет.";
-    return;
-  }
+  container.innerHTML = list.length ? "" : "Жалоб нет.";
 
-  complaints.forEach((c, i) => {
+  list.forEach((c, i) => {
     const div = document.createElement("div");
     div.className = "complaint";
     div.innerHTML = `
       <p><b>Ник:</b> ${c.nickname}</p>
       <p><b>Время:</b> ${c.time}</p>
       <p><b>Сообщение:</b> ${c.message}</p>
-      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Открыть вложение</a>` : ''}
-      <textarea id="reply_${i}" placeholder="Ответ игроку...">${c.reply || ''}</textarea>
-      <button onclick="sendReply(${i})">Ответить и закрыть</button>
+      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть файл</a>` : ''}
+      <textarea id="reply_${i}" placeholder="Ответ игроку...">${c.reply || ""}</textarea>
+      <button onclick="sendReply(${i})">Ответить</button>
     `;
     container.appendChild(div);
   });
 }
 
-// Ответ и удаление
+// Ответ игроку
 function sendReply(index) {
+  const list = loadComplaints();
   const reply = document.getElementById(`reply_${index}`).value.trim();
   if (!reply) return alert("Введите ответ");
 
-  complaints[index].reply = reply;
-  localStorage.setItem("complaints", JSON.stringify(complaints));
-  alert(`Ответ отправлен игроку ${complaints[index].nickname}`);
-
-  complaints.splice(index, 1);
-  localStorage.setItem("complaints", JSON.stringify(complaints));
+  list[index].reply = reply;
+  saveComplaints(list);
+  alert("Ответ сохранён");
   showAdminComplaints();
 }
 
-// Жалобы игрока по нику
+// Игрок смотрит свои жалобы
 function loadPlayerComplaints() {
+  cleanOldComplaints();
   const nickname = document.getElementById("playerName").value.trim().toLowerCase();
+  const list = loadComplaints().filter(c => c.nickname.toLowerCase() === nickname);
   const container = document.getElementById("playerComplaints");
   container.innerHTML = "";
 
-  if (!nickname) {
-    alert("Введите ник");
+  if (!nickname) return alert("Введите ник");
+  if (list.length === 0) {
+    container.innerHTML = "Жалоб не найдено.";
     return;
   }
 
-  const matches = complaints.filter(c => c.nickname.toLowerCase() === nickname);
-
-  if (matches.length === 0) {
-    container.innerHTML = "Жалобы не найдены.";
-    return;
-  }
-
-  matches.forEach(c => {
+  list.forEach(c => {
     const div = document.createElement("div");
     div.className = "complaint";
     div.innerHTML = `
       <p><b>Время:</b> ${c.time}</p>
       <p><b>Сообщение:</b> ${c.message}</p>
-      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть файл</a>` : ''}
-      <p><b>Ответ:</b> ${c.reply ? c.reply : "Ещё нет ответа."}</p>
+      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть вложение</a>` : ''}
+      <p><b>Ответ:</b> ${c.reply || "Ожидается ответ..."}</p>
     `;
     container.appendChild(div);
   });
 }
+
+// Очистить старые при загрузке страницы
+cleanOldComplaints();
 </script>
 </body>
 </html>
