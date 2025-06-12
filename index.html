@@ -11,8 +11,7 @@
     form, .complaint { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
     input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
     .hidden { display: none; }
-    .admin-login, .admin-panel, .player-check { margin-top: 40px; }
-    .file-link { margin-top: 10px; display: block; color: blue; text-decoration: underline; }
+    .file-link { display: inline-block; margin-top: 10px; color: blue; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -20,72 +19,44 @@
   <h1>Поддержка Glaswind</h1>
 </header>
 <main>
-  <!-- Форма отправки жалобы -->
+  <!-- Отправка жалобы -->
   <section>
     <h2>Отправить жалобу</h2>
     <form id="complaintForm">
-      <input type="text" placeholder="Твой ник в игре" name="nickname" required>
+      <input type="text" name="nickname" placeholder="Твой ник в игре" required>
       <textarea name="message" placeholder="Опиши проблему..." required></textarea>
       <input type="file" name="attachment">
-      <input type="text" name="botcheck" class="hidden" placeholder="Оставь это пустым">
+      <input type="text" name="botcheck" class="hidden">
       <button type="submit">Отправить</button>
     </form>
     <div id="formStatus"></div>
   </section>
 
-  <!-- Раздел для игроков -->
-  <section class="player-check">
+  <!-- Мои жалобы -->
+  <section>
     <h2>Мои жалобы</h2>
     <input type="text" id="playerName" placeholder="Введи свой ник">
-    <button onclick="loadPlayerComplaints()">Показать мои жалобы</button>
+    <button onclick="loadPlayerComplaints()">Показать</button>
     <div id="playerComplaints"></div>
   </section>
 
-  <!-- Раздел админки -->
-  <section class="admin-login">
+  <!-- Админка -->
+  <section>
     <h2>Админка</h2>
-    <input type="password" id="adminPass" placeholder="Пароль админки">
+    <input type="password" id="adminPass" placeholder="Пароль">
     <button onclick="loginAdmin()">Войти</button>
-  </section>
-
-  <section class="admin-panel hidden" id="adminPanel">
-    <h2>Жалобы</h2>
-    <div id="complaintsList">Загрузка жалоб...</div>
+    <div id="adminPanel" class="hidden">
+      <h3>Жалобы</h3>
+      <div id="complaintsList"></div>
+    </div>
   </section>
 </main>
 
 <script>
-const PASSWORD = "fghjkl0uio89iuolhkj4";
+const PASSWORD = "admin123"; // ЗАМЕНИ на свой пароль
 let complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
 
-// Отправка жалобы
-const form = document.getElementById("complaintForm");
-form.addEventListener("submit", async function(e) {
-  e.preventDefault();
-  const data = new FormData(form);
-  if (data.get("botcheck")) return alert("Бот замечен!");
-
-  const file = data.get("attachment");
-  let fileData = null;
-
-  if (file && file.size > 0) {
-    fileData = await toBase64(file);
-  }
-
-  const complaint = {
-    nickname: data.get("nickname"),
-    message: data.get("message"),
-    time: new Date().toLocaleString(),
-    reply: null,
-    file: fileData
-  };
-
-  complaints.push(complaint);
-  localStorage.setItem("complaints", JSON.stringify(complaints));
-  document.getElementById("formStatus").innerText = "Жалоба отправлена!";
-  form.reset();
-});
-
+// Преобразовать файл в base64
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -95,22 +66,52 @@ function toBase64(file) {
   });
 }
 
-// Вход в админку
+// Отправка жалобы
+document.getElementById("complaintForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  if (data.get("botcheck")) return;
+
+  let fileData = null;
+  const file = data.get("attachment");
+  if (file && file.size > 0) {
+    fileData = await toBase64(file);
+  }
+
+  const newComplaint = {
+    nickname: data.get("nickname"),
+    message: data.get("message"),
+    file: fileData,
+    time: new Date().toLocaleString(),
+    reply: null
+  };
+
+  complaints.push(newComplaint);
+  localStorage.setItem("complaints", JSON.stringify(complaints));
+  document.getElementById("formStatus").innerText = "Жалоба отправлена!";
+  form.reset();
+});
+
+// Админ логин
 function loginAdmin() {
-  const pass = document.getElementById("adminPass").value;
-  if (pass === PASSWORD) {
+  const input = document.getElementById("adminPass").value;
+  if (input === PASSWORD) {
     document.getElementById("adminPanel").classList.remove("hidden");
-    loadComplaints();
+    showAdminComplaints();
   } else {
     alert("Неверный пароль");
   }
 }
 
-// Загрузка жалоб в админке
-function loadComplaints() {
+// Показывать жалобы в админке
+function showAdminComplaints() {
   const container = document.getElementById("complaintsList");
   container.innerHTML = "";
-  if (complaints.length === 0) return container.innerHTML = "Нет жалоб.";
+  if (complaints.length === 0) {
+    container.innerHTML = "Жалоб нет.";
+    return;
+  }
 
   complaints.forEach((c, i) => {
     const div = document.createElement("div");
@@ -119,48 +120,53 @@ function loadComplaints() {
       <p><b>Ник:</b> ${c.nickname}</p>
       <p><b>Время:</b> ${c.time}</p>
       <p><b>Сообщение:</b> ${c.message}</p>
-      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Открыть прикреплённый файл</a>` : ''}
-      <textarea id="adminReply_${i}" placeholder="Ответ игроку...">${c.reply || ''}</textarea>
-      <button onclick="replyToComplaint(${i})">Ответить и закрыть</button>
+      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Открыть вложение</a>` : ''}
+      <textarea id="reply_${i}" placeholder="Ответ игроку...">${c.reply || ''}</textarea>
+      <button onclick="sendReply(${i})">Ответить и закрыть</button>
     `;
     container.appendChild(div);
   });
 }
 
-// Ответ админа и закрытие
-function replyToComplaint(index) {
-  const replyText = document.getElementById(`adminReply_${index}`).value.trim();
-  if (!replyText) return alert("Введите ответ.");
+// Ответ и удаление
+function sendReply(index) {
+  const reply = document.getElementById(`reply_${index}`).value.trim();
+  if (!reply) return alert("Введите ответ");
 
-  complaints[index].reply = replyText;
+  complaints[index].reply = reply;
   localStorage.setItem("complaints", JSON.stringify(complaints));
-  alert(`Ответ сохранён для игрока "${complaints[index].nickname}".`);
+  alert(`Ответ отправлен игроку ${complaints[index].nickname}`);
+
   complaints.splice(index, 1);
   localStorage.setItem("complaints", JSON.stringify(complaints));
-  loadComplaints();
+  showAdminComplaints();
 }
 
-// Раздел игрока — просмотр своих жалоб
+// Жалобы игрока по нику
 function loadPlayerComplaints() {
-  const name = document.getElementById("playerName").value.trim();
+  const nickname = document.getElementById("playerName").value.trim().toLowerCase();
   const container = document.getElementById("playerComplaints");
   container.innerHTML = "";
 
-  if (!name) return alert("Введите ник.");
-
-  const playerComplaints = complaints.filter(c => c.nickname.toLowerCase() === name.toLowerCase());
-  if (playerComplaints.length === 0) {
-    container.innerHTML = "Жалоб не найдено.";
+  if (!nickname) {
+    alert("Введите ник");
     return;
   }
 
-  playerComplaints.forEach(c => {
+  const matches = complaints.filter(c => c.nickname.toLowerCase() === nickname);
+
+  if (matches.length === 0) {
+    container.innerHTML = "Жалобы не найдены.";
+    return;
+  }
+
+  matches.forEach(c => {
     const div = document.createElement("div");
     div.className = "complaint";
     div.innerHTML = `
       <p><b>Время:</b> ${c.time}</p>
       <p><b>Сообщение:</b> ${c.message}</p>
-      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть вложение</a>` : ''}
+      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть файл</a>` : ''}
       <p><b>Ответ:</b> ${c.reply ? c.reply : "Ещё нет ответа."}</p>
     `;
     container.appendChild(div);
