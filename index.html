@@ -1,191 +1,52 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Glaswind Support</title>
+  <meta charset="UTF-8">
+  <title>Переводчик на выдуманный язык</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
-    header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
-    main { padding: 20px; max-width: 900px; margin: auto; }
-    form, .complaint { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-    input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    .hidden { display: none; }
-    .file-link { display: inline-block; margin-top: 10px; color: blue; text-decoration: underline; }
-    textarea { resize: vertical; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 100px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 18px;
+      margin: 10px;
+    }
+    #result {
+      font-size: 24px;
+      margin-top: 20px;
+      color: #0f0;
+    }
   </style>
 </head>
 <body>
-<header>
-  <h1>Поддержка Glaswind</h1>
-</header>
-<main>
-  <!-- Жалоба игрока -->
-  <section>
-    <h2>Отправить жалобу</h2>
-    <form id="complaintForm">
-      <input type="text" name="nickname" placeholder="Твой ник в игре" required>
-      <textarea name="message" placeholder="Опиши проблему..." required></textarea>
-      <input type="file" name="attachment">
-      <input type="text" name="botcheck" class="hidden">
-      <button type="submit">Отправить</button>
-    </form>
-    <div id="formStatus"></div>
-  </section>
+  <h1>🔄 Переводчик на выдуманный язык</h1>
+  <input id="inputWord" type="text" placeholder="Введи русское слово">
+  <button onclick="translate()">Перевести</button>
+  <div id="result"></div>
 
-  <!-- Посмотреть свои жалобы -->
-  <section>
-    <h2>Мои жалобы и ответы</h2>
-    <input type="text" id="playerName" placeholder="Введи свой ник">
-    <button onclick="loadPlayerComplaints()">Показать</button>
-    <div id="playerComplaints"></div>
-  </section>
+  <script>
+    function translate() {
+      const input = document.getElementById('inputWord').value;
+      const length = input.length;
+      const fakeLang = generateFakeWord(length);
+      document.getElementById('result').textContent = `"${input}" → "${fakeLang}"`;
+    }
 
-  <!-- Админка -->
-  <section>
-    <h2>Админка</h2>
-    <input type="password" id="adminPass" placeholder="Пароль">
-    <button onclick="loginAdmin()">Войти</button>
-    <div id="adminPanel" class="hidden">
-      <h3>Жалобы</h3>
-      <div id="complaintsList"></div>
-    </div>
-  </section>
-</main>
-
-<script>
-const PASSWORD = "admin123"; // замени на свой
-const MAX_AGE = 24 * 60 * 60 * 1000; // 24 часа в мс
-
-function loadComplaints() {
-  const raw = localStorage.getItem('complaints');
-  if (!raw) return [];
-  return JSON.parse(raw).filter(c => Date.now() - c.timestamp < MAX_AGE);
-}
-
-function saveComplaints(list) {
-  localStorage.setItem("complaints", JSON.stringify(list));
-}
-
-function cleanOldComplaints() {
-  const valid = loadComplaints();
-  saveComplaints(valid);
-}
-
-// Загружает вложение в base64
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-    reader.readAsDataURL(file);
-  });
-}
-
-// Отправка жалобы
-document.getElementById("complaintForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const data = new FormData(form);
-  if (data.get("botcheck")) return;
-
-  let fileData = null;
-  const file = data.get("attachment");
-  if (file && file.size > 0) {
-    fileData = await toBase64(file);
-  }
-
-  const newComplaint = {
-    nickname: data.get("nickname"),
-    message: data.get("message"),
-    file: fileData,
-    time: new Date().toLocaleString(),
-    timestamp: Date.now(),
-    reply: null
-  };
-
-  const list = loadComplaints();
-  list.push(newComplaint);
-  saveComplaints(list);
-
-  document.getElementById("formStatus").innerText = "Жалоба отправлена!";
-  form.reset();
-});
-
-// Админ вход
-function loginAdmin() {
-  const input = document.getElementById("adminPass").value;
-  if (input === PASSWORD) {
-    document.getElementById("adminPanel").classList.remove("hidden");
-    showAdminComplaints();
-  } else {
-    alert("Неверный пароль");
-  }
-}
-
-// Показ жалоб в админке
-function showAdminComplaints() {
-  cleanOldComplaints();
-  const list = loadComplaints();
-  const container = document.getElementById("complaintsList");
-  container.innerHTML = list.length ? "" : "Жалоб нет.";
-
-  list.forEach((c, i) => {
-    const div = document.createElement("div");
-    div.className = "complaint";
-    div.innerHTML = `
-      <p><b>Ник:</b> ${c.nickname}</p>
-      <p><b>Время:</b> ${c.time}</p>
-      <p><b>Сообщение:</b> ${c.message}</p>
-      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть файл</a>` : ''}
-      <textarea id="reply_${i}" placeholder="Ответ игроку...">${c.reply || ""}</textarea>
-      <button onclick="sendReply(${i})">Ответить</button>
-    `;
-    container.appendChild(div);
-  });
-}
-
-// Ответ игроку
-function sendReply(index) {
-  const list = loadComplaints();
-  const reply = document.getElementById(`reply_${index}`).value.trim();
-  if (!reply) return alert("Введите ответ");
-
-  list[index].reply = reply;
-  saveComplaints(list);
-  alert("Ответ сохранён");
-  showAdminComplaints();
-}
-
-// Игрок смотрит свои жалобы
-function loadPlayerComplaints() {
-  cleanOldComplaints();
-  const nickname = document.getElementById("playerName").value.trim().toLowerCase();
-  const list = loadComplaints().filter(c => c.nickname.toLowerCase() === nickname);
-  const container = document.getElementById("playerComplaints");
-  container.innerHTML = "";
-
-  if (!nickname) return alert("Введите ник");
-  if (list.length === 0) {
-    container.innerHTML = "Жалоб не найдено.";
-    return;
-  }
-
-  list.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "complaint";
-    div.innerHTML = `
-      <p><b>Время:</b> ${c.time}</p>
-      <p><b>Сообщение:</b> ${c.message}</p>
-      ${c.file ? `<a href="${c.file}" target="_blank" class="file-link">Посмотреть вложение</a>` : ''}
-      <p><b>Ответ:</b> ${c.reply || "Ожидается ответ..."}</p>
-    `;
-    container.appendChild(div);
-  });
-}
-
-// Очистить старые при загрузке страницы
-cleanOldComplaints();
-</script>
+    function generateFakeWord(length) {
+      const symbols = "!@#$%^&*()_+{}[]|:;<>,.?/~`-=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += symbols.charAt(Math.floor(Math.random() * symbols.length));
+      }
+      return result;
+    }
+  </script>
 </body>
 </html>
