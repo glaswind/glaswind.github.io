@@ -1,90 +1,139 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>LEGO Shop</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #fffae5;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #e60012;
-        }
-        .products {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-        }
-        .product {
-            border: 2px solid #ffcc00;
-            padding: 10px;
-            border-radius: 10px;
-            background: white;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .product img {
-            width: 100%;
-            height: auto;
-        }
-        .product h2 {
-            font-size: 18px;
-            margin: 10px 0 5px;
-        }
-        .product p {
-            font-size: 16px;
-            color: #333;
-        }
-        .buy-button {
-            background: #e60012;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .buy-button:hover {
-            background: #c5000f;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>LEGO Shop</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #fffae5;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+        color: #e60012;
+    }
+    .controls {
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    select {
+        padding: 8px;
+        font-size: 16px;
+    }
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    .product {
+        border: 2px solid #ffcc00;
+        padding: 10px;
+        border-radius: 10px;
+        background: white;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .product img {
+        width: 100%;
+        height: auto;
+    }
+    .product h2 {
+        font-size: 18px;
+        margin: 10px 0 5px;
+    }
+    .product p {
+        font-size: 16px;
+        color: #333;
+    }
+    .buy-button {
+        background: #e60012;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .buy-button:hover {
+        background: #c5000f;
+    }
+</style>
 </head>
 <body>
 
 <h1>LEGO Интернет-магазин</h1>
 
-<div class="products">
-    <div class="product">
-        <img src="https://www.lego.com/cdn/cs/set/assets/blt52c10e93e9a4a5ff/11001_alt1.png" alt="LEGO Classic">
-        <h2>LEGO Classic</h2>
-        <p>Цена: 1200 грн</p>
-        <button class="buy-button">Купить</button>
-    </div>
+<div class="controls">
+    <select id="categorySelect">
+        <option value="all">Все категории</option>
+        <option value="classic">Classic</option>
+        <option value="harrypotter">Harry Potter</option>
+        <option value="city">City</option>
+        <option value="creator">Creator</option>
+    </select>
 
-    <div class="product">
-        <img src="https://www.lego.com/cdn/cs/set/assets/blt2a387f082c77ff8e/75954_alt1.png" alt="LEGO Harry Potter">
-        <h2>LEGO Harry Potter</h2>
-        <p>Цена: 2500 грн</p>
-        <button class="buy-button">Купить</button>
-    </div>
-
-    <div class="product">
-        <img src="https://www.lego.com/cdn/cs/set/assets/bltb40e2e0344f8a60b/60197_alt1.png" alt="LEGO City Train">
-        <h2>LEGO City Train</h2>
-        <p>Цена: 3200 грн</p>
-        <button class="buy-button">Купить</button>
-    </div>
-
-    <div class="product">
-        <img src="https://www.lego.com/cdn/cs/set/assets/blt171f68504a658555/10270_alt1.png" alt="LEGO Creator Bookshop">
-        <h2>LEGO Bookshop</h2>
-        <p>Цена: 5500 грн</p>
-        <button class="buy-button">Купить</button>
-    </div>
+    <select id="sortSelect">
+        <option value="asc">По цене (возр.)</option>
+        <option value="desc">По цене (убыв.)</option>
+    </select>
 </div>
+
+<div class="products" id="productsList">
+    <!-- Товары будут сгенерированы с JS -->
+</div>
+
+<script>
+    const products = [
+        { name: "LEGO Classic", price: 1200, category: "classic", img: "https://www.lego.com/cdn/cs/set/assets/blt52c10e93e9a4a5ff/11001_alt1.png" },
+        { name: "LEGO Harry Potter", price: 2500, category: "harrypotter", img: "https://www.lego.com/cdn/cs/set/assets/blt2a387f082c77ff8e/75954_alt1.png" },
+        { name: "LEGO City Train", price: 3200, category: "city", img: "https://www.lego.com/cdn/cs/set/assets/bltb40e2e0344f8a60b/60197_alt1.png" },
+        { name: "LEGO Bookshop", price: 5500, category: "creator", img: "https://www.lego.com/cdn/cs/set/assets/blt171f68504a658555/10270_alt1.png" },
+        { name: "LEGO City Police", price: 1800, category: "city", img: "https://www.lego.com/cdn/cs/set/assets/blt32bdc344a25c3e0e/60317_alt1.png" },
+        { name: "LEGO Creator 3-in-1", price: 1500, category: "creator", img: "https://www.lego.com/cdn/cs/set/assets/blt46d531ebc988c125/31129_alt1.png" },
+        { name: "LEGO Hogwarts Castle", price: 9500, category: "harrypotter", img: "https://www.lego.com/cdn/cs/set/assets/blt0101e497157b2b2b/71043_alt1.png" },
+        { name: "LEGO Classic Bricks", price: 800, category: "classic", img: "https://www.lego.com/cdn/cs/set/assets/blt90c86754dd47f89c/11002_alt1.png" }
+    ];
+
+    const productsList = document.getElementById('productsList');
+    const categorySelect = document.getElementById('categorySelect');
+    const sortSelect = document.getElementById('sortSelect');
+
+    function renderProducts(items) {
+        productsList.innerHTML = '';
+        items.forEach(product => {
+            productsList.innerHTML += `
+                <div class="product">
+                    <img src="${product.img}" alt="${product.name}">
+                    <h2>${product.name}</h2>
+                    <p>Цена: ${product.price} грн</p>
+                    <button class="buy-button">Купить</button>
+                </div>
+            `;
+        });
+    }
+
+    function applyFiltersAndSort() {
+        let filtered = products;
+
+        const category = categorySelect.value;
+        if (category !== 'all') {
+            filtered = filtered.filter(p => p.category === category);
+        }
+
+        const sortBy = sortSelect.value;
+        filtered.sort((a,b) => sortBy === 'asc' ? a.price - b.price : b.price - a.price);
+
+        renderProducts(filtered);
+    }
+
+    categorySelect.addEventListener('change', applyFiltersAndSort);
+    sortSelect.addEventListener('change', applyFiltersAndSort);
+
+    // Первоначальный рендер
+    applyFiltersAndSort();
+</script>
 
 </body>
 </html>
