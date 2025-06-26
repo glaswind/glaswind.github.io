@@ -2,16 +2,21 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>LEGO Shop</title>
+<title>LEGO Интернет-магазин</title>
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: #fffae5;
+        background: linear-gradient(
+          90deg,
+          red, orange, yellow, green, blue, indigo, violet
+        );
         padding: 20px;
+        min-height: 100vh;
     }
     h1 {
         text-align: center;
-        color: #e60012;
+        color: white;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
     }
     .controls {
         margin: 20px 0;
@@ -80,9 +85,7 @@
     </select>
 </div>
 
-<div class="products" id="productsList">
-    <!-- Товары будут сгенерированы с JS -->
-</div>
+<div class="products" id="productsList"></div>
 
 <script>
     const products = [
@@ -131,7 +134,6 @@
     categorySelect.addEventListener('change', applyFiltersAndSort);
     sortSelect.addEventListener('change', applyFiltersAndSort);
 
-    // Первоначальный рендер
     applyFiltersAndSort();
 </script>
 
