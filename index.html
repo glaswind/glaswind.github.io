@@ -1,138 +1,128 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>LEGO Интернет-магазин</title>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Summer Car — Фан-сайт</title>
+  <style>
     body {
-        font-family: Arial, sans-serif;
-        background: url('background.png') center center / cover no-repeat fixed;
-        padding: 20px;
-        min-height: 100vh;
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #2f2f2f;
+      color: #f1f1f1;
     }
-    h1 {
-        text-align: center;
-        color: white;
-        text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+
+    header {
+      background-color: #111;
+      padding: 20px;
+      text-align: center;
     }
-    .controls {
-        margin: 20px 0;
-        display: flex;
-        justify-content: center;
-        gap: 20px;
+
+    header h1 {
+      margin: 0;
+      color: #ffd700;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px #000;
     }
-    select {
-        padding: 8px;
-        font-size: 16px;
+
+    nav {
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
     }
-    .products {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 20px;
+
+    nav a {
+      color: #ddd;
+      padding: 15px 20px;
+      text-decoration: none;
+      display: block;
+      transition: 0.2s;
     }
-    .product {
-        border: 2px solid #ffcc00;
-        padding: 10px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.9);
-        text-align: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+    nav a:hover {
+      background-color: #444;
+      color: #fff;
     }
-    .product img {
-        width: 100%;
-        height: auto;
+
+    section {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
     }
-    .product h2 {
-        font-size: 18px;
-        margin: 10px 0 5px;
+
+    section h2 {
+      color: #ffd700;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #555;
+      padding-bottom: 5px;
     }
-    .product p {
-        font-size: 16px;
-        color: #333;
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #111;
+      color: #888;
     }
-    .buy-button {
-        background: #e60012;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
+
+    @media (max-width: 600px) {
+      nav {
+        flex-direction: column;
+      }
     }
-    .buy-button:hover {
-        background: #c5000f;
-    }
-</style>
+  </style>
 </head>
 <body>
 
-<h1>LEGO Интернет-магазин</h1>
+<header>
+  <h1>My Summer Car — Фан-сайт</h1>
+</header>
 
-<div class="controls">
-    <select id="categorySelect">
-        <option value="all">Все категории</option>
-        <option value="classic">Classic</option>
-        <option value="harrypotter">Harry Potter</option>
-        <option value="city">City</option>
-        <option value="creator">Creator</option>
-    </select>
+<nav>
+  <a href="#about">Об игре</a>
+  <a href="#guide">Гайд</a>
+  <a href="#car">Машина</a>
+  <a href="#characters">Персонажи</a>
+  <a href="#tips">Советы</a>
+</nav>
 
-    <select id="sortSelect">
-        <option value="asc">По цене (возр.)</option>
-        <option value="desc">По цене (убыв.)</option>
-    </select>
-</div>
+<section id="about">
+  <h2>Об игре</h2>
+  <p>My Summer Car — симулятор жизни в Финляндии 90-х. Ты играешь за подростка, который должен собрать машину, выживать, пить пиво и не умереть.</p>
+</section>
 
-<div class="products" id="productsList"></div>
+<section id="guide">
+  <h2>Гайд по выживанию</h2>
+  <p>Сначала собери Сатсуму. Потом — ищи еду, зарабатывай деньги, устраняй поломки. Всегда следи за жаждой, голодом и усталостью!</p>
+</section>
 
-<script>
-    const products = [
-        { name: "LEGO Classic", price: 1200, category: "classic", img: "https://www.lego.com/cdn/cs/set/assets/blt52c10e93e9a4a5ff/11001_alt1.png" },
-        { name: "LEGO Harry Potter", price: 2500, category: "harrypotter", img: "https://www.lego.com/cdn/cs/set/assets/blt2a387f082c77ff8e/75954_alt1.png" },
-        { name: "LEGO City Train", price: 3200, category: "city", img: "https://www.lego.com/cdn/cs/set/assets/bltb40e2e0344f8a60b/60197_alt1.png" },
-        { name: "LEGO Bookshop", price: 5500, category: "creator", img: "https://www.lego.com/cdn/cs/set/assets/blt171f68504a658555/10270_alt1.png" },
-        { name: "LEGO City Police", price: 1800, category: "city", img: "https://www.lego.com/cdn/cs/set/assets/blt32bdc344a25c3e0e/60317_alt1.png" },
-        { name: "LEGO Creator 3-in-1", price: 1500, category: "creator", img: "https://www.lego.com/cdn/cs/set/assets/blt46d531ebc988c125/31129_alt1.png" },
-        { name: "LEGO Hogwarts Castle", price: 9500, category: "harrypotter", img: "https://www.lego.com/cdn/cs/set/assets/blt0101e497157b2b2b/71043_alt1.png" },
-        { name: "LEGO Classic Bricks", price: 800, category: "classic", img: "https://www.lego.com/cdn/cs/set/assets/blt90c86754dd47f89c/11002_alt1.png" }
-    ];
+<section id="car">
+  <h2>Машина: Сатсума</h2>
+  <p>Основной автомобиль — Satsuma AMP. Нужно собрать с нуля: двигатель, кузов, подвеску. Не забудь затянуть болты!</p>
+</section>
 
-    const productsList = document.getElementById('productsList');
-    const categorySelect = document.getElementById('categorySelect');
-    const sortSelect = document.getElementById('sortSelect');
+<section id="characters">
+  <h2>Персонажи</h2>
+  <ul>
+    <li>Механик Флетари — чини машину (если она не сгорела)</li>
+    <li>Пьяный сосед — ездит как бешеный</li>
+    <li>Почтальон, полицейские и продавец еды</li>
+  </ul>
+</section>
 
-    function renderProducts(items) {
-        productsList.innerHTML = '';
-        items.forEach(product => {
-            productsList.innerHTML += `
-                <div class="product">
-                    <img src="${product.img}" alt="${product.name}">
-                    <h2>${product.name}</h2>
-                    <p>Цена: ${product.price} грн</p>
-                    <button class="buy-button">Купить</button>
-                </div>
-            `;
-        });
-    }
+<section id="tips">
+  <h2>Полезные советы</h2>
+  <ul>
+    <li>Сохраняйся часто!</li>
+    <li>Болты нужно затягивать крест-накрест</li>
+    <li>Не пей всю водку сразу — ты умрешь :)</li>
+    <li>Покупай еду заранее — магазин не всегда открыт</li>
+  </ul>
+</section>
 
-    function applyFiltersAndSort() {
-        let filtered = products;
-
-        const category = categorySelect.value;
-        if (category !== 'all') {
-            filtered = filtered.filter(p => p.category === category);
-        }
-
-        const sortBy = sortSelect.value;
-        filtered.sort((a,b) => sortBy === 'asc' ? a.price - b.price : b.price - a.price);
-
-        renderProducts(filtered);
-    }
-
-    categorySelect.addEventListener('change', applyFiltersAndSort);
-    sortSelect.addEventListener('change', applyFiltersAndSort);
-
-    applyFiltersAndSort();
-</script>
+<footer>
+  <p>© 2025 My Summer Car фан-сайт. Неофициальный проект.</p>
+</footer>
 
 </body>
 </html>
