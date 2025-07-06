@@ -1,128 +1,35 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Goir Garage Survival — фан-сайт</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background-color: #2f2f2f;
-      color: #f1f1f1;
-    }
-
-    header {
-      background-color: #111;
-      padding: 20px;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      color: #ffd700;
-      font-size: 2.5em;
-      text-shadow: 2px 2px 4px #000;
-    }
-
-    nav {
-      background-color: #222;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    nav a {
-      color: #ddd;
-      padding: 15px 20px;
-      text-decoration: none;
-      display: block;
-      transition: 0.2s;
-    }
-
-    nav a:hover {
-      background-color: #444;
-      color: #fff;
-    }
-
-    section {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    section h2 {
-      color: #ffd700;
-      margin-bottom: 10px;
-      border-bottom: 2px solid #555;
-      padding-bottom: 5px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 10px;
-      background-color: #111;
-      color: #888;
-    }
-
-    @media (max-width: 600px) {
-      nav {
-        flex-direction: column;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<header>
-  <h1>Goir Garage Survival</h1>
-</header>
-
-<nav>
-  <a href="#about">Об игре</a>
-  <a href="#guide">Гайд</a>
-  <a href="#car">Машина</a>
-  <a href="#characters">Персонажи</a>
-  <a href="#tips">Советы</a>
-</nav>
-
-<section id="about">
-  <h2>Об игре</h2>
-  <p>Goir Garage Survival — это симулятор выживания в деревне. Игрок собирает автомобиль, выживает, ищет еду и ремонтирует технику.</p>
-</section>
-
-<section id="guide">
-  <h2>Гайд по выживанию</h2>
-  <p>Сначала собери свою машину. Затем следи за нуждами: жажда, голод, усталость. Деньги можно заработать, выполняя мелкие задания.</p>
-</section>
-
-<section id="car">
-  <h2>Машина</h2>
-  <p>Главная задача — восстановить старый автомобиль по частям. Всё от двигателя до подвески собирается вручную. Не забудь затягивать болты!</p>
-</section>
-
-<section id="characters">
-  <h2>Персонажи</h2>
-  <ul>
-    <li>Механик — поможет с ремонтом</li>
-    <li>Сосед — может подкинуть тебя в город</li>
-    <li>Продавец — продаёт еду и детали</li>
-  </ul>
-</section>
-
-<section id="tips">
-  <h2>Полезные советы</h2>
-  <ul>
-    <li>Сохраняйся перед каждой поездкой</li>
-    <li>Запасись едой заранее</li>
-    <li>Затягивай болты крест-накрест</li>
-    <li>Следи за уровнем масла и охлаждения</li>
-  </ul>
-</section>
-
-<footer>
-  <p>Все права защищены © 2025 Goir Studio</p>
-</footer>
-
-</body>
-</html>
+yp = (int)(height / 2 + K1 ooz * y);
+idx=xp + yp * width;
+if (idx >= 0 && idx < width height) {
+Lf (ooz > zBuffer[idx]) {
+zBuffer[idx] = ooz;
+buffer[idx] = ch;
+}
+}
+}
+int main() {
+printf("\x1b[2J");
+while (1) {
+memset(buffer, backgroundASCIICode, width height);
+memset(zBuffer, @, width height * 4);
+for (float cubeX-cubeWidth; cubeX< cubeWidth; cubeX + incrementSpeed) {
+for (float cubey-cubeWidth; cubey < cubeWidth;
+cubey += incrementSpeed) {
+calculateForSurface (cubeX, cubey, cubeWidth, '.');
+calculateForSurface(cubeWidth, cubey, cubeX, '$');
+calculateForSurface(-cubeWidth, cubey, -cubeX, '~');
+calculateForSurface(-cubeX, cubey, cubeWidth, #');
+calculateForSurface(cubeX, cubeWidth, -cubey, ';');
+calculateForSurface(cubeX, cubeWidth, cubey, +);
+}
+}
+printf("\x1b[Н");
+for (int k=0; k < width height; k++) {
+putchar(k% width ? buffer[k]: 10);
+}
+A+ 0.005;
+B+ 0.005;
+usleep(1000);
+}
+return 0;
+}
