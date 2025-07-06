@@ -1,90 +1,31 @@
-#include <stdio.h>    // For printf, putchar
-#include <string.h>   // For memset
-#include <unistd.h>   // For usleep (on Unix-like systems)
-#include <math.h>     // For sin, cos
-
-// Define constants for the scene
-#define width 80
-#define height 22
-#define K1 40
-#define incrementSpeed 0.02
-#define cubeWidth 10
-
-// Declare global buffers for the screen and Z-buffer
-char buffer[width * height];
-float zBuffer[width * height];
-
-// Global rotation angles
-float A = 0, B = 0;
-
-// ASCII character for background
-char backgroundASCIICode = ' ';
-
-// Function to calculate rotation and projection for a surface point
-void calculateForSurface(float cubeX, float cubeY, float cubeZ, char ch) {
-    // Rotate around Y-axis, then X-axis
-    float x = cubeY * sin(A) * sin(B) + cubeX * cos(B) + cubeY * cos(A) * sin(B);
-    float y = cubeY * cos(A) - cubeX * sin(A) * sin(B) + cubeZ * sin(A) * cos(B);
-    float z = cubeZ * cos(A) * cos(B) - cubeY * sin(A) * cos(B) + cubeX * sin(B) + 5; // Added 5 to bring it closer
-
-    // Perspective projection factor
-    float ooz = 1 / z; // one over z
-
-    // Project 3D coordinates to 2D screen coordinates
-    int xp = (int)(width / 2 + K1 * x * ooz);
-    int yp = (int)(height / 2 + K1 * y * ooz);
-
-    // Calculate index in 1D buffer
-    int idx = xp + yp * width;
-
-    // Check if the point is within screen bounds
-    if (xp >= 0 && xp < width && yp >= 0 && yp < height) {
-        // If this point is closer than what's already in the Z-buffer, update it
-        if (ooz > zBuffer[idx]) {
-            zBuffer[idx] = ooz;
-            buffer[idx] = ch;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Cube</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0F0; /* Green text for a terminal-like feel */
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars */
         }
-    }
-}
-
-int main() {
-    // Clear the screen (ANSI escape code)
-    printf("\x1b[2J");
-
-    while (1) {
-        // Initialize buffers for each frame
-        memset(buffer, backgroundASCIICode, width * height);
-        memset(zBuffer, 0, width * height * sizeof(float)); // Initialize zBuffer with 0s (farthest)
-
-        // Loop through the cube's surfaces to draw them
-        // This iterates across the surface of the cube
-        for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
-            for (float cubeY = -cubeWidth; cubeY < cubeWidth; cubeY += incrementSpeed) {
-                calculateForSurface(cubeX, cubeY, -cubeWidth, '.'); // Front face
-                calculateForSurface(cubeWidth, cubeY, cubeX, '$');   // Right face
-                calculateForSurface(-cubeWidth, cubeY, -cubeX, '~'); // Left face
-                calculateForSurface(-cubeX, cubeY, cubeWidth, '#');  // Back face
-                calculateForSurface(cubeX, cubeWidth, -cubeY, ';');  // Top face
-                calculateForSurface(cubeX, -cubeWidth, cubeY, '+');  // Bottom face (corrected sign for -cubeWidth)
-            }
+        pre {
+            white-space: pre; /* Preserve whitespace and line breaks */
+            line-height: 1; /* Tighter line spacing */
+            font-size: 10px; /* Adjust as needed */
         }
+    </style>
+</head>
+<body>
+    <pre id="cubeOutput"></pre>
 
-        // Set cursor to home position (top-left)
-        printf("\x1b[H");
-
-        // Print the buffer to the console
-        for (int k = 0; k < width * height; k++) {
-            // Print newline at the end of each row
-            putchar(k % width ? buffer[k] : '\n');
-        }
-
-        // Increment rotation angles
-        A += 0.005;
-        B += 0.005;
-
-        // Pause for a short duration to control animation speed
-        usleep(10000); // 10,000 microseconds = 10 milliseconds
-    }
-
-    return 0;
-}
+    <script src="cube.js"></script>
+</body>
+</html>
