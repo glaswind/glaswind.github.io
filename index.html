@@ -711,10 +711,10 @@
                                 <button 
                                     onclick="vote(${poll.id}, ${index})" 
                                     class="w-full text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition flex justify-between items-center"
-                                    ${localStorage.getItem(`poll_${poll.id}_voted`) ? 'disabled' : ''}
+                                    ${localStorage.getItem(`poll_${poll.id}_voted_${poll.question}`) ? 'disabled' : ''}
                                 >
                                     <span>${option}</span>
-                                    ${localStorage.getItem(`poll_${poll.id}_voted`) ? `
+                                    ${localStorage.getItem(`poll_${poll.id}_voted_${poll.question}`) ? `
                                         <span class="text-sm font-medium">
                                             ${poll.votes[index]} (${totalVotes ? Math.round((poll.votes[index] / totalVotes) * 100) : 0}%)
                                         </span>
@@ -731,7 +731,7 @@
                             </div>
                         `).join('')}
                     </div>
-                    ${localStorage.getItem(`poll_${poll.id}_voted`) ? `
+                    ${localStorage.getItem(`poll_${poll.id}_voted_${poll.question}`) ? `
                         <p class="text-sm text-gray-500 mt-3">Всього голосів: ${totalVotes}</p>
                     ` : ''}
                 `;
@@ -743,10 +743,10 @@
         // Vote function
         window.vote = function(pollId, optionIndex) {
             const poll = polls.find(p => p.id === pollId);
-            if (poll && !localStorage.getItem(`poll_${pollId}_voted`)) {
+            if (poll && !localStorage.getItem(`poll_${pollId}_voted_${poll.question}`)) {
                 poll.votes[optionIndex]++;
                 saveVotes();
-                localStorage.setItem(`poll_${pollId}_voted`, 'true');
+                localStorage.setItem(`poll_${pollId}_voted_${poll.question}`, 'true');
                 renderPolls();
             }
         };
@@ -756,7 +756,7 @@
             if (confirm('Ви впевнені, що хочете скинути всі голоси?')) {
                 polls.forEach(poll => {
                     poll.votes = new Array(poll.options.length).fill(0);
-                    localStorage.removeItem(`poll_${poll.id}_voted`);
+                    localStorage.removeItem(`poll_${poll.id}_voted_${poll.question}`);
                 });
                 saveVotes();
                 renderPolls();
