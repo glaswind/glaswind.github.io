@@ -438,6 +438,17 @@
         </div>
     </section>
 
+    <!-- Polls Section -->
+    <section id="polls" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-green-800">Опитування</h2>
+            
+            <div id="polls-container" class="max-w-3xl mx-auto">
+                <!-- Polls will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
     <!-- FAQ Section -->
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
@@ -630,6 +641,131 @@
                 }
             });
         });
+
+        // Polls System
+        const pollsContainer = document.getElementById('polls-container');
+        const storageKey = 'robochaya_polls_votes';
+
+        // Sample polls data - you can modify this easily
+        const polls = [
+            {
+                id: 1,
+                question: "Який аспект гри вас найбільше цікавить?",
+                options: [
+                    "Складання тракторів",
+                    "Бджільництво",
+                    "Сільське господарство",
+                    "Спілкування з NPC"
+                ],
+                votes: [0, 0, 0, 0] // Initialize with zero votes
+            },
+            {
+                id: 2,
+                question: "Як часто ви граєте в симулятори?",
+                options: [
+                    "Щодня",
+                    "Кілька разів на тиждень",
+                    "Кілька разів на місяць",
+                    "Рідко"
+                ],
+                votes: [0, 0, 0, 0]
+            }
+        ];
+
+        // Load saved votes from localStorage
+        function loadVotes() {
+            const savedVotes = localStorage.getItem(storageKey);
+            if (savedVotes) {
+                const parsedVotes = JSON.parse(savedVotes);
+                polls.forEach(poll => {
+                    if (parsedVotes[poll.id]) {
+                        poll.votes = parsedVotes[poll.id];
+                    }
+                });
+            }
+        }
+
+        // Save votes to localStorage
+        function saveVotes() {
+            const votesToSave = {};
+            polls.forEach(poll => {
+                votesToSave[poll.id] = poll.votes;
+            });
+            localStorage.setItem(storageKey, JSON.stringify(votesToSave));
+        }
+
+        // Render all polls
+        function renderPolls() {
+            pollsContainer.innerHTML = '';
+            polls.forEach(poll => {
+                const pollElement = document.createElement('div');
+                pollElement.className = 'mb-12 bg-white p-6 rounded-xl shadow-md';
+                
+                const totalVotes = poll.votes.reduce((a, b) => a + b, 0);
+                
+                pollElement.innerHTML = `
+                    <h3 class="text-xl font-bold mb-4">${poll.question}</h3>
+                    <div class="space-y-3">
+                        ${poll.options.map((option, index) => `
+                            <div class="poll-option">
+                                <button 
+                                    onclick="vote(${poll.id}, ${index})" 
+                                    class="w-full text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition flex justify-between items-center"
+                                    ${localStorage.getItem(`poll_${poll.id}_voted`) ? 'disabled' : ''}
+                                >
+                                    <span>${option}</span>
+                                    ${localStorage.getItem(`poll_${poll.id}_voted`) ? `
+                                        <span class="text-sm font-medium">
+                                            ${poll.votes[index]} (${totalVotes ? Math.round((poll.votes[index] / totalVotes) * 100) : 0}%)
+                                        </span>
+                                    ` : ''}
+                                </button>
+                                ${localStorage.getItem(`poll_${poll.id}_voted`) ? `
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                        <div 
+                                            class="bg-green-600 h-2.5 rounded-full" 
+                                            style="width: ${totalVotes ? (poll.votes[index] / totalVotes) * 100 : 0}%"
+                                        ></div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${localStorage.getItem(`poll_${poll.id}_voted`) ? `
+                        <p class="text-sm text-gray-500 mt-3">Всього голосів: ${totalVotes}</p>
+                    ` : ''}
+                `;
+                
+                pollsContainer.appendChild(pollElement);
+            });
+        }
+
+        // Vote function
+        window.vote = function(pollId, optionIndex) {
+            const poll = polls.find(p => p.id === pollId);
+            if (poll && !localStorage.getItem(`poll_${pollId}_voted`)) {
+                poll.votes[optionIndex]++;
+                saveVotes();
+                localStorage.setItem(`poll_${pollId}_voted`, 'true');
+                renderPolls();
+            }
+        };
+
+        // Reset all polls (for admin use)
+        window.resetPolls = function() {
+            if (confirm('Ви впевнені, що хочете скинути всі голоси?')) {
+                polls.forEach(poll => {
+                    poll.votes = new Array(poll.options.length).fill(0);
+                    localStorage.removeItem(`poll_${poll.id}_voted`);
+                });
+                saveVotes();
+                renderPolls();
+            }
+        };
+
+        // Initialize polls
+        loadVotes();
+        renderPolls();
     </script>
 </body>
 </html>
