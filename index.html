@@ -446,6 +446,12 @@
             <div id="polls-container" class="max-w-3xl mx-auto">
                 <!-- Polls will be dynamically inserted here -->
             </div>
+
+            <div class="text-center mt-8">
+                <button onclick="adminLogin()" class="text-sm text-gray-600 hover:text-green-800 transition">
+                    <i class="fas fa-lock mr-1"></i> Увійти як адміністратор
+                </button>
+            </div>
         </div>
     </section>
 
@@ -645,6 +651,14 @@
         // Polls System
         const pollsContainer = document.getElementById('polls-container');
         const storageKey = 'robochaya_polls_votes';
+        const adminEmail = 'ukraponovicaleksandr@gmail.com';
+
+        // Check if current user is admin
+        function isAdmin() {
+            // In a real app, you would verify the logged in user's email
+            // For demo purposes, we'll check localStorage
+            return localStorage.getItem('admin_email') === adminEmail;
+        }
 
         // Sample polls data - you can modify this easily
         const polls = [
@@ -753,6 +767,11 @@
 
         // Reset all polls (for admin use)
         window.resetPolls = function() {
+            if (!isAdmin()) {
+                alert('Тільки адміністратор може скидати голоси');
+                return;
+            }
+            
             if (confirm('Ви впевнені, що хочете скинути всі голоси?')) {
                 polls.forEach(poll => {
                     poll.votes = new Array(poll.options.length).fill(0);
@@ -760,6 +779,17 @@
                 });
                 saveVotes();
                 renderPolls();
+            }
+        };
+
+        // Admin login function (for demo purposes)
+        window.adminLogin = function() {
+            const email = prompt('Введіть email адміністратора:');
+            if (email === adminEmail) {
+                localStorage.setItem('admin_email', email);
+                alert('Ви увійшли як адміністратор');
+            } else if (email) {
+                alert('Невірний email адміністратора');
             }
         };
 
