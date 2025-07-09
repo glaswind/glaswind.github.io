@@ -452,6 +452,47 @@
                     <i class="fas fa-lock mr-1"></i> Увійти як адміністратор
                 </button>
             </div>
+
+            <!-- Admin Console (hidden by default) -->
+            <div id="admin-console" class="hidden max-w-3xl mx-auto mt-12 bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-800">Адмін консоль</h3>
+                
+                <div class="mb-6">
+                    <h4 class="font-bold mb-2">Додати нове опитування</h4>
+                    <div class="space-y-4">
+                        <input type="text" id="new-poll-question" placeholder="Питання опитування" class="w-full p-2 border rounded">
+                        <div id="poll-options-container">
+                            <input type="text" placeholder="Варіант відповіді" class="w-full p-2 border rounded mb-2 poll-option-input">
+                        </div>
+                        <button onclick="addPollOption()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm">
+                            <i class="fas fa-plus mr-1"></i> Додати варіант
+                        </button>
+                        <button onclick="createNewPoll()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-save mr-1"></i> Створити опитування
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold mb-2">Додати скріншот</h4>
+                    <div class="space-y-4">
+                        <input type="text" id="screenshot-url" placeholder="URL скріншоту" class="w-full p-2 border rounded">
+                        <button onclick="addScreenshot()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-image mr-1"></i> Додати скріншот
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-2">Адмін дії</h4>
+                    <button onclick="resetPolls()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded mr-2">
+                        <i class="fas fa-undo mr-1"></i> Скинути голоси
+                    </button>
+                    <button onclick="logoutAdmin()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Вийти
+                    </button>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -782,16 +823,113 @@
             }
         };
 
-        // Admin login function (for demo purposes)
+        // Admin login function
         window.adminLogin = function() {
             const email = prompt('Введіть email адміністратора:');
             if (email === adminEmail) {
                 localStorage.setItem('admin_email', email);
                 alert('Ви увійшли як адміністратор');
+                toggleAdminConsole(true);
             } else if (email) {
                 alert('Невірний email адміністратора');
             }
         };
+
+        // Logout admin
+        window.logoutAdmin = function() {
+            localStorage.removeItem('admin_email');
+            toggleAdminConsole(false);
+            alert('Ви вийшли з адмін панелі');
+        };
+
+        // Toggle admin console visibility
+        function toggleAdminConsole(show) {
+            const console = document.getElementById('admin-console');
+            if (show && isAdmin()) {
+                console.classList.remove('hidden');
+            } else {
+                console.classList.add('hidden');
+            }
+        }
+
+        // Add new poll option input
+        window.addPollOption = function() {
+            const container = document.getElementById('poll-options-container');
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.placeholder = 'Варіант відповіді';
+            newInput.className = 'w-full p-2 border rounded mb-2 poll-option-input';
+            container.appendChild(newInput);
+        };
+
+        // Create new poll
+        window.createNewPoll = function() {
+            if (!isAdmin()) return;
+            
+            const question = document.getElementById('new-poll-question').value;
+            const options = Array.from(document.querySelectorAll('.poll-option-input'))
+                                .map(input => input.value)
+                                .filter(opt => opt.trim() !== '');
+            
+            if (!question || options.length < 2) {
+                alert('Будь ласка, введіть питання та щонайменше 2 варіанти відповіді');
+                return;
+            }
+
+            const newPoll = {
+                id: polls.length + 1,
+                question: question,
+                options: options,
+                votes: new Array(options.length).fill(0)
+            };
+
+            polls.push(newPoll);
+            saveVotes();
+            renderPolls();
+            
+            // Clear form
+            document.getElementById('new-poll-question').value = '';
+            document.getElementById('poll-options-container').innerHTML = `
+                <input type="text" placeholder="Варіант відповіді" class="w-full p-2 border rounded mb-2 poll-option-input">
+            `;
+            
+            alert('Нове опитування додано!');
+        };
+
+        // Add screenshot to gallery
+        window.addScreenshot = function() {
+            if (!isAdmin()) return;
+            
+            const url = document.getElementById('screenshot-url').value.trim();
+            if (!url) {
+                alert('Будь ласка, введіть URL скріншоту');
+                return;
+            }
+
+            const gallery = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4.gap-6');
+            if (gallery) {
+                const newItem = document.createElement('div');
+                newItem.className = 'gallery-item cursor-pointer';
+                newItem.innerHTML = `
+                    <img src="${url}" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
+                `;
+                gallery.appendChild(newItem);
+                
+                // Rebind click event for the new image
+                newItem.querySelector('img').addEventListener('click', function() {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                });
+                
+                document.getElementById('screenshot-url').value = '';
+                alert('Скріншот додано до галереї!');
+            }
+        };
+
+        // Check admin status on page load
+        if (isAdmin()) {
+            toggleAdminConsole(true);
+        }
 
         // Initialize polls
         loadVotes();
