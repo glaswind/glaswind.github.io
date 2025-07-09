@@ -696,9 +696,21 @@
 
         // Check if current user is admin
         function isAdmin() {
-            // In a real app, you would verify the logged in user's email
-            // For demo purposes, we'll check localStorage
-            return localStorage.getItem('admin_email') === adminEmail;
+            const adminEmail = 'ukraponovicaleksandr@gmail.com';
+            const loggedInEmail = localStorage.getItem('admin_email');
+            return loggedInEmail === adminEmail;
+        }
+
+        // Track login status
+        function checkLoginStatus() {
+            const adminEmail = 'ukraponovicaleksandr@gmail.com';
+            const loggedInEmail = localStorage.getItem('admin_email');
+            
+            if (loggedInEmail === adminEmail) {
+                toggleAdminConsole(true);
+            } else {
+                toggleAdminConsole(false);
+            }
         }
 
         // Sample polls data - you can modify this easily
@@ -825,13 +837,16 @@
 
         // Admin login function
         window.adminLogin = function() {
+            const adminEmail = 'ukraponovicaleksandr@gmail.com';
             const email = prompt('Введіть email адміністратора:');
+            
             if (email === adminEmail) {
                 localStorage.setItem('admin_email', email);
                 alert('Ви увійшли як адміністратор');
                 toggleAdminConsole(true);
             } else if (email) {
                 alert('Невірний email адміністратора');
+                toggleAdminConsole(false);
             }
         };
 
@@ -926,10 +941,8 @@
             }
         };
 
-        // Check admin status on page load
-        if (isAdmin()) {
-            toggleAdminConsole(true);
-        }
+        // Check login status on page load
+        checkLoginStatus();
 
         // Initialize polls
         loadVotes();
