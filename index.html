@@ -3,656 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Messenger</title>
+    <title>Мультимедийный мессенджер</title>
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-        }
+        /* Основные стили (оставить из предыдущей версии) */
         
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-            max-width: 1200px;
-            margin: 0 auto;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            background: white;
-        }
-        
-        /* Сайдбар */
-        .sidebar {
-            width: 300px;
-            background: var(--primary);
-            color: white;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-            border: 2px solid white;
-        }
-        
-        .user-info {
-            flex: 1;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .user-id {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        .contacts-list {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-        
-        .contact {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .contact:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .contact.active {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .contact-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 10px;
-        }
-        
-        .contact-name {
-            font-weight: 500;
-        }
-        
-        .contact-last-message {
-            font-size: 12px;
-            opacity: 0.8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* Основной чат */
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-        }
-        
-        .chat-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-        }
-        
-        .chat-title {
-            font-weight: 600;
-        }
-        
-        .messages-container {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-        
-        .message {
-            display: flex;
-            margin-bottom: 15px;
-            max-width: 70%;
-        }
-        
-        .message.sent {
-            margin-left: auto;
-            flex-direction: row-reverse;
-        }
-        
-        .message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 10px;
-            align-self: flex-end;
-        }
-        
-        .message.sent .message-avatar {
-            margin-right: 0;
-            margin-left: 10px;
-        }
-        
-        .message-content {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .message-bubble {
-            padding: 10px 15px;
-            border-radius: 18px;
-            background: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        
-        .message.sent .message-bubble {
-            background: var(--primary);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-        
-        .message.received .message-bubble {
-            border-bottom-left-radius: 4px;
-        }
-        
-        .message-time {
-            font-size: 11px;
-            color: #adb5bd;
-            margin-top: 5px;
-            align-self: flex-end;
-        }
-        
-        .message.sent .message-time {
-            color: rgba(255,255,255,0.7);
-        }
-        
-        .message-input-container {
-            padding: 15px 20px;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            background: white;
-        }
-        
-        .message-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #e9ecef;
-            border-radius: 20px;
-            outline: none;
-            transition: border 0.2s;
-        }
-        
-        .message-input:focus {
-            border-color: var(--primary);
-        }
-        
-        .send-button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            margin-left: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-        
-        .send-button:hover {
-            background: var(--secondary);
-        }
-        
-        /* Аутентификация */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-        
-        .auth-card {
-            background: white;
+        /* Новые стили для медиа */
+        .media-preview {
+            max-width: 200px;
+            max-height: 200px;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            padding: 30px;
+            margin-top: 10px;
+            display: none;
         }
         
-        .auth-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--dark);
-        }
-        
-        .auth-form .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .auth-form label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .auth-form input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border 0.2s;
-        }
-        
-        .auth-form input:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-        
-        .auth-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--secondary);
-        }
-        
-        .btn-link {
+        .attachment-btn {
             background: none;
-            color: var(--primary);
-            text-decoration: underline;
-        }
-        
-        .avatar-upload {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .avatar-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            background: #e9ecef;
-            border: 3px solid white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .avatar-upload-btn {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-        
-        .avatar-upload-btn input {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
+            border: none;
             cursor: pointer;
+            padding: 8px;
+            margin-right: 10px;
         }
         
-        /* Утилиты */
-        .hidden {
-            display: none !important;
+        .message-media {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-top: 5px;
         }
         
-        .text-center {
-            text-align: center;
+        .input-container {
+            display: flex;
+            align-items: center;
         }
         
-        .mt-3 {
-            margin-top: 15px;
+        .message-input-wrapper {
+            flex: 1;
+            position: relative;
         }
     </style>
 </head>
 <body>
-    <!-- Аутентификация -->
-    <div id="auth-screen" class="auth-container">
-        <div class="auth-card">
-            <h2 class="auth-title">Добро пожаловать</h2>
-            
-            <div class="avatar-upload">
-                <img id="auth-avatar" class="avatar-preview" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e9ecef'/%3E%3C/svg%3E">
-                <button class="btn btn-primary avatar-upload-btn">
-                    Выбрать аватар
-                    <input type="file" id="avatar-input" accept="image/*">
-                </button>
-            </div>
-            
-            <div id="login-form">
-                <div class="form-group">
-                    <label for="username">Имя пользователя</label>
-                    <input type="text" id="username" placeholder="Введите ваш логин">
-                </div>
-                <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" placeholder="Введите ваш пароль">
-                </div>
-                <div class="form-group">
-                    <input type="checkbox" id="remember-me">
-                    <label for="remember-me">Запомнить меня</label>
-                </div>
-                <div class="auth-actions">
-                    <button id="login-btn" class="btn btn-primary">Войти</button>
-                    <button id="show-register" class="btn btn-link">Регистрация</button>
-                </div>
-            </div>
-            
-            <div id="register-form" class="hidden">
-                <div class="form-group">
-                    <label for="reg-username">Имя пользователя</label>
-                    <input type="text" id="reg-username" placeholder="Придумайте логин">
-                </div>
-                <div class="form-group">
-                    <label for="reg-password">Пароль</label>
-                    <input type="password" id="reg-password" placeholder="Придумайте пароль">
-                </div>
-                <div class="form-group">
-                    <label for="reg-password2">Повторите пароль</label>
-                    <input type="password" id="reg-password2" placeholder="Повторите пароль">
-                </div>
-                <div class="auth-actions">
-                    <button id="register-btn" class="btn btn-primary">Зарегистрироваться</button>
-                    <button id="show-login" class="btn btn-link">Уже есть аккаунт?</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Остальная разметка (оставить из предыдущей версии) -->
     
-    <!-- Основной интерфейс -->
-    <div id="app" class="app-container hidden">
-        <!-- Сайдбар с контактами -->
-        <div class="sidebar">
-            <div class="user-profile">
-                <img id="current-user-avatar" class="user-avatar" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23e9ecef'/%3E%3C/svg%3E">
-                <div class="user-info">
-                    <div id="current-user-name" class="user-name">Пользователь</div>
-                    <div id="current-user-id" class="user-id">ID: loading...</div>
-                </div>
-            </div>
-            
-            <div class="contacts-list" id="contacts-list">
-                <!-- Контакты будут загружаться здесь -->
-            </div>
-        </div>
-        
-        <!-- Основной чат -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <img id="chat-user-avatar" class="chat-avatar" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e9ecef'/%3E%3C/svg%3E">
-                <div id="chat-user-name" class="chat-title">Выберите чат</div>
-            </div>
-            
-            <div class="messages-container" id="messages-container">
-                <!-- Сообщения будут загружаться здесь -->
-                <div class="text-center mt-3" id="no-chat-selected">
-                    Выберите чат для начала общения
-                </div>
-            </div>
-            
-            <div class="message-input-container">
+    <!-- Изменения в поле ввода сообщения -->
+    <div class="message-input-container">
+        <div class="input-container">
+            <button class="attachment-btn" id="attach-btn" title="Прикрепить файл">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+            </button>
+            <div class="message-input-wrapper">
                 <input type="text" class="message-input" id="message-input" placeholder="Введите сообщение..." disabled>
-                <button class="send-button" id="send-btn" disabled>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
+                <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
+                <img id="media-preview" class="media-preview">
             </div>
+            <button class="send-button" id="send-btn" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
         </div>
     </div>
 
     <script>
-        // Генератор случайного ID
-        function generateId() {
-            return Math.random().toString(36).substr(2, 9);
-        }
-
-        // Хранилище данных
-        const storage = {
-            users: JSON.parse(localStorage.getItem('messenger_users')) || [],
-            messages: JSON.parse(localStorage.getItem('messenger_messages')) || [],
-            currentUser: JSON.parse(localStorage.getItem('messenger_current_user')) || null,
-            
-            saveUsers: function() {
-                localStorage.setItem('messenger_users', JSON.stringify(this.users));
-            },
-            
-            saveMessages: function() {
-                localStorage.setItem('messenger_messages', JSON.stringify(this.messages));
-            },
-            
-            saveCurrentUser: function() {
-                localStorage.setItem('messenger_current_user', JSON.stringify(this.currentUser));
-            },
-            
-            addUser: function(username, password, avatar) {
-                const id = generateId();
-                const user = { id, username, password, avatar };
-                this.users.push(user);
-                this.saveUsers();
-                return user;
-            },
-            
-            findUser: function(username) {
-                return this.users.find(user => user.username === username);
-            },
-            
-            findUserById: function(id) {
-                return this.users.find(user => user.id === id);
-            },
-            
-            addMessage: function(senderId, recipientId, text) {
-                const message = {
-                    id: generateId(),
-                    senderId,
-                    recipientId,
-                    text,
-                    timestamp: new Date().toISOString()
-                };
-                this.messages.push(message);
-                this.saveMessages();
-                return message;
-            },
-            
-            getMessagesBetween: function(user1Id, user2Id) {
-                return this.messages.filter(msg => 
-                    (msg.senderId === user1Id && msg.recipientId === user2Id) ||
-                    (msg.senderId === user2Id && msg.recipientId === user1Id)
-                ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            },
-            
-            getLastMessageBetween: function(user1Id, user2Id) {
-                const messages = this.getMessagesBetween(user1Id, user2Id);
-                return messages.length > 0 ? messages[messages.length - 1] : null;
-            },
-            
-            getUserContacts: function(userId) {
-                const contacts = new Set();
-                
-                // Находим всех пользователей, с которыми есть переписка
-                this.messages.forEach(msg => {
-                    if (msg.senderId === userId) contacts.add(msg.recipientId);
-                    if (msg.recipientId === userId) contacts.add(msg.senderId);
-                });
-                
-                return Array.from(contacts).map(id => this.findUserById(id)).filter(Boolean);
-            }
-        };
-
-        // DOM элементы
-        const authScreen = document.getElementById('auth-screen');
-        const app = document.getElementById('app');
+        // Дополнения к существующему коду
         
-        // Элементы аутентификации
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const regUsernameInput = document.getElementById('reg-username');
-        const regPasswordInput = document.getElementById('reg-password');
-        const regPassword2Input = document.getElementById('reg-password2');
-        const rememberMeCheckbox = document.getElementById('remember-me');
-        const loginBtn = document.getElementById('login-btn');
-        const registerBtn = document.getElementById('register-btn');
-        const showRegisterBtn = document.getElementById('show-register');
-        const showLoginBtn = document.getElementById('show-login');
-        const avatarInput = document.getElementById('avatar-input');
-        const authAvatar = document.getElementById('auth-avatar');
-        
-        // Элементы основного интерфейса
-        const currentUserAvatar = document.getElementById('current-user-avatar');
-        const currentUserName = document.getElementById('current-user-name');
-        const currentUserId = document.getElementById('current-user-id');
-        const contactsList = document.getElementById('contacts-list');
-        const messagesContainer = document.getElementById('messages-container');
-        const noChatSelected = document.getElementById('no-chat-selected');
-        const chatUserAvatar = document.getElementById('chat-user-avatar');
-        const chatUserName = document.getElementById('chat-user-name');
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-btn');
-        
-        // Текущий чат
-        let currentChatUserId = null;
-        let currentAvatar = null;
+        // DOM элементы для медиа
+        const attachBtn = document.getElementById('attach-btn');
+        const fileInput = document.getElementById('file-input');
+        const mediaPreview = document.getElementById('media-preview');
+        let currentMedia = null;
 
-        // Функции
-        function showAuth() {
-            authScreen.classList.remove('hidden');
-            app.classList.add('hidden');
-        }
+        // Обработчики событий для медиа
+        attachBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
 
-        function showApp() {
-            authScreen.classList.add('hidden');
-            app.classList.remove('hidden');
-            updateUserInfo();
-            loadContacts();
-        }
-
-        function updateUserInfo() {
-            if (storage.currentUser) {
-                currentUserAvatar.src = storage.currentUser.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="%23e9ecef"/%3E%3C/svg%3E';
-                currentUserName.textContent = storage.currentUser.username;
-                currentUserId.textContent = `ID: ${storage.currentUser.id}`;
-            }
-        }
-
-        function loadContacts() {
-            if (!storage.currentUser) return;
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             
-            contactsList.innerHTML = '';
-            const contacts = storage.getUserContacts(storage.currentUser.id);
-            
-            if (contacts.length === 0) {
-                contactsList.innerHTML = '<div class="text-center" style="padding: 20px; color: rgba(255,255,255,0.7)">Нет контактов</div>';
+            // Проверяем тип файла
+            if (!file.type.match('image.*') && !file.type.match('video.*')) {
+                alert('Пожалуйста, выберите изображение или видео');
                 return;
             }
             
-            contacts.forEach(contact => {
-                const lastMessage = storage.getLastMessageBetween(storage.currentUser.id, contact.id);
-                
-                const contactElement = document.createElement('div');
-                contactElement.className = 'contact';
-                contactElement.dataset.userId = contact.id;
-                
-                contactElement.innerHTML = `
-                    <img class="contact-avatar" src="${contact.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%23e9ecef"/%3E%3C/svg%3E'}" alt="${contact.username}">
-                    <div style="flex: 1; overflow: hidden;">
-                        <div class="contact-name">${contact.username}</div>
-                        <div class="contact-last-message">${lastMessage ? lastMessage.text : 'Нет сообщений'}</div>
-                    </div>
-                `;
-                
-                contactElement.addEventListener('click', () => openChat(contact));
-                contactsList.appendChild(contactElement);
-            });
-        }
-
-        function openChat(user) {
-            currentChatUserId = user.id;
-            chatUserAvatar.src = user.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%23e9ecef"/%3E%3C/svg%3E';
-            chatUserName.textContent = user.username;
-            noChatSelected.classList.add('hidden');
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            messageInput.focus();
+            // Проверяем размер файла (максимум 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Файл слишком большой (максимум 5MB)');
+                return;
+            }
             
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentMedia = {
+                    type: file.type.match('image.*') ? 'image' : 'video',
+                    data: event.target.result,
+                    name: file.name
+                };
+                
+                if (currentMedia.type === 'image') {
+                    mediaPreview.src = currentMedia.data;
+                    mediaPreview.style.display = 'block';
+                } else {
+                    // Для видео показываем иконку
+                    mediaPreview.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpolygon points="23 7 16 12 23 17 23 7"%3E%3C/polygon%3E%3Crect x="1" y="5" width="15" height="14" rx="2" ry="2"%3E%3C/rect%3E%3C/svg%3E';
+                    mediaPreview.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Модифицированная функция отправки сообщения
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            
+            if (!text && !currentMedia) return;
+            
+            let messageContent = {
+                text: text || '',
+                media: null
+            };
+            
+            if (currentMedia) {
+                messageContent.media = currentMedia;
+                
+                // Сбрасываем превью после отправки
+                mediaPreview.src = '';
+                mediaPreview.style.display = 'none';
+                fileInput.value = '';
+                currentMedia = null;
+            }
+            
+            // Добавляем сообщение в хранилище
+            storage.addMessage(
+                storage.currentUser.id, 
+                currentChatUserId, 
+                JSON.stringify(messageContent)
+            );
+            
+            messageInput.value = '';
             loadMessages();
+            loadContacts();
         }
 
+        // Модифицированная функция загрузки сообщений
         function loadMessages() {
             if (!storage.currentUser || !currentChatUserId) return;
             
@@ -665,126 +163,61 @@
             }
             
             messages.forEach(msg => {
-                const isSent = msg.senderId === storage.currentUser.id;
-                const user = isSent ? storage.currentUser : storage.findUserById(currentChatUserId);
-                
-                const messageElement = document.createElement('div');
-                messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
-                
-                messageElement.innerHTML = `
-                    <img class="message-avatar" src="${user.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"%3E%3Ccircle cx="16" cy="16" r="16" fill="%23e9ecef"/%3E%3C/svg%3E'}" alt="${user.username}">
-                    <div class="message-content">
-                        <div class="message-bubble">${msg.text}</div>
-                        <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    </div>
-                `;
-                
-                messagesContainer.appendChild(messageElement);
+                try {
+                    const content = JSON.parse(msg.text);
+                    const isSent = msg.senderId === storage.currentUser.id;
+                    const user = isSent ? storage.currentUser : storage.findUserById(currentChatUserId);
+                    
+                    const messageElement = document.createElement('div');
+                    messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
+                    
+                    let mediaHtml = '';
+                    if (content.media) {
+                        if (content.media.type === 'image') {
+                            mediaHtml = `<img src="${content.media.data}" class="message-media" alt="Изображение">`;
+                        } else if (content.media.type === 'video') {
+                            mediaHtml = `
+                                <video controls class="message-media">
+                                    <source src="${content.media.data}" type="video/mp4">
+                                    Ваш браузер не поддерживает видео.
+                                </video>
+                            `;
+                        }
+                    }
+                    
+                    messageElement.innerHTML = `
+                        <img class="message-avatar" src="${user.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"%3E%3Ccircle cx="16" cy="16" r="16" fill="%23e9ecef"/%3E%3C/svg%3E'}" alt="${user.username}">
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                ${content.text || ''}
+                                ${mediaHtml}
+                            </div>
+                            <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        </div>
+                    `;
+                    
+                    messagesContainer.appendChild(messageElement);
+                } catch (e) {
+                    console.error('Ошибка при разборе сообщения:', e);
+                }
             });
             
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || !storage.currentUser || !currentChatUserId) return;
-            
-            storage.addMessage(storage.currentUser.id, currentChatUserId, text);
-            messageInput.value = '';
-            loadMessages();
-            loadContacts(); // Обновляем список контактов (последнее сообщение)
-        }
-
-        // Обработчики событий
-        showRegisterBtn.addEventListener('click', () => {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        });
-
-        showLoginBtn.addEventListener('click', () => {
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-        });
-
-        avatarInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    currentAvatar = event.target.result;
-                    authAvatar.src = currentAvatar;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        loginBtn.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            
-            if (!username || !password) {
-                alert('Введите имя пользователя и пароль');
-                return;
-            }
-            
-            const user = storage.findUser(username);
-            if (!user || user.password !== password) {
-                alert('Неверное имя пользователя или пароль');
-                return;
-            }
-            
-            // Запоминаем пользователя если нужно
-            if (rememberMeCheckbox.checked) {
-                storage.currentUser = user;
-                storage.saveCurrentUser();
-            } else {
-                storage.currentUser = user;
-            }
-            
-            showApp();
-        });
-
-        registerBtn.addEventListener('click', () => {
-            const username = regUsernameInput.value.trim();
-            const password = regPasswordInput.value.trim();
-            const password2 = regPassword2Input.value.trim();
-            
-            if (!username || !password) {
-                alert('Введите имя пользователя и пароль');
-                return;
-            }
-            
-            if (password !== password2) {
-                alert('Пароли не совпадают');
-                return;
-            }
-            
-            if (storage.findUser(username)) {
-                alert('Пользователь с таким именем уже существует');
-                return;
-            }
-            
-            const user = storage.addUser(username, password, currentAvatar);
-            storage.currentUser = user;
-            storage.saveCurrentUser();
-            
-            showApp();
-        });
-
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        sendBtn.addEventListener('click', sendMessage);
-
-        // Инициализация
-        if (storage.currentUser) {
-            showApp();
-        } else {
-            showAuth();
-        }
+        // Модифицированная функция добавления сообщения в хранилище
+        storage.addMessage = function(senderId, recipientId, content) {
+            const message = {
+                id: generateId(),
+                senderId,
+                recipientId,
+                text: content,
+                timestamp: new Date().toISOString()
+            };
+            this.messages.push(message);
+            this.saveMessages();
+            return message;
+        };
     </script>
 </body>
 </html>
