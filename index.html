@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevGameHub - Сообщество разработчиков игр</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local Tailwind CSS -->
+    <script src="/assets/js/tailwind.config.js"></script>
+    <link href="/assets/css/tailwind.css" rel="stylesheet">
+    
+    <!-- Local Font Awesome -->
+    <link href="/assets/css/fontawesome.css" rel="stylesheet">
+    <link href="/assets/css/brands.css" rel="stylesheet">
+    <link href="/assets/css/solid.css" rel="stylesheet">
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #1e3a8a 0%, #7e22ce 100%);
@@ -47,7 +53,7 @@
     <header class="gradient-bg text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <i class="fas fa-gamepad text-3xl"></i>
+                <img src="/assets/images/logo.png" alt="Logo" class="h-10">
                 <h1 class="text-2xl font-bold">DevGameHub</h1>
             </div>
             <nav class="hidden md:flex space-x-6">
@@ -57,9 +63,18 @@
                 <a href="#" class="hover:text-blue-200 font-medium">Ресурсы</a>
             </nav>
             <div class="flex items-center space-x-4">
-                <button class="bg-white text-blue-800 px-4 py-2 rounded-full font-medium hover:bg-blue-100 transition">
-                    Войти
-                </button>
+                <div id="authButtons">
+                    <button class="bg-white text-blue-800 px-4 py-2 rounded-full font-medium hover:bg-blue-100 transition" onclick="showAuthModal()">
+                        Войти/Регистрация
+                    </button>
+                </div>
+                <div id="userProfile" class="hidden items-center space-x-2">
+                    <img src="https://via.placeholder.com/30" alt="User" class="rounded-full w-8 h-8">
+                    <span class="font-medium">Username</span>
+                    <button onclick="logout()" class="text-gray-500 hover:text-red-500">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
                 <button class="md:hidden text-2xl">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -125,7 +140,7 @@
                 <!-- Game Project Card 1 -->
                 <div class="game-card bg-white rounded-xl shadow-md overflow-hidden">
                     <div class="relative">
-                        <img src="https://via.placeholder.com/400x225" alt="Game Screenshot" class="w-full h-48 object-cover">
+                        <img src="/assets/images/game-placeholder.png" alt="Game Screenshot" class="w-full h-48 object-cover">
                         <div class="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
                             В разработке
                         </div>
@@ -313,7 +328,7 @@
                     </div>
                     <p class="mb-4">Только что добавил новую систему диалогов в игру! Теперь NPC могут реагировать на действия игрока и запоминать предыдущие разговоры. Какие еще функции вы бы хотели видеть в диалоговой системе?</p>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-                        <img src="https://via.placeholder.com/300x200" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
+                        <img src="/assets/images/update-placeholder.png" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
                         <img src="https://via.placeholder.com/300x200" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
                         <img src="https://via.placeholder.com/300x200" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
                     </div>
@@ -442,8 +457,127 @@
         </div>
     </footer>
 
+    <!-- Local JavaScript -->
+    <script src="/assets/js/main.js"></script>
+    
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">DevGameHub</h3>
+                <button onclick="hideAuthModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" class="w-full p-2 border rounded-lg">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Пароль</label>
+                    <input type="password" id="loginPassword" class="w-full p-2 border rounded-lg">
+                </div>
+                <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 mb-4">
+                    Войти
+                </button>
+                <p class="text-center text-gray-600">
+                    Нет аккаунта? <a href="#" onclick="showRegisterForm()" class="text-blue-600 hover:underline">Зарегистрироваться</a>
+                </p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Имя пользователя</label>
+                    <input type="text" id="registerUsername" class="w-full p-2 border rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="registerEmail" class="w-full p-2 border rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Пароль</label>
+                    <input type="password" id="registerPassword" class="w-full p-2 border rounded-lg">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Подтвердите пароль</label>
+                    <input type="password" id="registerConfirmPassword" class="w-full p-2 border rounded-lg">
+                </div>
+                <button onclick="register()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 mb-4">
+                    Зарегистрироваться
+                </button>
+                <p class="text-center text-gray-600">
+                    Уже есть аккаунт? <a href="#" onclick="showLoginForm()" class="text-blue-600 hover:underline">Войти</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Simple script for demonstration
+        // Auth functions
+        function showAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function hideAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showLoginForm() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Here would be actual login logic with server
+            console.log('Login attempt:', email, password);
+            alert('Вход выполнен (в реальном приложении здесь была бы проверка)');
+            hideAuthModal();
+        }
+
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Пароли не совпадают!');
+                return;
+            }
+            
+            // Here would be actual registration logic with server
+            console.log('Registration attempt:', username, email, password);
+            alert('Регистрация успешна (в реальном приложении здесь была бы проверка)');
+            showLoginForm();
+        }
+
+        // User management
+        function setLoggedInState(loggedIn) {
+            if (loggedIn) {
+                document.getElementById('authButtons').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden');
+            } else {
+                document.getElementById('authButtons').classList.remove('hidden');
+                document.getElementById('userProfile').classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            setLoggedInState(false);
+            alert('Вы вышли из системы');
+        }
+
+        // Like button functionality
         document.addEventListener('DOMContentLoaded', function() {
             // Like button functionality
             document.querySelectorAll('.fa-heart').forEach(icon => {
