@@ -1,42 +1,238 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LiteNet</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой мессенджер</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .auth-form, .chat-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+        .messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .message.sent {
+            background-color: #e1f5fe;
+            text-align: right;
+        }
+        .username {
+            font-weight: bold;
+            color: #333;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div id="auth">
-    <h2>Регистрация / Вход</h2>
-    <input type="text" id="nickname" placeholder="Никнейм">
-    <input type="password" id="password" placeholder="Пароль">
-    <button onclick="registerOrLogin()">Войти</button>
-  </div>
-
-  <div id="main" class="hidden">
-    <h2>Привет, <span id="userNick"></span>!</h2>
-
-    <div>
-      <input type="text" id="friendNick" placeholder="Добавить в друзья">
-      <button onclick="addFriend()">Добавить</button>
+    <div class="container">
+        <h1>Простой мессенджер</h1>
+        
+        <div id="auth-form" class="auth-form">
+            <h2>Регистрация/Вход</h2>
+            <input type="text" id="username" placeholder="Имя пользователя" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button id="register-btn">Зарегистрироваться</button>
+            <button id="login-btn">Войти</button>
+        </div>
+        
+        <div id="chat-container" class="chat-container hidden">
+            <h2>Чат</h2>
+            <div id="messages" class="messages"></div>
+            <input type="text" id="message-input" placeholder="Введите сообщение...">
+            <button id="send-btn">Отправить</button>
+            <button id="logout-btn">Выйти</button>
+        </div>
     </div>
 
-    <h3>Друзья</h3>
-    <ul id="friendsList"></ul>
+    <script>
+        // Хранилище данных
+        const storage = {
+            users: JSON.parse(localStorage.getItem('messenger_users')) || [],
+            messages: JSON.parse(localStorage.getItem('messenger_messages')) || [],
+            
+            saveUsers: function() {
+                localStorage.setItem('messenger_users', JSON.stringify(this.users));
+            },
+            
+            saveMessages: function() {
+                localStorage.setItem('messenger_messages', JSON.stringify(this.messages));
+            },
+            
+            addUser: function(username, password) {
+                this.users.push({ username, password });
+                this.saveUsers();
+            },
+            
+            findUser: function(username) {
+                return this.users.find(user => user.username === username);
+            },
+            
+            addMessage: function(sender, text) {
+                const message = {
+                    sender,
+                    text,
+                    timestamp: new Date().toISOString()
+                };
+                this.messages.push(message);
+                this.saveMessages();
+                return message;
+            },
+            
+            getMessages: function() {
+                return this.messages;
+            }
+        };
 
-    <h3>Отправить сообщение</h3>
-    <input type="text" id="messageInput" placeholder="Сообщение...">
-    <button onclick="sendMessage()">Отправить</button>
+        // DOM элементы
+        const authForm = document.getElementById('auth-form');
+        const chatContainer = document.getElementById('chat-container');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const registerBtn = document.getElementById('register-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const logoutBtn = document.getElementById('logout-btn');
 
-    <h3>Загрузить фото</h3>
-    <input type="file" id="imageInput" accept="image/*" onchange="uploadImage()">
-    <div id="gallery"></div>
+        // Текущий пользователь
+        let currentUser = null;
 
-    <h3>История сообщений</h3>
-    <div id="chatBox"></div>
-  </div>
+        // Функции
+        function showChat() {
+            authForm.classList.add('hidden');
+            chatContainer.classList.remove('hidden');
+            loadMessages();
+        }
 
-  <script src="app.js"></script>
+        function showAuth() {
+            chatContainer.classList.add('hidden');
+            authForm.classList.remove('hidden');
+            currentUser = null;
+        }
+
+        function loadMessages() {
+            messagesContainer.innerHTML = '';
+            const messages = storage.getMessages();
+            
+            messages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                if (msg.sender === currentUser) {
+                    messageElement.classList.add('sent');
+                }
+                
+                messageElement.innerHTML = `
+                    <div class="username">${msg.sender}</div>
+                    <div>${msg.text}</div>
+                    <small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text && currentUser) {
+                storage.addMessage(currentUser, text);
+                messageInput.value = '';
+                loadMessages();
+            }
+        }
+
+        // Обработчики событий
+        registerBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (username && password) {
+                if (storage.findUser(username)) {
+                    alert('Пользователь уже существует');
+                } else {
+                    storage.addUser(username, password);
+                    alert('Регистрация успешна. Теперь вы можете войти.');
+                }
+            } else {
+                alert('Введите имя пользователя и пароль');
+            }
+        });
+
+        loginBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            const user = storage.findUser(username);
+            
+            if (user && user.password === password) {
+                currentUser = username;
+                showChat();
+            } else {
+                alert('Неверное имя пользователя или пароль');
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        logoutBtn.addEventListener('click', showAuth);
+
+        // Инициализация
+        showAuth();
+    </script>
 </body>
 </html>
