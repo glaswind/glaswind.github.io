@@ -3,36 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Улучшенный мессенджер</title>
+    <title>Мессенджер с аватарками</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background-color: #f5f5f5;
         }
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
-        }
-        .auth-form, .chat-container {
             background: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
         }
         h1 {
             text-align: center;
             color: #333;
         }
-        input, button, select {
+        input, button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 5px;
             box-sizing: border-box;
         }
         button {
@@ -45,74 +41,55 @@
             background-color: #006699;
         }
         .messages {
-            height: 400px;
+            height: 300px;
             overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+            margin: 10px 0;
+            border-radius: 5px;
         }
         .message {
+            display: flex;
             margin-bottom: 10px;
             padding: 8px;
-            border-radius: 4px;
+            border-radius: 5px;
             background-color: #f9f9f9;
         }
         .message.sent {
             background-color: #e1f5fe;
+            flex-direction: row-reverse;
             text-align: right;
         }
-        .message.received {
-            background-color: #f0f0f0;
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
         }
-        .username {
-            font-weight: bold;
-            color: #333;
+        .message.sent .avatar {
+            margin-right: 0;
+            margin-left: 10px;
+        }
+        .message-content {
+            flex: 1;
         }
         .hidden {
             display: none;
         }
         .user-id {
-            font-size: 0.8em;
+            font-size: 12px;
             color: #666;
+            margin-top: 5px;
         }
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .online-users {
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            background: white;
-        }
-        .user-item {
-            padding: 5px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-        }
-        .user-item:hover {
-            background: #f0f0f0;
-        }
-        .user-item:last-child {
-            border-bottom: none;
-        }
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0088cc;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none;
+        .avatar-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 10px auto;
+            display: block;
+            background: #eee;
         }
         .remember-me {
             display: flex;
@@ -123,73 +100,51 @@
             width: auto;
             margin-right: 10px;
         }
-        .unread-count {
-            background: red;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 12px;
-            margin-left: 5px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Улучшенный мессенджер</h1>
+        <h1>Мессенджер с аватарками</h1>
         
-        <div id="auth-form" class="auth-form">
-            <h2>Вход</h2>
+        <!-- Форма входа -->
+        <div id="auth-form">
+            <h2>Вход / Регистрация</h2>
             <input type="text" id="username" placeholder="Имя пользователя" required>
             <input type="password" id="password" placeholder="Пароль" required>
             <div class="remember-me">
                 <input type="checkbox" id="remember-checkbox">
                 <label for="remember-checkbox">Запомнить меня</label>
             </div>
+            <img id="avatar-preview" class="avatar-preview" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ddd'/%3E%3C/svg%3E">
+            <input type="file" id="avatar-input" accept="image/*">
             <button id="register-btn">Зарегистрироваться</button>
             <button id="login-btn">Войти</button>
         </div>
         
-        <div id="chat-container" class="chat-container hidden">
-            <div class="chat-header">
-                <h2>Чат с <span id="recipient-name"></span></h2>
-                <div class="user-id">Ваш ID: <span id="current-user-id"></span></div>
-            </div>
+        <!-- Чат (изначально скрыт) -->
+        <div id="chat-container" class="hidden">
+            <h2>Ваш чат</h2>
+            <div id="current-user-id" class="user-id">Ваш ID: <span></span></div>
             
-            <div class="online-users hidden" id="online-users">
-                <h3>Пользователи онлайн</h3>
-                <div id="users-list"></div>
-            </div>
+            <div class="messages" id="messages"></div>
             
-            <button id="show-users-btn">Показать пользователей</button>
-            <input type="text" id="recipient-id" placeholder="ID получателя или выберите из списка">
-            
-            <div id="messages" class="messages"></div>
+            <input type="text" id="recipient-id" placeholder="ID получателя">
             <input type="text" id="message-input" placeholder="Введите сообщение...">
             <button id="send-btn">Отправить</button>
             <button id="logout-btn">Выйти</button>
         </div>
     </div>
 
-    <div class="notification" id="notification">
-        Новое сообщение!
-    </div>
-
-    <audio id="notification-sound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
-    </audio>
-
     <script>
-        // Генератор случайных ID
+        // Генератор случайного ID
         function generateId() {
             return Math.random().toString(36).substr(2, 9);
         }
 
-        // Хранилище данных
+        // Хранилище данных в localStorage
         const storage = {
             users: JSON.parse(localStorage.getItem('messenger_users')) || [],
             messages: JSON.parse(localStorage.getItem('messenger_messages')) || [],
-            lastRecipients: JSON.parse(localStorage.getItem('messenger_last_recipients')) || {},
-            unreadMessages: JSON.parse(localStorage.getItem('messenger_unread_messages')) || {},
             
             saveUsers: function() {
                 localStorage.setItem('messenger_users', JSON.stringify(this.users));
@@ -199,19 +154,19 @@
                 localStorage.setItem('messenger_messages', JSON.stringify(this.messages));
             },
             
-            saveLastRecipients: function() {
-                localStorage.setItem('messenger_last_recipients', JSON.stringify(this.lastRecipients));
-            },
-            
-            saveUnreadMessages: function() {
-                localStorage.setItem('messenger_unread_messages', JSON.stringify(this.unreadMessages));
-            },
-            
-            addUser: function(username, password) {
+            addUser: function(username, password, avatar) {
                 const id = generateId();
-                this.users.push({ id, username, password });
+                this.users.push({ id, username, password, avatar });
                 this.saveUsers();
                 return id;
+            },
+            
+            updateUserAvatar: function(userId, avatar) {
+                const user = this.findUserById(userId);
+                if (user) {
+                    user.avatar = avatar;
+                    this.saveUsers();
+                }
             },
             
             findUser: function(username) {
@@ -224,49 +179,14 @@
             
             addMessage: function(senderId, recipientId, text) {
                 const message = {
-                    id: generateId(),
                     senderId,
                     recipientId,
                     text,
-                    timestamp: new Date().toISOString(),
-                    read: false
+                    timestamp: new Date().toISOString()
                 };
                 this.messages.push(message);
                 this.saveMessages();
-                
-                // Добавляем в непрочитанные
-                if (!this.unreadMessages[recipientId]) {
-                    this.unreadMessages[recipientId] = {};
-                }
-                if (!this.unreadMessages[recipientId][senderId]) {
-                    this.unreadMessages[recipientId][senderId] = 0;
-                }
-                this.unreadMessages[recipientId][senderId]++;
-                this.saveUnreadMessages();
-                
                 return message;
-            },
-            
-            markMessagesAsRead: function(userId, senderId) {
-                if (this.unreadMessages[userId] && this.unreadMessages[userId][senderId]) {
-                    delete this.unreadMessages[userId][senderId];
-                    this.saveUnreadMessages();
-                }
-                
-                // Помечаем сообщения как прочитанные
-                this.messages.forEach(msg => {
-                    if (msg.senderId === senderId && msg.recipientId === userId && !msg.read) {
-                        msg.read = true;
-                    }
-                });
-                this.saveMessages();
-            },
-            
-            getUnreadCount: function(userId, senderId) {
-                if (this.unreadMessages[userId] && this.unreadMessages[userId][senderId]) {
-                    return this.unreadMessages[userId][senderId];
-                }
-                return 0;
             },
             
             getMessagesBetween: function(user1Id, user2Id) {
@@ -274,19 +194,6 @@
                     (msg.senderId === user1Id && msg.recipientId === user2Id) ||
                     (msg.senderId === user2Id && msg.recipientId === user1Id)
                 ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            },
-            
-            setLastRecipient: function(userId, recipientId) {
-                this.lastRecipients[userId] = recipientId;
-                this.saveLastRecipients();
-            },
-            
-            getLastRecipient: function(userId) {
-                return this.lastRecipients[userId];
-            },
-            
-            getAllUsers: function() {
-                return this.users;
             }
         };
 
@@ -302,184 +209,93 @@
         const sendBtn = document.getElementById('send-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const recipientIdInput = document.getElementById('recipient-id');
-        const recipientNameSpan = document.getElementById('recipient-name');
-        const currentUserIdSpan = document.getElementById('current-user-id');
-        const onlineUsersDiv = document.getElementById('online-users');
-        const usersListDiv = document.getElementById('users-list');
-        const showUsersBtn = document.getElementById('show-users-btn');
-        const notification = document.getElementById('notification');
-        const notificationSound = document.getElementById('notification-sound');
+        const currentUserIdSpan = document.getElementById('current-user-id').querySelector('span');
+        const avatarInput = document.getElementById('avatar-input');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const rememberCheckbox = document.getElementById('remember-checkbox');
 
-        // Текущий пользователь
+        // Текущий пользователь и получатель
         let currentUser = null;
         let currentRecipient = null;
-        let checkInterval = null;
+        let currentAvatar = null;
 
         // Функции
         function showChat() {
             authForm.classList.add('hidden');
             chatContainer.classList.remove('hidden');
             currentUserIdSpan.textContent = currentUser.id;
-            
-            // Загружаем последнего получателя
-            const lastRecipientId = storage.getLastRecipient(currentUser.id);
-            if (lastRecipientId) {
-                const recipient = storage.findUserById(lastRecipientId);
-                if (recipient) {
-                    recipientIdInput.value = recipient.id;
-                    loadChatWithRecipient(recipient);
-                }
-            }
-            
-            // Запускаем проверку новых сообщений
-            startCheckingMessages();
+            loadMessages();
         }
 
         function showAuth() {
             chatContainer.classList.add('hidden');
             authForm.classList.remove('hidden');
             currentUser = null;
-            currentRecipient = null;
-            
-            // Останавливаем проверку новых сообщений
-            stopCheckingMessages();
+            // Сброс аватарки при выходе
+            avatarPreview.src = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ddd'/%3E%3C/svg%3E";
+            avatarInput.value = '';
         }
 
-        function loadChatWithRecipient(recipient) {
-            currentRecipient = recipient;
-            recipientNameSpan.textContent = recipient.username;
+        function loadMessages() {
+            if (!currentRecipient) return;
             
-            // Помечаем сообщения как прочитанные
-            storage.markMessagesAsRead(currentUser.id, recipient.id);
-            
-            // Сохраняем как последнего получателя
-            storage.setLastRecipient(currentUser.id, recipient.id);
-            
-            // Загружаем сообщения
             messagesContainer.innerHTML = '';
-            const messages = storage.getMessagesBetween(currentUser.id, recipient.id);
+            const messages = storage.getMessagesBetween(currentUser.id, currentRecipient.id);
             
             messages.forEach(msg => {
-                addMessageToChat(msg, msg.senderId === currentUser.id);
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                
+                if (msg.senderId === currentUser.id) {
+                    messageElement.classList.add('sent');
+                }
+                
+                const sender = msg.senderId === currentUser.id ? currentUser : currentRecipient;
+                const avatarSrc = sender.avatar || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ddd'/%3E%3C/svg%3E";
+                
+                messageElement.innerHTML = `
+                    <img class="avatar" src="${avatarSrc}" alt="${sender.username}">
+                    <div class="message-content">
+                        <div><strong>${msg.senderId === currentUser.id ? 'Вы' : sender.username}</strong></div>
+                        <div>${msg.text}</div>
+                        <small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
             });
             
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function addMessageToChat(msg, isSent) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-            messageElement.dataset.messageId = msg.id;
-            
-            if (isSent) {
-                messageElement.classList.add('sent');
-            } else {
-                messageElement.classList.add('received');
-            }
-            
-            const sender = isSent ? 'Вы' : currentRecipient.username;
-            
-            messageElement.innerHTML = `
-                <div class="username">${sender}</div>
-                <div>${msg.text}</div>
-                <small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
-            `;
-            
-            messagesContainer.appendChild(messageElement);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         function sendMessage() {
             const text = messageInput.value.trim();
-            if (text && currentUser && currentRecipient) {
-                const msg = storage.addMessage(currentUser.id, currentRecipient.id, text);
-                addMessageToChat(msg, true);
-                messageInput.value = '';
+            const recipientId = recipientIdInput.value.trim();
+            
+            if (!text) return;
+            
+            if (!recipientId) {
+                alert('Введите ID получателя');
+                return;
             }
-        }
-
-        function showOnlineUsers() {
-            usersListDiv.innerHTML = '';
-            const users = storage.getAllUsers();
             
-            users.forEach(user => {
-                if (user.id !== currentUser.id) {
-                    const unreadCount = storage.getUnreadCount(currentUser.id, user.id);
-                    
-                    const userElement = document.createElement('div');
-                    userElement.classList.add('user-item');
-                    userElement.innerHTML = `
-                        <strong>${user.username}</strong>
-                        ${unreadCount > 0 ? `<span class="unread-count">${unreadCount}</span>` : ''}
-                        <div class="user-id">ID: ${user.id}</div>
-                    `;
-                    
-                    userElement.addEventListener('click', () => {
-                        recipientIdInput.value = user.id;
-                        loadChatWithRecipient(user);
-                        onlineUsersDiv.classList.add('hidden');
-                    });
-                    
-                    usersListDiv.appendChild(userElement);
-                }
-            });
-            
-            onlineUsersDiv.classList.toggle('hidden');
-        }
-
-        function showNotification(senderName) {
-            notification.textContent = `Новое сообщение от ${senderName}!`;
-            notification.style.display = 'block';
-            
-            // Проигрываем звук уведомления
-            notificationSound.play();
-            
-            // Скрываем уведомление через 3 секунды
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        function checkForNewMessages() {
-            if (!currentUser) return;
-            
-            // Проверяем непрочитанные сообщения от всех пользователей
-            const unreadData = storage.unreadMessages[currentUser.id] || {};
-            
-            Object.keys(unreadData).forEach(senderId => {
-                const count = unreadData[senderId];
-                if (count > 0) {
-                    const sender = storage.findUserById(senderId);
-                    if (sender) {
-                        // Если сейчас открыт чат с этим пользователем, помечаем как прочитанные
-                        if (currentRecipient && currentRecipient.id === senderId) {
-                            storage.markMessagesAsRead(currentUser.id, senderId);
-                        } else {
-                            // Показываем уведомление только если чат не открыт
-                            showNotification(sender.username);
-                        }
-                    }
-                }
-            });
-        }
-
-        function startCheckingMessages() {
-            // Проверяем каждые 2 секунды
-            checkInterval = setInterval(checkForNewMessages, 2000);
-        }
-
-        function stopCheckingMessages() {
-            if (checkInterval) {
-                clearInterval(checkInterval);
-                checkInterval = null;
+            const recipient = storage.findUserById(recipientId);
+            if (!recipient) {
+                alert('Пользователь с таким ID не найден');
+                return;
             }
+            
+            currentRecipient = recipient;
+            storage.addMessage(currentUser.id, recipient.id, text);
+            messageInput.value = '';
+            loadMessages();
         }
 
         function checkRememberedUser() {
             const rememberedUser = JSON.parse(localStorage.getItem('messenger_remembered_user'));
             if (rememberedUser && rememberedUser.username) {
                 usernameInput.value = rememberedUser.username;
-                document.getElementById('remember-checkbox').checked = true;
+                rememberCheckbox.checked = true;
                 passwordInput.focus();
             }
         }
@@ -493,8 +309,9 @@
                 if (storage.findUser(username)) {
                     alert('Пользователь уже существует');
                 } else {
-                    const id = storage.addUser(username, password);
-                    alert(`Регистрация успешна. Ваш ID: ${id}\nЗапомните его для входа.`);
+                    const id = storage.addUser(username, password, currentAvatar);
+                    alert(`Регистрация успешна! Ваш ID: ${id}\nЗапомните его, он нужен для входа.`);
+                    showAuth();
                 }
             } else {
                 alert('Введите имя пользователя и пароль');
@@ -504,7 +321,7 @@
         loginBtn.addEventListener('click', () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
-            const rememberMe = document.getElementById('remember-checkbox').checked;
+            const rememberMe = rememberCheckbox.checked;
             const user = storage.findUser(username);
             
             if (user && user.password === password) {
@@ -525,6 +342,23 @@
             }
         });
 
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentAvatar = event.target.result;
+                    avatarPreview.src = currentAvatar;
+                    
+                    // Если пользователь уже зарегистрирован, обновляем аватар
+                    if (currentUser) {
+                        storage.updateUserAvatar(currentUser.id, currentAvatar);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         sendBtn.addEventListener('click', sendMessage);
 
         messageInput.addEventListener('keypress', (e) => {
@@ -533,21 +367,18 @@
             }
         });
 
-        logoutBtn.addEventListener('click', showAuth);
-
         recipientIdInput.addEventListener('change', () => {
             const recipientId = recipientIdInput.value.trim();
             if (recipientId) {
                 const recipient = storage.findUserById(recipientId);
                 if (recipient) {
-                    loadChatWithRecipient(recipient);
-                } else {
-                    alert('Пользователь с таким ID не найден');
+                    currentRecipient = recipient;
+                    loadMessages();
                 }
             }
         });
 
-        showUsersBtn.addEventListener('click', showOnlineUsers);
+        logoutBtn.addEventListener('click', showAuth);
 
         // Инициализация
         checkRememberedUser();
