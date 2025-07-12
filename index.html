@@ -2,155 +2,41 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MiniDevForum</title>
-  <style>
-    body { font-family: sans-serif; background: #1e1e1e; color: #f0f0f0; margin: 0; padding: 1rem; }
-    .container { max-width: 800px; margin: auto; }
-    .box { background: #2c2c2c; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-    input, textarea, button { width: 100%; padding: 0.5rem; margin: 0.25rem 0; border-radius: 4px; border: none; }
-    button { background: #3b82f6; color: white; cursor: pointer; }
-    .post { border-top: 1px solid #444; margin-top: 1rem; padding-top: 1rem; }
-    .comment { margin-left: 1rem; border-left: 2px solid #444; padding-left: 1rem; margin-top: 0.5rem; }
-    .like-btn { color: #aaa; cursor: pointer; margin-right: 1rem; }
-    .like-btn.liked { color: #f87171; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LiteNet</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>MiniDevForum</h1>
-
-    <div id="authBox" class="box"></div>
-    <div id="postForm" class="box" style="display: none"></div>
-    <div id="feed"></div>
+  <div id="auth">
+    <h2>Регистрация / Вход</h2>
+    <input type="text" id="nickname" placeholder="Никнейм">
+    <input type="password" id="password" placeholder="Пароль">
+    <button onclick="registerOrLogin()">Войти</button>
   </div>
 
-  <script>
-    const authBox = document.getElementById("authBox");
-    const postForm = document.getElementById("postForm");
-    const feed = document.getElementById("feed");
+  <div id="main" class="hidden">
+    <h2>Привет, <span id="userNick"></span>!</h2>
 
-    let currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
-    let posts = JSON.parse(localStorage.getItem("posts") || "[]");
+    <div>
+      <input type="text" id="friendNick" placeholder="Добавить в друзья">
+      <button onclick="addFriend()">Добавить</button>
+    </div>
 
-    function savePosts() {
-      localStorage.setItem("posts", JSON.stringify(posts));
-    }
+    <h3>Друзья</h3>
+    <ul id="friendsList"></ul>
 
-    function renderAuth() {
-      if (currentUser) {
-        authBox.innerHTML = `<p>Привет, <b>${currentUser.name}</b> <button onclick="logout()">Выйти</button></p>`;
-        postForm.style.display = "block";
-        renderPostForm();
-      } else {
-        authBox.innerHTML = `
-          <input id="regName" placeholder="Имя" />
-          <input id="regEmail" placeholder="Email" />
-          <input id="regPass" placeholder="Пароль" type="password" />
-          <button onclick="register()">Регистрация / Вход</button>
-        `;
-        postForm.style.display = "none";
-      }
-    }
+    <h3>Отправить сообщение</h3>
+    <input type="text" id="messageInput" placeholder="Сообщение...">
+    <button onclick="sendMessage()">Отправить</button>
 
-    function register() {
-      const name = document.getElementById("regName").value.trim();
-      const email = document.getElementById("regEmail").value.trim();
-      const pass = document.getElementById("regPass").value;
-      if (!name || !email || !pass) return alert("Заполните все поля");
-      let user = users.find(u => u.email === email);
-      if (!user) {
-        user = { name, email, pass };
-        users.push(user);
-        localStorage.setItem("users", JSON.stringify(users));
-      }
-      if (user.pass !== pass) return alert("Неверный пароль");
-      currentUser = user;
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      renderAuth();
-      renderFeed();
-    }
+    <h3>Загрузить фото</h3>
+    <input type="file" id="imageInput" accept="image/*" onchange="uploadImage()">
+    <div id="gallery"></div>
 
-    function logout() {
-      localStorage.removeItem("currentUser");
-      currentUser = null;
-      renderAuth();
-      renderFeed();
-    }
+    <h3>История сообщений</h3>
+    <div id="chatBox"></div>
+  </div>
 
-    function renderPostForm() {
-      postForm.innerHTML = `
-        <textarea id="postText" placeholder="Что нового?" rows="3"></textarea>
-        <input id="postTag" placeholder="#тег (например: #Unity)" />
-        <button onclick="createPost()">Опубликовать</button>
-      `;
-    }
-
-    function createPost() {
-      const text = document.getElementById("postText").value.trim();
-      const tag = document.getElementById("postTag").value.trim();
-      if (!text) return;
-      const newPost = {
-        id: Date.now(),
-        user: currentUser.name,
-        text,
-        tag,
-        likes: [],
-        comments: []
-      };
-      posts.unshift(newPost);
-      savePosts();
-      renderFeed();
-      renderPostForm();
-    }
-
-    function toggleLike(id) {
-      const post = posts.find(p => p.id === id);
-      const liked = post.likes.includes(currentUser.email);
-      if (liked) {
-        post.likes = post.likes.filter(e => e !== currentUser.email);
-      } else {
-        post.likes.push(currentUser.email);
-      }
-      savePosts();
-      renderFeed();
-    }
-
-    function addComment(id) {
-      const input = document.getElementById(`comment-${id}`);
-      const comment = input.value.trim();
-      if (!comment) return;
-      const post = posts.find(p => p.id === id);
-      post.comments.push({ user: currentUser.name, text: comment });
-      input.value = "";
-      savePosts();
-      renderFeed();
-    }
-
-    function renderFeed() {
-      feed.innerHTML = posts.map(post => `
-        <div class="box post">
-          <p><b>${post.user}</b>: ${post.text}</p>
-          ${post.tag ? `<p style="color:#60a5fa">${post.tag}</p>` : ""}
-          <p>
-            <span class="like-btn ${post.likes.includes(currentUser?.email) ? "liked" : ""}" onclick="toggleLike(${post.id})">
-              ❤ ${post.likes.length}
-            </span>
-          </p>
-          <div>
-            ${post.comments.map(c => `<div class="comment"><b>${c.user}</b>: ${c.text}</div>`).join("")}
-          </div>
-          ${currentUser ? `
-            <input id="comment-${post.id}" placeholder="Комментарий..." />
-            <button onclick="addComment(${post.id})">Ответить</button>
-          ` : "<p>Войдите, чтобы комментировать</p>"}
-        </div>
-      `).join("");
-    }
-
-    renderAuth();
-    renderFeed();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
