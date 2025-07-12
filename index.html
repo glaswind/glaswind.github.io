@@ -1,952 +1,467 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Робочяя местность - Симулятор життя в українському селі</title>
-    <meta name="description" content="Симулятор життя в українському селі, де ви зможете будувати трактори, займатися бджільництвом та досліджувати відкритий світ.">
+    <title>DevGameHub - Сообщество разработчиков игр</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom CSS for things that can't be done with Tailwind */
-        .hero-video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #7e22ce 100%);
+        }
+        .game-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+        .progress-fill {
             height: 100%;
-            object-fit: cover;
-            z-index: -1;
-            opacity: 0.7;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: width 0.5s ease;
         }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        
-        .news-card:hover {
-            transform: scale(1.02);
-        }
-        
-        .language-switcher {
+        .avatar-upload {
             position: relative;
             display: inline-block;
         }
-        
-        .language-dropdown {
-            display: none;
+        .avatar-upload input {
             position: absolute;
-            right: 0;
-            background-color: #f9f9f9;
-            min-width: 100px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 0.5rem;
-        }
-        
-        .language-switcher:hover .language-dropdown {
-            display: block;
-        }
-        
-        .language-dropdown a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-        
-        .language-dropdown a:hover {
-            background-color: #f1f1f1;
-        }
-        
-        /* Animation for wishlist button */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-        
-        .wishlist-btn {
-            animation: pulse 2s infinite;
-        }
-        
-        /* Gallery modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
+            opacity: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.9);
-        }
-        
-        .modal-content {
-            margin: auto;
-            display: block;
-            width: 80%;
-            max-width: 1200px;
-            max-height: 80vh;
-            margin-top: 10vh;
-        }
-        
-        .close {
-            position: absolute;
-            top: 15px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        
-        .close:hover,
-        .close:focus {
-            color: #bbb;
-            text-decoration: none;
             cursor: pointer;
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
     <!-- Header -->
-    <header class="bg-green-800 text-white sticky top-0 z-50 shadow-lg">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <a href="#" class="flex items-center">
-                    <img src="https://via.placeholder.com/50x50" alt="Робочяя местность лого" class="h-10 w-10 rounded-full">
-                    <span class="ml-2 text-xl font-bold hidden sm:inline">Робочяя местность</span>
-                </a>
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-gamepad text-3xl"></i>
+                <h1 class="text-2xl font-bold">DevGameHub</h1>
             </div>
-            
             <nav class="hidden md:flex space-x-6">
-                <a href="#about" class="hover:text-yellow-300 transition">Про гру</a>
-                <a href="#features" class="hover:text-yellow-300 transition">Особливості</a>
-                <a href="#media" class="hover:text-yellow-300 transition">Медіа</a>
-                <a href="#news" class="hover:text-yellow-300 transition">Новини</a>
-                <a href="#community" class="hover:text-yellow-300 transition">Спільнота</a>
+                <a href="#" class="hover:text-blue-200 font-medium">Главная</a>
+                <a href="#" class="hover:text-blue-200 font-medium">Проекты</a>
+                <a href="#" class="hover:text-blue-200 font-medium">Сообщество</a>
+                <a href="#" class="hover:text-blue-200 font-medium">Ресурсы</a>
             </nav>
-            
             <div class="flex items-center space-x-4">
-                <button class="wishlist-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg transition hidden sm:block">
-                    <i class="fas fa-heart mr-2"></i>Steam Wishlist
+                <button class="bg-white text-blue-800 px-4 py-2 rounded-full font-medium hover:bg-blue-100 transition">
+                    Войти
                 </button>
-                
-                <div class="language-switcher">
-                    <button class="flex items-center space-x-1 bg-green-700 hover:bg-green-600 px-3 py-1 rounded-lg">
-                        <span class="text-sm">UA</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                    <div class="language-dropdown">
-                        <a href="#" class="text-sm">Українська</a>
-                        <a href="#" class="text-sm">English</a>
-                    </div>
-                </div>
-                
-                <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
-                    <i class="fas fa-bars text-2xl"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-green-900 px-4 py-2">
-            <div class="flex flex-col space-y-3">
-                <a href="#about" class="text-white hover:text-yellow-300 transition">Про гру</a>
-                <a href="#features" class="text-white hover:text-yellow-300 transition">Особливості</a>
-                <a href="#media" class="text-white hover:text-yellow-300 transition">Медіа</a>
-                <a href="#news" class="text-white hover:text-yellow-300 transition">Новини</a>
-                <a href="#community" class="text-white hover:text-yellow-300 transition">Спільнота</a>
-                <button class="wishlist-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg transition w-full">
-                    <i class="fas fa-heart mr-2"></i>Steam Wishlist
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <section class="relative h-screen flex items-center justify-center overflow-hidden">
-        <video autoplay muted loop class="hero-video">
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-countryside-meadow-4075-large.mp4" type="video/mp4">
-        </video>
-        
-        <div class="absolute inset-0 bg-black opacity-40"></div>
-        
-        <div class="container mx-auto px-4 z-10 text-center text-white">
-            <img src="https://via.placeholder.com/400x150" alt="Робочяя местность лого" class="mx-auto mb-8 w-full max-w-md">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4">Побудуй свій трактор, виживи в селі</h1>
-            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Справжній симулятор українського сільського життя початку 2000-х</p>
-            
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button class="wishlist-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-8 rounded-lg text-lg transition transform hover:scale-105">
-                    <i class="fas fa-heart mr-2"></i>Додати до бажаного на Steam
-                </button>
-                <button class="bg-white hover:bg-gray-200 text-green-800 font-bold py-4 px-8 rounded-lg text-lg transition transform hover:scale-105">
-                    <i class="fas fa-play mr-2"></i>Дивитися трейлер
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Key Features -->
-    <section id="features" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-green-800">Ключові особливості</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="feature-card bg-gray-50 rounded-xl p-6 shadow-md transition duration-300">
-                    <div class="text-green-600 text-4xl mb-4">
-                        <i class="fas fa-tractor"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Складання транспорту</h3>
-                    <p class="text-gray-700">Знаходьте запчастини, збирайте та ремонтуйте трактори та іншу техніку. Кожен болтик має значення!</p>
-                </div>
-                
-                <!-- Feature 2 -->
-                <div class="feature-card bg-gray-50 rounded-xl p-6 shadow-md transition duration-300">
-                    <div class="text-green-600 text-4xl mb-4">
-                        <i class="fas fa-honey-pot"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Бджільництво та мед</h3>
-                    <p class="text-gray-700">Доглядайте за вуликами, збирайте мед та продавайте його на ринку. Але остерігайтесь ведмедів!</p>
-                </div>
-                
-                <!-- Feature 3 -->
-                <div class="feature-card bg-gray-50 rounded-xl p-6 shadow-md transition duration-300">
-                    <div class="text-green-600 text-4xl mb-4">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Життя в українському селі</h3>
-                    <p class="text-gray-700">Відчуйте автентичну атмосферу українського села з його традиціями, гумором та побутом.</p>
-                </div>
-                
-                <!-- Feature 4 -->
-                <div class="feature-card bg-gray-50 rounded-xl p-6 shadow-md transition duration-300">
-                    <div class="text-green-600 text-4xl mb-4">
-                        <i class="fas fa-heartbeat"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Система виживання</h3>
-                    <p class="text-gray-700">Слідкуйте за голодом, спрагою, втомою та здоров'ям. Хвороби та травми потребують лікування.</p>
-                </div>
-                
-                <!-- Feature 5 -->
-                <div class="feature-card bg-gray-50 rounded-xl p-6 shadow-md transition duration-300">
-                    <div class="text-green-600 text-4xl mb-4">
-                        <i class="fas fa-map-marked-alt"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Відкритий світ</h3>
-                    <p class="text-gray-700">Досліджуйте велику територію села та околиць з унікальними локаціями та секретами.</p>
-                </div>
-                
-                <!-- Feature 6 -->
-                <div class="feature-card bg-gray-50 rounded-xl p-6 shadow-md transition duration-300">
-                    <div class="text-green-600 text-4xl mb-4">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Взаємодія з NPC</h3>
-                    <p class="text-gray-700">Спілкуйтесь з місцевими жителями, виконуйте завдання та ставайте частиною спільноти.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Game -->
-    <section id="about" class="py-16 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row items-center gap-12">
-                <div class="lg:w-1/2">
-                    <img src="https://via.placeholder.com/600x400" alt="Game screenshot" class="rounded-xl shadow-xl w-full">
-                </div>
-                <div class="lg:w-1/2">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-6 text-green-800">Про гру</h2>
-                    <p class="text-gray-700 mb-4">"Робочяя местность" - це унікальний симулятор життя в українському селі початку 2000-х років, де кожна деталь має значення.</p>
-                    <p class="text-gray-700 mb-4">Гра надихнута справжнім досвідом життя в українській глушині та сповнена ностальгії за тими часами, коли трактор був найдорожчим скарбом, а мед з власної пасіки - валютою.</p>
-                    <p class="text-gray-700 mb-6">Ви будете виконувати різноманітні завдання, від ремонту техніки до догляду за тваринами, від торгівлі на ринку до вечірніх посиденьок з сусідами.</p>
-                    
-                    <div class="flex flex-wrap gap-4">
-                        <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full">
-                            <i class="fas fa-cogs mr-2"></i>Симулятор
-                        </div>
-                        <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full">
-                            <i class="fas fa-leaf mr-2"></i>Відкритий світ
-                        </div>
-                        <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full">
-                            <i class="fas fa-heart mr-2"></i>Ностальгія
-                        </div>
-                        <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full">
-                            <i class="fas fa-laugh-squint mr-2"></i>Гумор
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Video Section -->
-    <section class="py-16 bg-green-800 text-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Останній трейлер</h2>
-            
-            <div class="aspect-w-16 aspect-h-9 w-full max-w-4xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl">
-                <!-- YouTube iframe will be here -->
-                <div class="w-full h-0 pb-[56.25%] relative">
-                    <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/ulXkgdijz1c" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-            </div>
-            
-            <div class="max-w-3xl mx-auto mt-8 text-center">
-                <p class="text-xl mb-6">Дивіться офіційний анонс гри "Робочяя местность" - симулятора українського сільського життя.</p>
-                <button class="wishlist-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded-lg transition">
-                    <i class="fas fa-heart mr-2"></i>Додати до бажаного на Steam
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- News Section -->
-    <section id="news" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-green-800">Останні новини</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- News 1 -->
-                <div class="news-card bg-gray-50 rounded-xl overflow-hidden shadow-md transition duration-300">
-                    <img src="https://via.placeholder.com/400x225" alt="News image" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-sm text-gray-500 mb-2">15 червня 2023</div>
-                        <h3 class="text-xl font-bold mb-3">Оновлення системи сільського господарства</h3>
-                        <p class="text-gray-700 mb-4">Ми значно покращили механіки посадки, догляду та збору урожаю. Додано нові культури та інструменти.</p>
-                        <a href="#" class="text-green-600 font-semibold hover:text-green-800 transition">Читати далі →</a>
-                    </div>
-                </div>
-                
-                <!-- News 2 -->
-                <div class="news-card bg-gray-50 rounded-xl overflow-hidden shadow-md transition duration-300">
-                    <img src="https://via.placeholder.com/400x225" alt="News image" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-sm text-gray-500 mb-2">1 червня 2023</div>
-                        <h3 class="text-xl font-bold mb-3">Додано бджільництво</h3>
-                        <p class="text-gray-700 mb-4">Нова система дозволяє займатися бджільництвом: встановлювати вулики, доглядати за бджолами та збирати мед.</p>
-                        <a href="#" class="text-green-600 font-semibold hover:text-green-800 transition">Читати далі →</a>
-                    </div>
-                </div>
-                
-                <!-- News 3 -->
-                <div class="news-card bg-gray-50 rounded-xl overflow-hidden shadow-md transition duration-300">
-                    <img src="https://via.placeholder.com/400x225" alt="News image" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-sm text-gray-500 mb-2">20 травня 2023</div>
-                        <h3 class="text-xl font-bold mb-3">Гра вийде на Steam</h3>
-                        <p class="text-gray-700 mb-4">Ми раді повідомити, що "Робочяя местность" з'явиться на Steam. Додавайте гру до списку бажаного!</p>
-                        <a href="#" class="text-green-600 font-semibold hover:text-green-800 transition">Читати далі →</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center mt-12">
-                <a href="#" class="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-lg transition">
-                    Всі новини
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Media Gallery -->
-    <section id="media" class="py-16 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-green-800">Галерея</h2>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Gallery items will be added here -->
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-                <div class="gallery-item cursor-pointer">
-                    <img src="https://via.placeholder.com/400x225" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                </div>
-            </div>
-            
-            <!-- The Modal -->
-            <div id="galleryModal" class="modal">
-                <span class="close">&times;</span>
-                <img class="modal-content" id="modalImage">
-            </div>
-        </div>
-    </section>
-
-    <!-- Community Section -->
-    <section id="community" class="py-16 bg-green-800 text-white">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-3xl md:text-4xl font-bold mb-6">Приєднуйтесь до спільноти</h2>
-                <p class="text-xl mb-8">Ставайте частиною нашої спільноти, спілкуйтесь з іншими гравцями, отримуйте останні новини про розробку та діліться своїми ідеями!</p>
-                
-                <div class="flex flex-wrap justify-center gap-6 mb-12">
-                    <a href="https://discord.gg/64RZknaQ" class="bg-gray-800 hover:bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition transform hover:scale-110">
-                        <i class="fab fa-discord"></i>
-                    </a>
-                    <a href="https://www.youtube.com/watch?v=ulXkgdijz1c&t=17s" class="bg-red-600 hover:bg-red-700 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition transform hover:scale-110">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                    <a href="#" class="bg-blue-400 hover:bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition transform hover:scale-110">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="bg-pink-600 hover:bg-pink-700 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition transform hover:scale-110">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" class="bg-black hover:bg-gray-900 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition transform hover:scale-110">
-                        <i class="fab fa-tiktok"></i>
-                    </a>
-                </div>
-                
-                <div class="bg-green-900 rounded-xl p-6 max-w-2xl mx-auto">
-                    <h3 class="text-xl font-bold mb-4">Discord сервер</h3>
-                    <p class="mb-4">Наш Discord - найкраще місце для спілкування з розробниками, отримання ексклюзивних новин та участі в тестуванні гри.</p>
-                    <a href="https://discord.gg/64RZknaQ" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105">
-                        <i class="fab fa-discord mr-2"></i>Приєднатися
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Polls Section -->
-    <section id="polls" class="py-16 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-green-800">Опитування</h2>
-            
-            <div id="polls-container" class="max-w-3xl mx-auto">
-                <!-- Polls will be dynamically inserted here -->
-            </div>
-
-            <div class="text-center mt-8">
-                <button onclick="adminLogin()" class="text-sm text-gray-600 hover:text-green-800 transition">
-                    <i class="fas fa-lock mr-1"></i> Увійти як адміністратор
-                </button>
-            </div>
-
-            <!-- Admin Console (hidden by default) -->
-            <div id="admin-console" class="hidden max-w-3xl mx-auto mt-12 bg-white p-6 rounded-xl shadow-lg">
-                <h3 class="text-xl font-bold mb-4 text-green-800">Адмін консоль</h3>
-                
-                <div class="mb-6">
-                    <h4 class="font-bold mb-2">Додати нове опитування</h4>
-                    <div class="space-y-4">
-                        <input type="text" id="new-poll-question" placeholder="Питання опитування" class="w-full p-2 border rounded">
-                        <div id="poll-options-container">
-                            <input type="text" placeholder="Варіант відповіді" class="w-full p-2 border rounded mb-2 poll-option-input">
-                        </div>
-                        <button onclick="addPollOption()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm">
-                            <i class="fas fa-plus mr-1"></i> Додати варіант
-                        </button>
-                        <button onclick="createNewPoll()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-                            <i class="fas fa-save mr-1"></i> Створити опитування
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <h4 class="font-bold mb-2">Додати скріншот</h4>
-                    <div class="space-y-4">
-                        <input type="text" id="screenshot-url" placeholder="URL скріншоту" class="w-full p-2 border rounded">
-                        <button onclick="addScreenshot()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-                            <i class="fas fa-image mr-1"></i> Додати скріншот
-                        </button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-2">Адмін дії</h4>
-                    <button onclick="resetPolls()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded mr-2">
-                        <i class="fas fa-undo mr-1"></i> Скинути голоси
-                    </button>
-                    <button onclick="logoutAdmin()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Вийти
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-green-800">Часті запитання</h2>
-            
-            <div class="max-w-3xl mx-auto">
-                <!-- FAQ Item 1 -->
-                <div class="mb-6 border-b border-gray-200 pb-6">
-                    <h3 class="text-xl font-bold mb-2 flex items-center justify-between cursor-pointer faq-question">
-                        <span>Коли вийде гра?</span>
-                        <i class="fas fa-chevron-down transition"></i>
-                    </h3>
-                    <div class="faq-answer hidden mt-2 text-gray-700">
-                        <p>Ми плануємо випустити ранній доступ у 2024 році. Точна дата буде оголошена пізніше. Підпишіться на наші соціальні мережі, щоб не пропустити анонс.</p>
-                    </div>
-                </div>
-                
-                <!-- FAQ Item 2 -->
-                <div class="mb-6 border-b border-gray-200 pb-6">
-                    <h3 class="text-xl font-bold mb-2 flex items-center justify-between cursor-pointer faq-question">
-                        <span>На які платформи вийде гра?</span>
-                        <i class="fas fa-chevron-down transition"></i>
-                    </h3>
-                    <div class="faq-answer hidden mt-2 text-gray-700">
-                        <p>Спочатку гра вийде для PC (Windows) через Steam. У майбутньому ми розглядаємо можливість портування на інші платформи.</p>
-                    </div>
-                </div>
-                
-                <!-- FAQ Item 3 -->
-                <div class="mb-6 border-b border-gray-200 pb-6">
-                    <h3 class="text-xl font-bold mb-2 flex items-center justify-between cursor-pointer faq-question">
-                        <span>Які системні вимоги?</span>
-                        <i class="fas fa-chevron-down transition"></i>
-                    </h3>
-                    <div class="faq-answer hidden mt-2 text-gray-700">
-                        <p><strong>Мінімальні:</strong> Windows 10, Intel Core i5-4460 / AMD FX-8350, 8 GB RAM, NVIDIA GTX 760 / AMD Radeon R7 260x, 10 GB HDD</p>
-                        <p class="mt-2"><strong>Рекомендовані:</strong> Windows 10/11, Intel Core i7-6700K / AMD Ryzen 5 2600, 16 GB RAM, NVIDIA GTX 1060 / AMD RX 580, 10 GB SSD</p>
-                    </div>
-                </div>
-                
-                <!-- FAQ Item 4 -->
-                <div class="mb-6 border-b border-gray-200 pb-6">
-                    <h3 class="text-xl font-bold mb-2 flex items-center justify-between cursor-pointer faq-question">
-                        <span>Чи буде мультиплеєр?</span>
-                        <i class="fas fa-chevron-down transition"></i>
-                    </h3>
-                    <div class="faq-answer hidden mt-2 text-gray-700">
-                        <p>Наразі ми зосереджені на розробці якісного однокористувацького досвіду. Мультиплеєр можливий у майбутньому, але не обіцяємо.</p>
-                    </div>
-                </div>
-                
-                <!-- FAQ Item 5 -->
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold mb-2 flex items-center justify-between cursor-pointer faq-question">
-                        <span>Як я можу підтримати гру?</span>
-                        <i class="fas fa-chevron-down transition"></i>
-                    </h3>
-                    <div class="faq-answer hidden mt-2 text-gray-700">
-                        <p>Найкраща підтримка зараз - додати гру до списку бажаного на Steam та розповісти про неї друзям. Також ви можете приєднатися до нашої спільноти в Discord та соціальних мережах.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-16 bg-yellow-50">
+    <section class="gradient-bg text-white py-16">
         <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6 text-green-800">Готові до пригод?</h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto">Додайте "Робочяя местность" до списку бажаного на Steam та отримайте сповіщення про реліз!</p>
-            
-            <button class="wishlist-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-8 rounded-lg text-lg transition transform hover:scale-105 mb-8">
-                <i class="fas fa-heart mr-2"></i>Додати до бажаного на Steam
-            </button>
-            
-            <div class="flex flex-wrap justify-center gap-6">
-                <a href="#" class="text-gray-700 hover:text-green-800 transition">
-                    <i class="fab fa-steam text-3xl"></i>
-                </a>
-                <a href="#" class="text-gray-700 hover:text-green-800 transition">
-                    <i class="fas fa-envelope text-3xl"></i>
-                </a>
-                <a href="#" class="text-gray-700 hover:text-green-800 transition">
-                    <i class="fas fa-question-circle text-3xl"></i>
-                </a>
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Покажи миру свою игру</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">
+                DevGameHub - это место, где разработчики игр делятся своим прогрессом, получают фидбэк и находят единомышленников.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button class="bg-white text-blue-800 px-6 py-3 rounded-full font-bold hover:bg-blue-100 transition">
+                    Присоединиться
+                </button>
+                <button class="bg-transparent border-2 border-white px-6 py-3 rounded-full font-bold hover:bg-white hover:text-blue-800 transition">
+                    Узнать больше
+                </button>
             </div>
         </div>
     </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Create Post Section -->
+        <section class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div class="flex items-start space-x-4">
+                <div class="avatar-upload">
+                    <img src="https://via.placeholder.com/50" alt="User" class="rounded-full w-12 h-12">
+                    <input type="file" accept="image/*">
+                </div>
+                <div class="flex-1">
+                    <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Поделитесь своим прогрессом..."></textarea>
+                    <div class="flex justify-between items-center mt-3">
+                        <div class="flex space-x-2">
+                            <button class="text-gray-500 hover:text-blue-500">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <button class="text-gray-500 hover:text-blue-500">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <button class="text-gray-500 hover:text-blue-500">
+                                <i class="fas fa-code"></i>
+                            </button>
+                        </div>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Опубликовать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Projects Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-rocket mr-2 text-blue-600"></i> Последние проекты
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Game Project Card 1 -->
+                <div class="game-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="relative">
+                        <img src="https://via.placeholder.com/400x225" alt="Game Screenshot" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                            В разработке
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Cosmic Adventure</h3>
+                        <p class="text-gray-600 mb-4">Приключенческая игра в открытом космосе с элементами RPG</p>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Прогресс:</span>
+                                <span>65%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">Unity</span>
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">C#</span>
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">3D</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium mb-1">Ссылки на игру:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fas fa-globe mr-1"></i> itch.io
+                                </a>
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fab fa-steam mr-1"></i> Steam
+                                </a>
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fab fa-github mr-1"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <i class="fas fa-heart"></i>
+                                <span>42</span>
+                            </div>
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <i class="fas fa-comment"></i>
+                                <span>8</span>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Project Card 2 -->
+                <div class="game-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="relative">
+                        <img src="https://via.placeholder.com/400x225" alt="Game Screenshot" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+                            Выпущена
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Pixel Dungeon</h3>
+                        <p class="text-gray-600 mb-4">Рогалик в пиксельном стиле с процедурной генерацией</p>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Прогресс:</span>
+                                <span>100%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">Godot</span>
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">GDScript</span>
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">2D</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium mb-1">Ссылки на игру:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fas fa-globe mr-1"></i> Официальный сайт
+                                </a>
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fab fa-google-play mr-1"></i> Play Store
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <i class="fas fa-heart"></i>
+                                <span>128</span>
+                            </div>
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <i class="fas fa-comment"></i>
+                                <span>24</span>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Project Card 3 -->
+                <div class="game-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="relative">
+                        <img src="https://via.placeholder.com/400x225" alt="Game Screenshot" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                            Альфа-тест
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Cyber Racers</h3>
+                        <p class="text-gray-600 mb-4">Гонки будущего с неоновыми трассами и модификациями</p>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Прогресс:</span>
+                                <span>35%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 35%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">Unreal</span>
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">C++</span>
+                            <span class="bg-gray-200 px-2 py-1 rounded text-xs">Мультиплеер</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium mb-1">Ссылки на игру:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fab fa-discord mr-1"></i> Discord
+                                </a>
+                                <a href="#" class="text-blue-600 hover:underline text-sm flex items-center">
+                                    <i class="fab fa-youtube mr-1"></i> YouTube
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <i class="fas fa-heart"></i>
+                                <span>76</span>
+                            </div>
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <i class="fas fa-comment"></i>
+                                <span>15</span>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Updates Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-newspaper mr-2 text-blue-600"></i> Последние обновления
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- Update 1 -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <img src="https://via.placeholder.com/50" alt="User" class="rounded-full w-12 h-12">
+                        <div>
+                            <h3 class="font-bold">Alex GameDev</h3>
+                            <p class="text-gray-500 text-sm">2 часа назад · <span class="text-blue-600">Cosmic Adventure</span></p>
+                        </div>
+                    </div>
+                    <p class="mb-4">Только что добавил новую систему диалогов в игру! Теперь NPC могут реагировать на действия игрока и запоминать предыдущие разговоры. Какие еще функции вы бы хотели видеть в диалоговой системе?</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+                        <img src="https://via.placeholder.com/300x200" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
+                        <img src="https://via.placeholder.com/300x200" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
+                        <img src="https://via.placeholder.com/300x200" alt="Screenshot" class="rounded-lg object-cover h-32 w-full">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-4">
+                            <button class="flex items-center space-x-1 text-gray-500 hover:text-red-500">
+                                <i class="far fa-heart"></i>
+                                <span>Нравится</span>
+                            </button>
+                            <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
+                                <i class="far fa-comment"></i>
+                                <span>Комментировать</span>
+                            </button>
+                        </div>
+                        <button class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Update 2 -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <img src="https://via.placeholder.com/50" alt="User" class="rounded-full w-12 h-12">
+                        <div>
+                            <h3 class="font-bold">PixelArt Studio</h3>
+                            <p class="text-gray-500 text-sm">5 часов назад · <span class="text-blue-600">Pixel Dungeon</span></p>
+                        </div>
+                    </div>
+                    <p class="mb-4">Выпустили большое обновление для Pixel Dungeon! Добавили 10 новых типов врагов, 5 боссов и систему крафта. Игра теперь доступна на Android. Оставляйте отзывы!</p>
+                    <div class="mb-4">
+                        <div class="aspect-w-16 aspect-h-9">
+                            <iframe class="w-full h-64 rounded-lg" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-4">
+                            <button class="flex items-center space-x-1 text-gray-500 hover:text-red-500">
+                                <i class="far fa-heart"></i>
+                                <span>Нравится</span>
+                            </button>
+                            <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
+                                <i class="far fa-comment"></i>
+                                <span>Комментировать</span>
+                            </button>
+                        </div>
+                        <button class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Stats -->
+        <section class="bg-white rounded-xl shadow-md p-6 mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Наше сообщество</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="p-4">
+                    <div class="text-5xl font-bold text-blue-600 mb-2">12,345</div>
+                    <div class="text-gray-600">Разработчиков</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-5xl font-bold text-purple-600 mb-2">5,678</div>
+                    <div class="text-gray-600">Игровых проектов</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-5xl font-bold text-green-600 mb-2">1,234</div>
+                    <div class="text-gray-600">Выпущенных игр</div>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-green-900 text-white py-12">
+    <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Робочяя местность</h3>
-                    <p class="mb-4">Симулятор життя в українському селі початку 2000-х років.</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="hover:text-yellow-300 transition"><i class="fab fa-steam"></i></a>
-                        <a href="#" class="hover:text-yellow-300 transition"><i class="fab fa-discord"></i></a>
-                        <a href="https://www.youtube.com/watch?v=ulXkgdijz1c&t=17s" class="hover:text-yellow-300 transition"><i class="fab fa-youtube"></i></a>
-                    </div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-gamepad mr-2"></i> DevGameHub
+                    </h3>
+                    <p class="text-gray-400">
+                        Сообщество разработчиков игр, где можно делиться прогрессом, получать фидбэк и находить единомышленников.
+                    </p>
                 </div>
-                
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Навігація</h3>
+                    <h4 class="font-bold mb-4">Навигация</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="hover:text-yellow-300 transition">Головна</a></li>
-                        <li><a href="#about" class="hover:text-yellow-300 transition">Про гру</a></li>
-                        <li><a href="#features" class="hover:text-yellow-300 transition">Особливості</a></li>
-                        <li><a href="#news" class="hover:text-yellow-300 transition">Новини</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Главная</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Проекты</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Сообщество</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Ресурсы</a></li>
                     </ul>
                 </div>
-                
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Підтримка</h3>
+                    <h4 class="font-bold mb-4">Ресурсы</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="hover:text-yellow-300 transition">FAQ</a></li>
-                        <li><a href="#" class="hover:text-yellow-300 transition">Контакти</a></li>
-                        <li><a href="#" class="hover:text-yellow-300 transition">Політика конфіденційності</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Документация</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Учебные материалы</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Ассеты</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Вакансии</a></li>
                     </ul>
                 </div>
-                
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Контакти</h3>
-                    <p class="mb-2"><i class="fas fa-envelope mr-2"></i>contact@robochaya-mestnost.com</p>
-                    <p><i class="fas fa-map-marker-alt mr-2"></i>Україна</p>
+                    <h4 class="font-bold mb-4">Контакты</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-gray-400"></i>
+                            <a href="mailto:contact@devgamehub.com" class="text-gray-400 hover:text-white">contact@devgamehub.com</a>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fab fa-discord mr-2 text-gray-400"></i>
+                            <a href="#" class="text-gray-400 hover:text-white">Discord сервер</a>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fab fa-twitter mr-2 text-gray-400"></i>
+                            <a href="#" class="text-gray-400 hover:text-white">Twitter</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            
-            <div class="border-t border-green-800 mt-12 pt-8 text-center">
-                <p>© 2023 Робочяя местность. Всі права захищені.</p>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2023 DevGameHub. Все права защищены.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-
-        // FAQ accordion
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const answer = question.nextElementSibling;
-                const icon = question.querySelector('i');
-                
-                answer.classList.toggle('hidden');
-                icon.classList.toggle('fa-chevron-down');
-                icon.classList.toggle('fa-chevron-up');
-            });
-        });
-
-        // Gallery modal
-        const modal = document.getElementById("galleryModal");
-        const modalImg = document.getElementById("modalImage");
-        const closeBtn = document.getElementsByClassName("close")[0];
-        
-        document.querySelectorAll('.gallery-item img').forEach(img => {
-            img.addEventListener('click', function() {
-                modal.style.display = "block";
-                modalImg.src = this.src;
-            });
-        });
-        
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-        }
-        
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-                
-                // Close mobile menu if open
-                const mobileMenu = document.getElementById('mobile-menu');
-                if (!mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.add('hidden');
-                }
-            });
-        });
-
-        // Polls System
-        const pollsContainer = document.getElementById('polls-container');
-        const storageKey = 'robochaya_polls_votes';
-        const adminEmail = 'ukraponovicaleksandr@gmail.com';
-
-        // Check if current user is admin
-        function isAdmin() {
-            const adminEmail = 'ukraponovicaleksandr@gmail.com';
-            const loggedInEmail = localStorage.getItem('admin_email');
-            return loggedInEmail === adminEmail;
-        }
-
-        // Track login status
-        function checkLoginStatus() {
-            const adminEmail = 'ukraponovicaleksandr@gmail.com';
-            const loggedInEmail = localStorage.getItem('admin_email');
-            
-            if (loggedInEmail === adminEmail) {
-                toggleAdminConsole(true);
-            } else {
-                toggleAdminConsole(false);
-            }
-        }
-
-        // Sample polls data - you can modify this easily
-        const polls = [
-            {
-                id: 1,
-                question: "Який аспект гри вас найбільше цікавить?",
-                options: [
-                    "Складання тракторів",
-                    "Бджільництво",
-                    "Сільське господарство",
-                    "Спілкування з NPC"
-                ],
-                votes: [0, 0, 0, 0] // Initialize with zero votes
-            },
-            {
-                id: 2,
-                question: "Як часто ви граєте в симулятори?",
-                options: [
-                    "Щодня",
-                    "Кілька разів на тиждень",
-                    "Кілька разів на місяць",
-                    "Рідко"
-                ],
-                votes: [0, 0, 0, 0]
-            }
-        ];
-
-        // Load saved votes from localStorage
-        function loadVotes() {
-            const savedVotes = localStorage.getItem(storageKey);
-            if (savedVotes) {
-                const parsedVotes = JSON.parse(savedVotes);
-                polls.forEach(poll => {
-                    if (parsedVotes[poll.id]) {
-                        poll.votes = parsedVotes[poll.id];
+        // Simple script for demonstration
+        document.addEventListener('DOMContentLoaded', function() {
+            // Like button functionality
+            document.querySelectorAll('.fa-heart').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    if (this.classList.contains('far')) {
+                        this.classList.remove('far');
+                        this.classList.add('fas', 'text-red-500');
+                    } else {
+                        this.classList.remove('fas', 'text-red-500');
+                        this.classList.add('far');
                     }
                 });
-            }
-        }
-
-        // Save votes to localStorage
-        function saveVotes() {
-            const votesToSave = {};
-            polls.forEach(poll => {
-                votesToSave[poll.id] = poll.votes;
             });
-            localStorage.setItem(storageKey, JSON.stringify(votesToSave));
-        }
 
-        // Render all polls
-        function renderPolls() {
-            pollsContainer.innerHTML = '';
-            polls.forEach(poll => {
-                const pollElement = document.createElement('div');
-                pollElement.className = 'mb-12 bg-white p-6 rounded-xl shadow-md';
-                
-                const totalVotes = poll.votes.reduce((a, b) => a + b, 0);
-                
-                pollElement.innerHTML = `
-                    <h3 class="text-xl font-bold mb-4">${poll.question}</h3>
-                    <div class="space-y-3">
-                        ${poll.options.map((option, index) => `
-                            <div class="poll-option">
-                                <button 
-                                    onclick="vote(${poll.id}, ${index})" 
-                                    class="w-full text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition flex justify-between items-center"
-                                    ${localStorage.getItem(`poll_${poll.id}_voted_${poll.question}`) ? 'disabled' : ''}
-                                >
-                                    <span>${option}</span>
-                                    ${localStorage.getItem(`poll_${poll.id}_voted_${poll.question}`) ? `
-                                        <span class="text-sm font-medium">
-                                            ${poll.votes[index]} (${totalVotes ? Math.round((poll.votes[index] / totalVotes) * 100) : 0}%)
-                                        </span>
-                                    ` : ''}
-                                </button>
-                                ${localStorage.getItem(`poll_${poll.id}_voted`) ? `
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                                        <div 
-                                            class="bg-green-600 h-2.5 rounded-full" 
-                                            style="width: ${totalVotes ? (poll.votes[index] / totalVotes) * 100 : 0}%"
-                                        ></div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                    ${localStorage.getItem(`poll_${poll.id}_voted_${poll.question}`) ? `
-                        <p class="text-sm text-gray-500 mt-3">Всього голосів: ${totalVotes}</p>
-                    ` : ''}
-                `;
-                
-                pollsContainer.appendChild(pollElement);
-            });
-        }
-
-        // Vote function
-        window.vote = function(pollId, optionIndex) {
-            const poll = polls.find(p => p.id === pollId);
-            if (poll && !localStorage.getItem(`poll_${pollId}_voted_${poll.question}`)) {
-                poll.votes[optionIndex]++;
-                saveVotes();
-                localStorage.setItem(`poll_${pollId}_voted_${poll.question}`, 'true');
-                renderPolls();
-            }
-        };
-
-        // Reset all polls (for admin use)
-        window.resetPolls = function() {
-            if (!isAdmin()) {
-                alert('Тільки адміністратор може скидати голоси');
-                return;
-            }
-            
-            if (confirm('Ви впевнені, що хочете скинути всі голоси?')) {
-                polls.forEach(poll => {
-                    poll.votes = new Array(poll.options.length).fill(0);
-                    localStorage.removeItem(`poll_${poll.id}_voted_${poll.question}`);
-                });
-                saveVotes();
-                renderPolls();
-            }
-        };
-
-        // Admin login function
-        window.adminLogin = function() {
-            const adminEmail = 'ukraponovicaleksandr@gmail.com';
-            const email = prompt('Введіть email адміністратора:');
-            
-            if (email === adminEmail) {
-                localStorage.setItem('admin_email', email);
-                alert('Ви увійшли як адміністратор');
-                toggleAdminConsole(true);
-            } else if (email) {
-                alert('Невірний email адміністратора');
-                toggleAdminConsole(false);
-            }
-        };
-
-        // Logout admin
-        window.logoutAdmin = function() {
-            localStorage.removeItem('admin_email');
-            toggleAdminConsole(false);
-            alert('Ви вийшли з адмін панелі');
-        };
-
-        // Toggle admin console visibility
-        function toggleAdminConsole(show) {
-            const console = document.getElementById('admin-console');
-            if (show && isAdmin()) {
-                console.classList.remove('hidden');
-            } else {
-                console.classList.add('hidden');
-            }
-        }
-
-        // Add new poll option input
-        window.addPollOption = function() {
-            const container = document.getElementById('poll-options-container');
-            const newInput = document.createElement('input');
-            newInput.type = 'text';
-            newInput.placeholder = 'Варіант відповіді';
-            newInput.className = 'w-full p-2 border rounded mb-2 poll-option-input';
-            container.appendChild(newInput);
-        };
-
-        // Create new poll
-        window.createNewPoll = function() {
-            if (!isAdmin()) return;
-            
-            const question = document.getElementById('new-poll-question').value;
-            const options = Array.from(document.querySelectorAll('.poll-option-input'))
-                                .map(input => input.value)
-                                .filter(opt => opt.trim() !== '');
-            
-            if (!question || options.length < 2) {
-                alert('Будь ласка, введіть питання та щонайменше 2 варіанти відповіді');
-                return;
-            }
-
-            const newPoll = {
-                id: polls.length + 1,
-                question: question,
-                options: options,
-                votes: new Array(options.length).fill(0)
-            };
-
-            polls.push(newPoll);
-            saveVotes();
-            renderPolls();
-            
-            // Clear form
-            document.getElementById('new-poll-question').value = '';
-            document.getElementById('poll-options-container').innerHTML = `
-                <input type="text" placeholder="Варіант відповіді" class="w-full p-2 border rounded mb-2 poll-option-input">
-            `;
-            
-            alert('Нове опитування додано!');
-        };
-
-        // Add screenshot to gallery
-        window.addScreenshot = function() {
-            if (!isAdmin()) return;
-            
-            const url = document.getElementById('screenshot-url').value.trim();
-            if (!url) {
-                alert('Будь ласка, введіть URL скріншоту');
-                return;
-            }
-
-            const gallery = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4.gap-6');
-            if (gallery) {
-                const newItem = document.createElement('div');
-                newItem.className = 'gallery-item cursor-pointer';
-                newItem.innerHTML = `
-                    <img src="${url}" alt="Game screenshot" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition">
-                `;
-                gallery.appendChild(newItem);
-                
-                // Rebind click event for the new image
-                newItem.querySelector('img').addEventListener('click', function() {
-                    modal.style.display = "block";
-                    modalImg.src = this.src;
-                });
-                
-                document.getElementById('screenshot-url').value = '';
-                alert('Скріншот додано до галереї!');
-            }
-        };
-
-        // Check login status on page load
-        checkLoginStatus();
-
-        // Initialize polls
-        loadVotes();
-        renderPolls();
+            // Mobile menu toggle would go here
+            const mobileMenuButton = document.querySelector('.md\\:hidden');
+            // Add mobile menu functionality as needed
+        });
     </script>
 </body>
 </html>
