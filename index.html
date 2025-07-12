@@ -3,9 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мессенджер с запоминанием</title>
+    <title>Улучшенный мессенджер</title>
     <style>
-        /* ... (оставьте предыдущие стили без изменений) ... */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .auth-form, .chat-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+        .messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .message.sent {
+            background-color: #e1f5fe;
+            text-align: right;
+        }
+        .message.received {
+            background-color: #f0f0f0;
+        }
+        .username {
+            font-weight: bold;
+            color: #333;
+        }
+        .hidden {
+            display: none;
+        }
+        .user-id {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .online-users {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background: white;
+        }
+        .user-item {
+            padding: 5px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .user-item:hover {
+            background: #f0f0f0;
+        }
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0088cc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
         .remember-me {
             display: flex;
             align-items: center;
@@ -15,10 +123,19 @@
             width: auto;
             margin-right: 10px;
         }
+        .unread-count {
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
-    <!-- ... (оставьте предыдущую HTML-разметку без изменений до формы авторизации) ... -->
+    <div class="container">
+        <h1>Улучшенный мессенджер</h1>
         
         <div id="auth-form" class="auth-form">
             <h2>Вход</h2>
@@ -32,12 +149,332 @@
             <button id="login-btn">Войти</button>
         </div>
         
-    <!-- ... (оставьте остальную HTML-разметку без изменений) ... -->
+        <div id="chat-container" class="chat-container hidden">
+            <div class="chat-header">
+                <h2>Чат с <span id="recipient-name"></span></h2>
+                <div class="user-id">Ваш ID: <span id="current-user-id"></span></div>
+            </div>
+            
+            <div class="online-users hidden" id="online-users">
+                <h3>Пользователи онлайн</h3>
+                <div id="users-list"></div>
+            </div>
+            
+            <button id="show-users-btn">Показать пользователей</button>
+            <input type="text" id="recipient-id" placeholder="ID получателя или выберите из списка">
+            
+            <div id="messages" class="messages"></div>
+            <input type="text" id="message-input" placeholder="Введите сообщение...">
+            <button id="send-btn">Отправить</button>
+            <button id="logout-btn">Выйти</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Новое сообщение!
+    </div>
+
+    <audio id="notification-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
-        // ... (оставьте предыдущий код до обработчиков событий без изменений) ...
+        // Генератор случайных ID
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
 
-        // Проверяем, есть ли сохраненные данные пользователя
+        // Хранилище данных
+        const storage = {
+            users: JSON.parse(localStorage.getItem('messenger_users')) || [],
+            messages: JSON.parse(localStorage.getItem('messenger_messages')) || [],
+            lastRecipients: JSON.parse(localStorage.getItem('messenger_last_recipients')) || {},
+            unreadMessages: JSON.parse(localStorage.getItem('messenger_unread_messages')) || {},
+            
+            saveUsers: function() {
+                localStorage.setItem('messenger_users', JSON.stringify(this.users));
+            },
+            
+            saveMessages: function() {
+                localStorage.setItem('messenger_messages', JSON.stringify(this.messages));
+            },
+            
+            saveLastRecipients: function() {
+                localStorage.setItem('messenger_last_recipients', JSON.stringify(this.lastRecipients));
+            },
+            
+            saveUnreadMessages: function() {
+                localStorage.setItem('messenger_unread_messages', JSON.stringify(this.unreadMessages));
+            },
+            
+            addUser: function(username, password) {
+                const id = generateId();
+                this.users.push({ id, username, password });
+                this.saveUsers();
+                return id;
+            },
+            
+            findUser: function(username) {
+                return this.users.find(user => user.username === username);
+            },
+            
+            findUserById: function(id) {
+                return this.users.find(user => user.id === id);
+            },
+            
+            addMessage: function(senderId, recipientId, text) {
+                const message = {
+                    id: generateId(),
+                    senderId,
+                    recipientId,
+                    text,
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+                this.messages.push(message);
+                this.saveMessages();
+                
+                // Добавляем в непрочитанные
+                if (!this.unreadMessages[recipientId]) {
+                    this.unreadMessages[recipientId] = {};
+                }
+                if (!this.unreadMessages[recipientId][senderId]) {
+                    this.unreadMessages[recipientId][senderId] = 0;
+                }
+                this.unreadMessages[recipientId][senderId]++;
+                this.saveUnreadMessages();
+                
+                return message;
+            },
+            
+            markMessagesAsRead: function(userId, senderId) {
+                if (this.unreadMessages[userId] && this.unreadMessages[userId][senderId]) {
+                    delete this.unreadMessages[userId][senderId];
+                    this.saveUnreadMessages();
+                }
+                
+                // Помечаем сообщения как прочитанные
+                this.messages.forEach(msg => {
+                    if (msg.senderId === senderId && msg.recipientId === userId && !msg.read) {
+                        msg.read = true;
+                    }
+                });
+                this.saveMessages();
+            },
+            
+            getUnreadCount: function(userId, senderId) {
+                if (this.unreadMessages[userId] && this.unreadMessages[userId][senderId]) {
+                    return this.unreadMessages[userId][senderId];
+                }
+                return 0;
+            },
+            
+            getMessagesBetween: function(user1Id, user2Id) {
+                return this.messages.filter(msg => 
+                    (msg.senderId === user1Id && msg.recipientId === user2Id) ||
+                    (msg.senderId === user2Id && msg.recipientId === user1Id)
+                ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            },
+            
+            setLastRecipient: function(userId, recipientId) {
+                this.lastRecipients[userId] = recipientId;
+                this.saveLastRecipients();
+            },
+            
+            getLastRecipient: function(userId) {
+                return this.lastRecipients[userId];
+            },
+            
+            getAllUsers: function() {
+                return this.users;
+            }
+        };
+
+        // DOM элементы
+        const authForm = document.getElementById('auth-form');
+        const chatContainer = document.getElementById('chat-container');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const registerBtn = document.getElementById('register-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const recipientIdInput = document.getElementById('recipient-id');
+        const recipientNameSpan = document.getElementById('recipient-name');
+        const currentUserIdSpan = document.getElementById('current-user-id');
+        const onlineUsersDiv = document.getElementById('online-users');
+        const usersListDiv = document.getElementById('users-list');
+        const showUsersBtn = document.getElementById('show-users-btn');
+        const notification = document.getElementById('notification');
+        const notificationSound = document.getElementById('notification-sound');
+
+        // Текущий пользователь
+        let currentUser = null;
+        let currentRecipient = null;
+        let checkInterval = null;
+
+        // Функции
+        function showChat() {
+            authForm.classList.add('hidden');
+            chatContainer.classList.remove('hidden');
+            currentUserIdSpan.textContent = currentUser.id;
+            
+            // Загружаем последнего получателя
+            const lastRecipientId = storage.getLastRecipient(currentUser.id);
+            if (lastRecipientId) {
+                const recipient = storage.findUserById(lastRecipientId);
+                if (recipient) {
+                    recipientIdInput.value = recipient.id;
+                    loadChatWithRecipient(recipient);
+                }
+            }
+            
+            // Запускаем проверку новых сообщений
+            startCheckingMessages();
+        }
+
+        function showAuth() {
+            chatContainer.classList.add('hidden');
+            authForm.classList.remove('hidden');
+            currentUser = null;
+            currentRecipient = null;
+            
+            // Останавливаем проверку новых сообщений
+            stopCheckingMessages();
+        }
+
+        function loadChatWithRecipient(recipient) {
+            currentRecipient = recipient;
+            recipientNameSpan.textContent = recipient.username;
+            
+            // Помечаем сообщения как прочитанные
+            storage.markMessagesAsRead(currentUser.id, recipient.id);
+            
+            // Сохраняем как последнего получателя
+            storage.setLastRecipient(currentUser.id, recipient.id);
+            
+            // Загружаем сообщения
+            messagesContainer.innerHTML = '';
+            const messages = storage.getMessagesBetween(currentUser.id, recipient.id);
+            
+            messages.forEach(msg => {
+                addMessageToChat(msg, msg.senderId === currentUser.id);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addMessageToChat(msg, isSent) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.dataset.messageId = msg.id;
+            
+            if (isSent) {
+                messageElement.classList.add('sent');
+            } else {
+                messageElement.classList.add('received');
+            }
+            
+            const sender = isSent ? 'Вы' : currentRecipient.username;
+            
+            messageElement.innerHTML = `
+                <div class="username">${sender}</div>
+                <div>${msg.text}</div>
+                <small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text && currentUser && currentRecipient) {
+                const msg = storage.addMessage(currentUser.id, currentRecipient.id, text);
+                addMessageToChat(msg, true);
+                messageInput.value = '';
+            }
+        }
+
+        function showOnlineUsers() {
+            usersListDiv.innerHTML = '';
+            const users = storage.getAllUsers();
+            
+            users.forEach(user => {
+                if (user.id !== currentUser.id) {
+                    const unreadCount = storage.getUnreadCount(currentUser.id, user.id);
+                    
+                    const userElement = document.createElement('div');
+                    userElement.classList.add('user-item');
+                    userElement.innerHTML = `
+                        <strong>${user.username}</strong>
+                        ${unreadCount > 0 ? `<span class="unread-count">${unreadCount}</span>` : ''}
+                        <div class="user-id">ID: ${user.id}</div>
+                    `;
+                    
+                    userElement.addEventListener('click', () => {
+                        recipientIdInput.value = user.id;
+                        loadChatWithRecipient(user);
+                        onlineUsersDiv.classList.add('hidden');
+                    });
+                    
+                    usersListDiv.appendChild(userElement);
+                }
+            });
+            
+            onlineUsersDiv.classList.toggle('hidden');
+        }
+
+        function showNotification(senderName) {
+            notification.textContent = `Новое сообщение от ${senderName}!`;
+            notification.style.display = 'block';
+            
+            // Проигрываем звук уведомления
+            notificationSound.play();
+            
+            // Скрываем уведомление через 3 секунды
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function checkForNewMessages() {
+            if (!currentUser) return;
+            
+            // Проверяем непрочитанные сообщения от всех пользователей
+            const unreadData = storage.unreadMessages[currentUser.id] || {};
+            
+            Object.keys(unreadData).forEach(senderId => {
+                const count = unreadData[senderId];
+                if (count > 0) {
+                    const sender = storage.findUserById(senderId);
+                    if (sender) {
+                        // Если сейчас открыт чат с этим пользователем, помечаем как прочитанные
+                        if (currentRecipient && currentRecipient.id === senderId) {
+                            storage.markMessagesAsRead(currentUser.id, senderId);
+                        } else {
+                            // Показываем уведомление только если чат не открыт
+                            showNotification(sender.username);
+                        }
+                    }
+                }
+            });
+        }
+
+        function startCheckingMessages() {
+            // Проверяем каждые 2 секунды
+            checkInterval = setInterval(checkForNewMessages, 2000);
+        }
+
+        function stopCheckingMessages() {
+            if (checkInterval) {
+                clearInterval(checkInterval);
+                checkInterval = null;
+            }
+        }
+
         function checkRememberedUser() {
             const rememberedUser = JSON.parse(localStorage.getItem('messenger_remembered_user'));
             if (rememberedUser && rememberedUser.username) {
@@ -88,10 +525,32 @@
             }
         });
 
-        // ... (оставьте остальные обработчики событий без изменений) ...
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        logoutBtn.addEventListener('click', showAuth);
+
+        recipientIdInput.addEventListener('change', () => {
+            const recipientId = recipientIdInput.value.trim();
+            if (recipientId) {
+                const recipient = storage.findUserById(recipientId);
+                if (recipient) {
+                    loadChatWithRecipient(recipient);
+                } else {
+                    alert('Пользователь с таким ID не найден');
+                }
+            }
+        });
+
+        showUsersBtn.addEventListener('click', showOnlineUsers);
 
         // Инициализация
-        checkRememberedUser(); // Проверяем сохраненного пользователя при загрузке
+        checkRememberedUser();
         showAuth();
     </script>
 </body>
