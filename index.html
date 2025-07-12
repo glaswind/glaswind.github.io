@@ -4,343 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevGameHub - Сообщество разработчиков игр</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            background-color: #15171a;
-            color: #e1e3e6;
-            font-family: 'Inter', sans-serif;
-        }
-        .glass-header {
-            background-color: rgba(21, 23, 26, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(63, 63, 70, 0.4);
-        }
-        .nav-link-active {
-            color: #ffffff;
-            font-weight: 700;
-        }
-        .card-bg {
-            background-color: #1a1d21;
-        }
+        body { background-color: #15171a; color: #e1e3e6; font-family: 'Inter', sans-serif; }
+        .glass-header { background-color: rgba(21, 23, 26, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(63, 63, 70, 0.4); }
+        .nav-link-active { color: #ffffff; font-weight: 700; }
+        .card-bg { background-color: #1a1d21; }
     </style>
 </head>
 <body>
-
-    <header class="glass-header sticky top-0 z-40">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-gamepad text-2xl text-blue-500"></i>
-                    <h1 class="text-xl font-bold text-white">DevGameHub</h1>
-                </div>
-                <div class="hidden md:block w-full max-w-md">
-                    <div class="relative">
-                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"><i class="fas fa-search"></i></span>
-                        <input type="text" placeholder="Поиск проектов, людей, обновлений..." class="w-full bg-[#202327] border border-transparent focus:border-blue-500 focus:bg-[#15171a] focus:ring-0 rounded-full py-2 pl-10 pr-4 text-white transition-colors">
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div id="authButtons">
-                        <button class="bg-blue-500 text-white px-4 py-2 rounded-full font-bold hover:bg-blue-600 transition" onclick="showAuthModal()">Войти</button>
-                    </div>
-                    <div id="userProfile" class="hidden items-center space-x-3">
-                        <img src="https://placehold.co/40x40/7e22ce/white?text=U" alt="User Avatar" class="rounded-full w-9 h-9 border-2 border-gray-700">
-                        <span class="font-bold text-white hidden lg:block">Username</span>
-                        <button onclick="logout()" class="text-gray-400 hover:text-red-500 transition" title="Выйти"><i class="fas fa-sign-out-alt text-lg"></i></button>
-                    </div>
-                </div>
+    <header class="glass-header sticky top-0 z-40 p-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-gamepad text-blue-500 text-2xl"></i>
+                <h1 class="text-xl font-bold">DevGameHub</h1>
+            </div>
+            <nav class="flex gap-4">
+                <button class="hover:underline" onclick="showSection('home')">Главная</button>
+                <button class="hover:underline" onclick="showSection('projects')">Проекты</button>
+                <button class="hover:underline" onclick="showSection('community')">Сообщество</button>
+                <button class="hover:underline" onclick="showSection('resources')">Ресурсы</button>
+                <button class="hover:underline" onclick="showSection('chat')">Чат</button>
+            </nav>
+            <div>
+                <button onclick="toggleModal('loginModal')" class="bg-blue-500 px-4 py-2 rounded-full font-bold">Войти</button>
             </div>
         </div>
     </header>
 
-    <div class="container mx-auto grid grid-cols-10 gap-6 px-4 py-6">
-
-        <aside class="hidden md:block md:col-span-2">
-            <nav class="sticky top-24 flex flex-col space-y-2">
-                <a href="#" class="flex items-center space-x-4 p-3 rounded-full hover:bg-gray-800 transition-colors nav-link-active"><i class="fas fa-home text-xl w-6"></i><span class="text-lg">Главная</span></a>
-                <a href="#" class="flex items-center space-x-4 p-3 rounded-full hover:bg-gray-800 transition-colors text-gray-300"><i class="fas fa-rocket text-xl w-6"></i><span class="text-lg">Проекты</span></a>
-                <a href="#" class="flex items-center space-x-4 p-3 rounded-full hover:bg-gray-800 transition-colors text-gray-300"><i class="fas fa-users text-xl w-6"></i><span class="text-lg">Сообщество</span></a>
-                <a href="#" class="flex items-center space-x-4 p-3 rounded-full hover:bg-gray-800 transition-colors text-gray-300"><i class="fas fa-book text-xl w-6"></i><span class="text-lg">Ресурсы</span></a>
-                <button class="mt-4 bg-blue-500 text-white w-full py-3 rounded-full font-bold text-lg hover:bg-blue-600 transition-all">Опубликовать</button>
-            </nav>
-        </aside>
-
-        <main class="col-span-10 md:col-span-8 lg:col-span-5 border-x border-gray-800">
-            <div class="p-4 border-b border-gray-800">
-                 <div class="flex items-start space-x-4">
-                    <img src="https://placehold.co/50x50/3a86ff/white?text=Me" alt="User" class="rounded-full w-12 h-12">
-                    <div class="flex-1">
-                        <textarea id="postTextarea" class="w-full bg-transparent text-lg placeholder-gray-500 focus:outline-none" rows="3" placeholder="Что нового, разработчик?"></textarea>
-                        
-                        <div id="imagePreviewContainer" class="mt-3"></div>
-
-                        <div class="flex justify-between items-center mt-3">
-                            <div class="flex space-x-4 text-blue-500">
-                                <button id="imageUploadBtn" class="hover:bg-blue-500 hover:bg-opacity-10 rounded-full p-2 transition" title="Добавить изображение"><i class="fas fa-image"></i></button>
-                                <button class="hover:bg-blue-500 hover:bg-opacity-10 rounded-full p-2 transition"><i class="fas fa-link"></i></button>
-                                <button class="hover:bg-blue-500 hover:bg-opacity-10 rounded-full p-2 transition"><i class="fas fa-code"></i></button>
-                            </div>
-                            <input type="file" id="imageUploadInput" class="hidden" accept="image/*">
-                            
-                            <button id="publishBtn" class="bg-blue-500 text-white px-5 py-2 rounded-full font-bold hover:bg-blue-600 transition-all disabled:opacity-50" disabled>
-                                Пост
-                            </button>
-                        </div>
-                    </div>
+    <main class="p-6 space-y-6">
+        <section id="home" class="section">
+            <h2 class="text-2xl font-bold mb-4">Добро пожаловать на DevGameHub</h2>
+            <button class="bg-green-600 px-4 py-2 rounded-full hover:bg-green-700" onclick="showPostForm()">Опубликовать пост</button>
+            <div id="postForm" class="mt-4 hidden">
+                <textarea id="postContent" class="w-full p-3 rounded bg-[#202327] border border-gray-700" rows="3" placeholder="Что нового?"></textarea>
+                <div class="mt-2 flex justify-between items-center">
+                    <input type="file" id="postImage" class="text-sm text-gray-400">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="publishPost()">Опубликовать</button>
                 </div>
             </div>
+            <div id="feed" class="mt-6 space-y-4"></div>
+        </section>
+        <section id="projects" class="section hidden"><h2 class="text-xl font-bold">Раздел проектов</h2></section>
+        <section id="community" class="section hidden"><h2 class="text-xl font-bold">Общение и сообщество</h2></section>
+        <section id="resources" class="section hidden"><h2 class="text-xl font-bold">Полезные материалы</h2></section>
+        <section id="chat" class="section hidden"><h2 class="text-xl font-bold">Общий чат (скоро)</h2></section>
+    </main>
 
-            <div class="divide-y divide-gray-800">
-                 <article class="p-4 hover:bg-white hover:bg-opacity-[0.03] transition-colors cursor-pointer">
-                     <div class="flex items-start space-x-4">
-                        <img src="https://placehold.co/50x50/1e3a8a/white?text=A" alt="User" class="rounded-full w-12 h-12">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                                <h3 class="font-bold text-white">Alex GameDev</h3>
-                                <span class="text-gray-500">@alex_dev · 2ч</span>
-                            </div>
-                            <p class="mt-1">Только что добавил новую систему диалогов в <span class="text-blue-400">#CosmicAdventure</span>! Теперь NPC могут реагировать на действия игрока. 🔥 Какие еще функции вы бы хотели видеть?</p>
-                            <div class="mt-3 rounded-2xl border border-gray-700 overflow-hidden">
-                                <img src="https://placehold.co/600x300/1e3a8a/fff?text=New+Dialog+System" alt="Screenshot" class="w-full object-cover">
-                            </div>
-                            <div class="flex justify-between items-center mt-4 text-gray-500 max-w-sm">
-                                <button class="flex items-center space-x-2 hover:text-blue-400 group"><div class="group-hover:bg-blue-500/10 rounded-full p-2 transition-colors"><i class="far fa-comment"></i></div> <span>15</span></button>
-                                <button class="flex items-center space-x-2 hover:text-green-400 group"><div class="group-hover:bg-green-500/10 rounded-full p-2 transition-colors"><i class="fas fa-retweet"></i></div> <span>8</span></button>
-                                <button class="flex items-center space-x-2 hover:text-red-400 group"><div class="group-hover:bg-red-500/10 rounded-full p-2 transition-colors"><i class="far fa-heart"></i></div> <span>76</span></button>
-                                <button class="hover:text-blue-400 group"><div class="group-hover:bg-blue-500/10 rounded-full p-2 transition-colors"><i class="fas fa-share-alt"></i></div></button>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </main>
-
-        <aside class="hidden lg:block lg:col-span-3">
-             <div class="sticky top-24 space-y-6">
-                <div class="card-bg border border-gray-800 rounded-2xl">
-                    <h3 class="font-bold text-xl p-4 text-white">Актуальные проекты</h3>
-                    <div class="space-y-4 p-4 pt-0">
-                        <div class="flex justify-between items-center hover:bg-white/5 p-2 rounded-lg transition-colors">
-                            <div>
-                                <div class="text-gray-500 text-sm">RPG · В тренде</div>
-                                <div class="font-bold text-white">Cosmic Adventure</div>
-                            </div>
-                            <a href="#" class="border border-white text-white px-3 py-1 rounded-full font-bold text-sm hover:bg-white hover:text-black transition-colors">Следить</a>
-                        </div>
-                         <div class="flex justify-between items-center hover:bg-white/5 p-2 rounded-lg transition-colors">
-                            <div>
-                                <div class="text-gray-500 text-sm">Гонки · В тренде</div>
-                                <div class="font-bold text-white">Cyber Racers</div>
-                            </div>
-                            <a href="#" class="border border-white text-white px-3 py-1 rounded-full font-bold text-sm hover:bg-white hover:text-black transition-colors">Следить</a>
-                        </div>
-                    </div>
-                    <a href="#" class="block w-full p-4 text-blue-400 hover:bg-white/5 rounded-b-2xl transition-colors">Показать еще</a>
-                </div>
-             </div>
-        </aside>
-    </div>
-    
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
-        <div class="card-bg border border-gray-700 rounded-2xl p-8 w-full max-w-md relative">
-            <button onclick="hideAuthModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><i class="fas fa-times text-xl"></i></button>
-            <div class="flex justify-center items-center mb-6 space-x-2">
-                 <i class="fas fa-gamepad text-3xl text-blue-500"></i>
-                 <h3 class="text-2xl font-bold text-white">Вход в DevGameHub</h3>
-            </div>
-            <div id="loginForm">
-                 <p id="loginError" class="text-red-500 text-sm mb-4 text-center hidden"></p>
-                <input type="email" id="loginEmail" placeholder="Email" class="w-full p-3 mb-4 bg-[#202327] border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white">
-                <input type="password" id="loginPassword" placeholder="Пароль" class="w-full p-3 mb-6 bg-[#202327] border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white">
-                <button onclick="login()" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-bold mb-4">Войти</button>
-                <p class="text-center text-gray-500">Нет аккаунта? <a href="#" onclick="showRegisterForm(event)" class="text-blue-400 hover:underline">Зарегистрироваться</a></p>
-            </div>
-            <div id="registerForm" class="hidden">
-                 <p id="registerError" class="text-red-500 text-sm mb-4 text-center hidden"></p>
-                 <input type="text" id="registerUsername" placeholder="Имя пользователя" class="w-full mb-4 p-3 bg-[#202327] border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white">
-                 <input type="email" id="registerEmail" placeholder="Email" class="w-full mb-4 p-3 bg-[#202327] border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white">
-                 <input type="password" id="registerPassword" placeholder="Пароль" class="w-full mb-4 p-3 bg-[#202327] border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white">
-                 <input type="password" id="registerConfirmPassword" placeholder="Подтвердите пароль" class="w-full mb-6 p-3 bg-[#202327] border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white">
-                <button onclick="register()" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-bold mb-4">Зарегистрироваться</button>
-                <p class="text-center text-gray-500">Уже есть аккаунт? <a href="#" onclick="showLoginForm(event)" class="text-blue-400 hover:underline">Войти</a></p>
-            </div>
+    <div id="loginModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden">
+        <div class="card-bg p-8 rounded-xl w-full max-w-sm relative">
+            <button onclick="toggleModal('loginModal')" class="absolute top-2 right-2 text-white"><i class="fas fa-times"></i></button>
+            <h3 class="text-xl font-bold mb-4">Вход</h3>
+            <input type="text" placeholder="Имя" class="w-full p-2 mb-2 rounded bg-[#202327] text-white">
+            <input type="password" placeholder="Пароль" class="w-full p-2 mb-4 rounded bg-[#202327] text-white">
+            <button class="bg-blue-500 px-4 py-2 rounded w-full">Войти</button>
         </div>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- Секция аутентификации (без изменений) ---
-            const authModal = document.getElementById('authModal');
-            const loginForm = document.getElementById('loginForm');
-            // ... (весь предыдущий JS код аутентификации остается здесь)
-            const registerForm = document.getElementById('registerForm');
-            const authButtons = document.getElementById('authButtons');
-            const userProfile = document.getElementById('userProfile');
-            const userProfileName = document.querySelector('#userProfile span');
-            const loginError = document.getElementById('loginError');
-            const registerError = document.getElementById('registerError');
-            
-            window.showAuthModal = () => authModal.classList.remove('hidden');
-            window.hideAuthModal = () => authModal.classList.add('hidden');
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
 
-            window.showRegisterForm = (e) => {
-                if(e) e.preventDefault();
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                loginError.classList.add('hidden');
-            };
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
 
-            window.showLoginForm = (e) => {
-                if(e) e.preventDefault();
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                registerError.classList.add('hidden');
-            };
-             
-            window.login = () => {
-                const email = document.getElementById('loginEmail').value.trim();
-                const password = document.getElementById('loginPassword').value;
-                loginError.classList.add('hidden');
-                if (!email || !password) {
-                    showError(loginError, 'Пожалуйста, заполните все поля.');
-                    return;
-                }
-                const users = JSON.parse(localStorage.getItem('devGameHubUsers')) || [];
-                const user = users.find(u => u.email === email && u.password === password);
-                if (user) {
-                    localStorage.setItem('loggedInUser', JSON.stringify(user));
-                    setLoggedInState(true, user.username);
-                    hideAuthModal();
-                } else {
-                    showError(loginError, 'Неверный email или пароль.');
-                }
-            };
-            
-            window.register = () => {
-                const username = document.getElementById('registerUsername').value.trim();
-                const email = document.getElementById('registerEmail').value.trim();
-                const password = document.getElementById('registerPassword').value;
-                const confirmPassword = document.getElementById('registerConfirmPassword').value;
-                registerError.classList.add('hidden');
-                if (!username || !email || !password || !confirmPassword) {
-                    showError(registerError, 'Пожалуйста, заполните все поля.');
-                    return;
-                }
-                if (!/^\S+@\S+\.\S+$/.test(email)) {
-                    showError(registerError, 'Пожалуйста, введите корректный email.');
-                    return;
-                }
-                if (password.length < 6) {
-                    showError(registerError, 'Пароль должен быть не менее 6 символов.');
-                    return;
-                }
-                if (password !== confirmPassword) {
-                    showError(registerError, 'Пароли не совпадают!');
-                    return;
-                }
-                let users = JSON.parse(localStorage.getItem('devGameHubUsers')) || [];
-                if (users.some(u => u.email === email)) {
-                    showError(registerError, 'Пользователь с таким email уже существует.');
-                    return;
-                }
-                const newUser = { username, email, password };
-                users.push(newUser);
-                localStorage.setItem('devGameHubUsers', JSON.stringify(users));
-                localStorage.setItem('loggedInUser', JSON.stringify(newUser));
-                setLoggedInState(true, newUser.username);
-                hideAuthModal();
-                alert(`Регистрация успешна! Добро пожаловать, ${username}!`);
-            };
+        function showPostForm() {
+            document.getElementById('postForm').classList.toggle('hidden');
+        }
 
-            window.logout = () => {
-                localStorage.removeItem('loggedInUser');
-                setLoggedInState(false);
-            };
-            
-            function setLoggedInState(isLoggedIn, username = '') {
-                if (isLoggedIn) {
-                    authButtons.classList.add('hidden');
-                    userProfile.classList.remove('hidden');
-                    userProfile.classList.add('flex');
-                    userProfileName.textContent = username;
-                } else {
-                    authButtons.classList.remove('hidden');
-                    userProfile.classList.add('hidden');
-                    userProfile.classList.remove('flex');
-                }
+        function publishPost() {
+            const content = document.getElementById('postContent').value.trim();
+            const imageInput = document.getElementById('postImage');
+            const feed = document.getElementById('feed');
+
+            if (!content && !imageInput.files[0]) return;
+
+            const post = document.createElement('div');
+            post.className = 'p-4 border border-gray-700 rounded-lg';
+
+            let html = `<p class="mb-2">${content}</p>`;
+            if (imageInput.files[0]) {
+                const url = URL.createObjectURL(imageInput.files[0]);
+                html += `<img src="${url}" alt="" class="mt-2 rounded">`;
             }
-            
-            function showError(element, message) {
-                element.textContent = message;
-                element.classList.remove('hidden');
-            }
+            html += `<div class="mt-3 flex gap-4 text-gray-400">
+                        <button class="hover:text-blue-400"><i class="far fa-comment"></i></button>
+                        <button class="hover:text-red-400"><i class="far fa-heart"></i></button>
+                        <button class="hover:text-green-400"><i class="fas fa-retweet"></i></button>
+                    </div>`;
 
-            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-            if (loggedInUser) {
-                setLoggedInState(true, loggedInUser.username);
-            } else {
-                setLoggedInState(false);
-            }
+            post.innerHTML = html;
+            feed.prepend(post);
 
-            // --- ИЗМЕНЕНИЕ: Новый JS код для загрузки изображений и кнопки "Пост" ---
-
-            const imageUploadBtn = document.getElementById('imageUploadBtn');
-            const imageUploadInput = document.getElementById('imageUploadInput');
-            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-            const postTextarea = document.getElementById('postTextarea');
-            const publishBtn = document.getElementById('publishBtn');
-
-            // 1. Активируем кнопку "Пост", если есть текст или картинка
-            function checkPublishButtonState() {
-                const hasText = postTextarea.value.trim().length > 0;
-                const hasImage = imageUploadInput.files.length > 0;
-                publishBtn.disabled = !hasText && !hasImage;
-            }
-
-            postTextarea.addEventListener('input', checkPublishButtonState);
-
-            // 2. При клике на иконку картинки, нажимаем на скрытый input
-            imageUploadBtn.addEventListener('click', () => {
-                imageUploadInput.click();
-            });
-
-            // 3. Когда пользователь выбрал файл, показываем его превью
-            imageUploadInput.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                imagePreviewContainer.innerHTML = ''; // Очищаем старое превью
-
-                if (file) {
-                    const previewWrapper = document.createElement('div');
-                    previewWrapper.className = 'relative inline-flex items-center bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm';
-                    
-                    const fileName = document.createElement('span');
-                    fileName.className = 'text-gray-300';
-                    fileName.textContent = file.name.length > 25 ? file.name.substring(0, 22) + '...' : file.name;
-
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'ml-3 text-gray-500 hover:text-white transition-colors';
-                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    removeBtn.onclick = () => {
-                        imageUploadInput.value = ''; // Сбрасываем значение input
-                        imagePreviewContainer.innerHTML = ''; // Удаляем превью
-                        checkPublishButtonState(); // Проверяем состояние кнопки "Пост"
-                    };
-                    
-                    previewWrapper.appendChild(fileName);
-                    previewWrapper.appendChild(removeBtn);
-                    imagePreviewContainer.appendChild(previewWrapper);
-                }
-                checkPublishButtonState();
-            });
-        });
+            document.getElementById('postContent').value = '';
+            imageInput.value = '';
+            document.getElementById('postForm').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
