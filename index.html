@@ -3,135 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мессенджер с аватарками</title>
+    <title>Modern Messenger</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        
+        * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        button {
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            cursor: pointer;
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
         }
-        button:hover {
-            background-color: #006699;
-        }
-        .messages {
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-        .message {
+        
+        .app-container {
             display: flex;
-            margin-bottom: 10px;
-            padding: 8px;
+            min-height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            background: white;
+        }
+        
+        /* Сайдбар */
+        .sidebar {
+            width: 300px;
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid white;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-id {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .contact {
+            display: flex;
+            align-items: center;
+            padding: 10px;
             border-radius: 5px;
-            background-color: #f9f9f9;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .message.sent {
-            background-color: #e1f5fe;
-            flex-direction: row-reverse;
-            text-align: right;
+        
+        .contact:hover {
+            background: rgba(255,255,255,0.1);
         }
-        .avatar {
+        
+        .contact.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .contact-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
             margin-right: 10px;
         }
-        .message.sent .avatar {
+        
+        .contact-name {
+            font-weight: 500;
+        }
+        
+        .contact-last-message {
+            font-size: 12px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Основной чат */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        
+        .chat-title {
+            font-weight: 600;
+        }
+        
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+            max-width: 70%;
+        }
+        
+        .message.sent {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            align-self: flex-end;
+        }
+        
+        .message.sent .message-avatar {
             margin-right: 0;
             margin-left: 10px;
         }
+        
         .message-content {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
-        .hidden {
-            display: none;
+        
+        .message-bubble {
+            padding: 10px 15px;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
         }
-        .user-id {
-            font-size: 12px;
-            color: #666;
+        
+        .message.sent .message-bubble {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.received .message-bubble {
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #adb5bd;
             margin-top: 5px;
+            align-self: flex-end;
         }
-        .avatar-preview {
-            width: 60px;
-            height: 60px;
+        
+        .message.sent .message-time {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .message-input-container {
+            padding: 15px 20px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            background: white;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        
+        .message-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .send-button {
+            background: var(--primary);
+            color: white;
+            border: none;
             border-radius: 50%;
-            object-fit: cover;
-            margin: 10px auto;
-            display: block;
-            background: #eee;
-        }
-        .remember-me {
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            margin: 10px 0;
+            justify-content: center;
+            transition: background 0.2s;
         }
-        #remember-checkbox {
-            width: auto;
-            margin-right: 10px;
+        
+        .send-button:hover {
+            background: var(--secondary);
+        }
+        
+        /* Аутентификация */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+        }
+        
+        .auth-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--dark);
+        }
+        
+        .auth-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .auth-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .auth-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.2s;
+        }
+        
+        .auth-form input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .auth-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+        
+        .btn-link {
+            background: none;
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        
+        .avatar-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            background: #e9ecef;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .avatar-upload-btn {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .avatar-upload-btn input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        /* Утилиты */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-3 {
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Мессенджер с аватарками</h1>
-        
-        <!-- Форма входа -->
-        <div id="auth-form">
-            <h2>Вход / Регистрация</h2>
-            <input type="text" id="username" placeholder="Имя пользователя" required>
-            <input type="password" id="password" placeholder="Пароль" required>
-            <div class="remember-me">
-                <input type="checkbox" id="remember-checkbox">
-                <label for="remember-checkbox">Запомнить меня</label>
+    <!-- Аутентификация -->
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-card">
+            <h2 class="auth-title">Добро пожаловать</h2>
+            
+            <div class="avatar-upload">
+                <img id="auth-avatar" class="avatar-preview" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e9ecef'/%3E%3C/svg%3E">
+                <button class="btn btn-primary avatar-upload-btn">
+                    Выбрать аватар
+                    <input type="file" id="avatar-input" accept="image/*">
+                </button>
             </div>
-            <img id="avatar-preview" class="avatar-preview" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ddd'/%3E%3C/svg%3E">
-            <input type="file" id="avatar-input" accept="image/*">
-            <button id="register-btn">Зарегистрироваться</button>
-            <button id="login-btn">Войти</button>
+            
+            <div id="login-form">
+                <div class="form-group">
+                    <label for="username">Имя пользователя</label>
+                    <input type="text" id="username" placeholder="Введите ваш логин">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" placeholder="Введите ваш пароль">
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="remember-me">
+                    <label for="remember-me">Запомнить меня</label>
+                </div>
+                <div class="auth-actions">
+                    <button id="login-btn" class="btn btn-primary">Войти</button>
+                    <button id="show-register" class="btn btn-link">Регистрация</button>
+                </div>
+            </div>
+            
+            <div id="register-form" class="hidden">
+                <div class="form-group">
+                    <label for="reg-username">Имя пользователя</label>
+                    <input type="text" id="reg-username" placeholder="Придумайте логин">
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Пароль</label>
+                    <input type="password" id="reg-password" placeholder="Придумайте пароль">
+                </div>
+                <div class="form-group">
+                    <label for="reg-password2">Повторите пароль</label>
+                    <input type="password" id="reg-password2" placeholder="Повторите пароль">
+                </div>
+                <div class="auth-actions">
+                    <button id="register-btn" class="btn btn-primary">Зарегистрироваться</button>
+                    <button id="show-login" class="btn btn-link">Уже есть аккаунт?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основной интерфейс -->
+    <div id="app" class="app-container hidden">
+        <!-- Сайдбар с контактами -->
+        <div class="sidebar">
+            <div class="user-profile">
+                <img id="current-user-avatar" class="user-avatar" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23e9ecef'/%3E%3C/svg%3E">
+                <div class="user-info">
+                    <div id="current-user-name" class="user-name">Пользователь</div>
+                    <div id="current-user-id" class="user-id">ID: loading...</div>
+                </div>
+            </div>
+            
+            <div class="contacts-list" id="contacts-list">
+                <!-- Контакты будут загружаться здесь -->
+            </div>
         </div>
         
-        <!-- Чат (изначально скрыт) -->
-        <div id="chat-container" class="hidden">
-            <h2>Ваш чат</h2>
-            <div id="current-user-id" class="user-id">Ваш ID: <span></span></div>
+        <!-- Основной чат -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <img id="chat-user-avatar" class="chat-avatar" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e9ecef'/%3E%3C/svg%3E">
+                <div id="chat-user-name" class="chat-title">Выберите чат</div>
+            </div>
             
-            <div class="messages" id="messages"></div>
+            <div class="messages-container" id="messages-container">
+                <!-- Сообщения будут загружаться здесь -->
+                <div class="text-center mt-3" id="no-chat-selected">
+                    Выберите чат для начала общения
+                </div>
+            </div>
             
-            <input type="text" id="recipient-id" placeholder="ID получателя">
-            <input type="text" id="message-input" placeholder="Введите сообщение...">
-            <button id="send-btn">Отправить</button>
-            <button id="logout-btn">Выйти</button>
+            <div class="message-input-container">
+                <input type="text" class="message-input" id="message-input" placeholder="Введите сообщение..." disabled>
+                <button class="send-button" id="send-btn" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -141,10 +481,11 @@
             return Math.random().toString(36).substr(2, 9);
         }
 
-        // Хранилище данных в localStorage
+        // Хранилище данных
         const storage = {
             users: JSON.parse(localStorage.getItem('messenger_users')) || [],
             messages: JSON.parse(localStorage.getItem('messenger_messages')) || [],
+            currentUser: JSON.parse(localStorage.getItem('messenger_current_user')) || null,
             
             saveUsers: function() {
                 localStorage.setItem('messenger_users', JSON.stringify(this.users));
@@ -154,19 +495,16 @@
                 localStorage.setItem('messenger_messages', JSON.stringify(this.messages));
             },
             
-            addUser: function(username, password, avatar) {
-                const id = generateId();
-                this.users.push({ id, username, password, avatar });
-                this.saveUsers();
-                return id;
+            saveCurrentUser: function() {
+                localStorage.setItem('messenger_current_user', JSON.stringify(this.currentUser));
             },
             
-            updateUserAvatar: function(userId, avatar) {
-                const user = this.findUserById(userId);
-                if (user) {
-                    user.avatar = avatar;
-                    this.saveUsers();
-                }
+            addUser: function(username, password, avatar) {
+                const id = generateId();
+                const user = { id, username, password, avatar };
+                this.users.push(user);
+                this.saveUsers();
+                return user;
             },
             
             findUser: function(username) {
@@ -179,6 +517,7 @@
             
             addMessage: function(senderId, recipientId, text) {
                 const message = {
+                    id: generateId(),
                     senderId,
                     recipientId,
                     text,
@@ -194,71 +533,149 @@
                     (msg.senderId === user1Id && msg.recipientId === user2Id) ||
                     (msg.senderId === user2Id && msg.recipientId === user1Id)
                 ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            },
+            
+            getLastMessageBetween: function(user1Id, user2Id) {
+                const messages = this.getMessagesBetween(user1Id, user2Id);
+                return messages.length > 0 ? messages[messages.length - 1] : null;
+            },
+            
+            getUserContacts: function(userId) {
+                const contacts = new Set();
+                
+                // Находим всех пользователей, с которыми есть переписка
+                this.messages.forEach(msg => {
+                    if (msg.senderId === userId) contacts.add(msg.recipientId);
+                    if (msg.recipientId === userId) contacts.add(msg.senderId);
+                });
+                
+                return Array.from(contacts).map(id => this.findUserById(id)).filter(Boolean);
             }
         };
 
         // DOM элементы
-        const authForm = document.getElementById('auth-form');
-        const chatContainer = document.getElementById('chat-container');
+        const authScreen = document.getElementById('auth-screen');
+        const app = document.getElementById('app');
+        
+        // Элементы аутентификации
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
-        const registerBtn = document.getElementById('register-btn');
+        const regUsernameInput = document.getElementById('reg-username');
+        const regPasswordInput = document.getElementById('reg-password');
+        const regPassword2Input = document.getElementById('reg-password2');
+        const rememberMeCheckbox = document.getElementById('remember-me');
         const loginBtn = document.getElementById('login-btn');
-        const messagesContainer = document.getElementById('messages');
+        const registerBtn = document.getElementById('register-btn');
+        const showRegisterBtn = document.getElementById('show-register');
+        const showLoginBtn = document.getElementById('show-login');
+        const avatarInput = document.getElementById('avatar-input');
+        const authAvatar = document.getElementById('auth-avatar');
+        
+        // Элементы основного интерфейса
+        const currentUserAvatar = document.getElementById('current-user-avatar');
+        const currentUserName = document.getElementById('current-user-name');
+        const currentUserId = document.getElementById('current-user-id');
+        const contactsList = document.getElementById('contacts-list');
+        const messagesContainer = document.getElementById('messages-container');
+        const noChatSelected = document.getElementById('no-chat-selected');
+        const chatUserAvatar = document.getElementById('chat-user-avatar');
+        const chatUserName = document.getElementById('chat-user-name');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const recipientIdInput = document.getElementById('recipient-id');
-        const currentUserIdSpan = document.getElementById('current-user-id').querySelector('span');
-        const avatarInput = document.getElementById('avatar-input');
-        const avatarPreview = document.getElementById('avatar-preview');
-        const rememberCheckbox = document.getElementById('remember-checkbox');
-
-        // Текущий пользователь и получатель
-        let currentUser = null;
-        let currentRecipient = null;
+        
+        // Текущий чат
+        let currentChatUserId = null;
         let currentAvatar = null;
 
         // Функции
-        function showChat() {
-            authForm.classList.add('hidden');
-            chatContainer.classList.remove('hidden');
-            currentUserIdSpan.textContent = currentUser.id;
+        function showAuth() {
+            authScreen.classList.remove('hidden');
+            app.classList.add('hidden');
+        }
+
+        function showApp() {
+            authScreen.classList.add('hidden');
+            app.classList.remove('hidden');
+            updateUserInfo();
+            loadContacts();
+        }
+
+        function updateUserInfo() {
+            if (storage.currentUser) {
+                currentUserAvatar.src = storage.currentUser.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="%23e9ecef"/%3E%3C/svg%3E';
+                currentUserName.textContent = storage.currentUser.username;
+                currentUserId.textContent = `ID: ${storage.currentUser.id}`;
+            }
+        }
+
+        function loadContacts() {
+            if (!storage.currentUser) return;
+            
+            contactsList.innerHTML = '';
+            const contacts = storage.getUserContacts(storage.currentUser.id);
+            
+            if (contacts.length === 0) {
+                contactsList.innerHTML = '<div class="text-center" style="padding: 20px; color: rgba(255,255,255,0.7)">Нет контактов</div>';
+                return;
+            }
+            
+            contacts.forEach(contact => {
+                const lastMessage = storage.getLastMessageBetween(storage.currentUser.id, contact.id);
+                
+                const contactElement = document.createElement('div');
+                contactElement.className = 'contact';
+                contactElement.dataset.userId = contact.id;
+                
+                contactElement.innerHTML = `
+                    <img class="contact-avatar" src="${contact.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%23e9ecef"/%3E%3C/svg%3E'}" alt="${contact.username}">
+                    <div style="flex: 1; overflow: hidden;">
+                        <div class="contact-name">${contact.username}</div>
+                        <div class="contact-last-message">${lastMessage ? lastMessage.text : 'Нет сообщений'}</div>
+                    </div>
+                `;
+                
+                contactElement.addEventListener('click', () => openChat(contact));
+                contactsList.appendChild(contactElement);
+            });
+        }
+
+        function openChat(user) {
+            currentChatUserId = user.id;
+            chatUserAvatar.src = user.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%23e9ecef"/%3E%3C/svg%3E';
+            chatUserName.textContent = user.username;
+            noChatSelected.classList.add('hidden');
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+            
             loadMessages();
         }
 
-        function showAuth() {
-            chatContainer.classList.add('hidden');
-            authForm.classList.remove('hidden');
-            currentUser = null;
-            // Сброс аватарки при выходе
-            avatarPreview.src = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ddd'/%3E%3C/svg%3E";
-            avatarInput.value = '';
-        }
-
         function loadMessages() {
-            if (!currentRecipient) return;
+            if (!storage.currentUser || !currentChatUserId) return;
             
             messagesContainer.innerHTML = '';
-            const messages = storage.getMessagesBetween(currentUser.id, currentRecipient.id);
+            const messages = storage.getMessagesBetween(storage.currentUser.id, currentChatUserId);
+            
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = '<div class="text-center" style="padding: 20px; color: #adb5bd">Нет сообщений</div>';
+                return;
+            }
             
             messages.forEach(msg => {
+                const isSent = msg.senderId === storage.currentUser.id;
+                const user = isSent ? storage.currentUser : storage.findUserById(currentChatUserId);
+                
                 const messageElement = document.createElement('div');
-                messageElement.classList.add('message');
-                
-                if (msg.senderId === currentUser.id) {
-                    messageElement.classList.add('sent');
-                }
-                
-                const sender = msg.senderId === currentUser.id ? currentUser : currentRecipient;
-                const avatarSrc = sender.avatar || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ddd'/%3E%3C/svg%3E";
+                messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
                 
                 messageElement.innerHTML = `
-                    <img class="avatar" src="${avatarSrc}" alt="${sender.username}">
+                    <img class="message-avatar" src="${user.avatar || 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"%3E%3Ccircle cx="16" cy="16" r="16" fill="%23e9ecef"/%3E%3C/svg%3E'}" alt="${user.username}">
                     <div class="message-content">
-                        <div><strong>${msg.senderId === currentUser.id ? 'Вы' : sender.username}</strong></div>
-                        <div>${msg.text}</div>
-                        <small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
+                        <div class="message-bubble">${msg.text}</div>
+                        <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                     </div>
                 `;
                 
@@ -270,76 +687,23 @@
 
         function sendMessage() {
             const text = messageInput.value.trim();
-            const recipientId = recipientIdInput.value.trim();
+            if (!text || !storage.currentUser || !currentChatUserId) return;
             
-            if (!text) return;
-            
-            if (!recipientId) {
-                alert('Введите ID получателя');
-                return;
-            }
-            
-            const recipient = storage.findUserById(recipientId);
-            if (!recipient) {
-                alert('Пользователь с таким ID не найден');
-                return;
-            }
-            
-            currentRecipient = recipient;
-            storage.addMessage(currentUser.id, recipient.id, text);
+            storage.addMessage(storage.currentUser.id, currentChatUserId, text);
             messageInput.value = '';
             loadMessages();
-        }
-
-        function checkRememberedUser() {
-            const rememberedUser = JSON.parse(localStorage.getItem('messenger_remembered_user'));
-            if (rememberedUser && rememberedUser.username) {
-                usernameInput.value = rememberedUser.username;
-                rememberCheckbox.checked = true;
-                passwordInput.focus();
-            }
+            loadContacts(); // Обновляем список контактов (последнее сообщение)
         }
 
         // Обработчики событий
-        registerBtn.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            
-            if (username && password) {
-                if (storage.findUser(username)) {
-                    alert('Пользователь уже существует');
-                } else {
-                    const id = storage.addUser(username, password, currentAvatar);
-                    alert(`Регистрация успешна! Ваш ID: ${id}\nЗапомните его, он нужен для входа.`);
-                    showAuth();
-                }
-            } else {
-                alert('Введите имя пользователя и пароль');
-            }
+        showRegisterBtn.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
         });
 
-        loginBtn.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            const rememberMe = rememberCheckbox.checked;
-            const user = storage.findUser(username);
-            
-            if (user && user.password === password) {
-                currentUser = user;
-                
-                // Сохраняем данные пользователя, если выбрано "Запомнить меня"
-                if (rememberMe) {
-                    localStorage.setItem('messenger_remembered_user', JSON.stringify({
-                        username: user.username
-                    }));
-                } else {
-                    localStorage.removeItem('messenger_remembered_user');
-                }
-                
-                showChat();
-            } else {
-                alert('Неверное имя пользователя или пароль');
-            }
+        showLoginBtn.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
         });
 
         avatarInput.addEventListener('change', function(e) {
@@ -348,18 +712,64 @@
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     currentAvatar = event.target.result;
-                    avatarPreview.src = currentAvatar;
-                    
-                    // Если пользователь уже зарегистрирован, обновляем аватар
-                    if (currentUser) {
-                        storage.updateUserAvatar(currentUser.id, currentAvatar);
-                    }
+                    authAvatar.src = currentAvatar;
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        sendBtn.addEventListener('click', sendMessage);
+        loginBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль');
+                return;
+            }
+            
+            const user = storage.findUser(username);
+            if (!user || user.password !== password) {
+                alert('Неверное имя пользователя или пароль');
+                return;
+            }
+            
+            // Запоминаем пользователя если нужно
+            if (rememberMeCheckbox.checked) {
+                storage.currentUser = user;
+                storage.saveCurrentUser();
+            } else {
+                storage.currentUser = user;
+            }
+            
+            showApp();
+        });
+
+        registerBtn.addEventListener('click', () => {
+            const username = regUsernameInput.value.trim();
+            const password = regPasswordInput.value.trim();
+            const password2 = regPassword2Input.value.trim();
+            
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль');
+                return;
+            }
+            
+            if (password !== password2) {
+                alert('Пароли не совпадают');
+                return;
+            }
+            
+            if (storage.findUser(username)) {
+                alert('Пользователь с таким именем уже существует');
+                return;
+            }
+            
+            const user = storage.addUser(username, password, currentAvatar);
+            storage.currentUser = user;
+            storage.saveCurrentUser();
+            
+            showApp();
+        });
 
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -367,22 +777,14 @@
             }
         });
 
-        recipientIdInput.addEventListener('change', () => {
-            const recipientId = recipientIdInput.value.trim();
-            if (recipientId) {
-                const recipient = storage.findUserById(recipientId);
-                if (recipient) {
-                    currentRecipient = recipient;
-                    loadMessages();
-                }
-            }
-        });
-
-        logoutBtn.addEventListener('click', showAuth);
+        sendBtn.addEventListener('click', sendMessage);
 
         // Инициализация
-        checkRememberedUser();
-        showAuth();
+        if (storage.currentUser) {
+            showApp();
+        } else {
+            showAuth();
+        }
     </script>
 </body>
 </html>
