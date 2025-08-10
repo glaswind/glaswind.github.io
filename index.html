@@ -6,156 +6,76 @@
   <title>Этапы исследования — ТИТАН</title>
   <style>
     :root{
-      --bg:#071226; /* deep space */
       --card:#0b2333;
-      --accent:#f4c95e; /* Titan gold */
+      --accent:#f4c95e;
       --muted:#9fb1c0;
-      --glass: rgba(255,255,255,0.03);
       --radius:14px;
-      --fw:600;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter, Roboto, "Segoe UI", Arial, sans-serif;background:radial-gradient(1200px 600px at 10% 10%, rgba(20,35,55,0.6), transparent), var(--bg);color:#e6f0ff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px}
-
-    .wrap{width:100%;max-width:980px}
+    body{
+      margin:0;
+      font-family:Inter, Roboto, "Segoe UI", Arial, sans-serif;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/5/57/Titan_in_true_color.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color:#e6f0ff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:36px;
+      backdrop-filter: blur(4px);
+    }
+    .wrap{width:100%;max-width:980px;background:rgba(7,18,38,0.85);padding:20px;border-radius:var(--radius)}
     header{display:flex;gap:16px;align-items:center;margin-bottom:22px}
-    .logo{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#f6d58a,#d48b2a);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);font-weight:800;color:#071226}
+    .logo{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#f6d58a,#d48b2a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#071226}
     h1{font-size:20px;margin:0}
     p.lead{margin:0;color:var(--muted);font-size:13px}
-
-    /* card */
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(3,18,28,0.6)}
-
-    .progress-wrap{display:flex;align-items:center;gap:18px}
-    .radial{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--accent) var(--pct), rgba(255,255,255,0.04) 0);display:grid;place-items:center;font-weight:700}
-    .radial .num{font-size:18px;color:#071226}
-    .progress-info{flex:1}
-    .progress-bar{height:12px;width:100%;background:var(--glass);border-radius:999px;overflow:hidden;margin-top:8px}
-    .progress-bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#ffd88c);border-radius:999px;transition:width 600ms cubic-bezier(.2,.9,.2,1)}
-
-    /* steps list */
-    .steps{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
-    .step{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:12px;align-items:flex-start}
-    .badge{width:44px;height:44px;border-radius:10px;background:#082736;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);flex-shrink:0;border:1px solid rgba(255,255,255,0.02)}
-    .step h3{margin:0;font-size:14px}
-    .step p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
-    .step.completed{border-color:rgba(244,201,94,0.25);box-shadow:0 6px 18px rgba(244,201,94,0.06)}
-    .step .icon{width:28px;height:28px;opacity:0.95}
-
-    footer{margin-top:16px;display:flex;gap:8px;align-items:center}
-    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
-    .btn.primary{background:linear-gradient(90deg,var(--accent),#ffd88c);color:#071226;border:0}
-
-    /* stars background */
-    .space{position:absolute;inset:0;pointer-events:none;opacity:0.06}
-    .space:before,.space:after{content:"";position:absolute;inset:0;background-image:radial-gradient(#fff 1px, transparent 1px);background-size:6px 6px;mask-image:linear-gradient(#000,#0000);}
-
-    @media (max-width:720px){.steps{grid-template-columns:1fr}.radial{width:92px;height:92px}}
+    .card{background:rgba(255,255,255,0.05);border-radius:var(--radius);padding:18px}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:18px}
+    .step{background:rgba(255,255,255,0.08);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);cursor:pointer}
+    .step.completed{border-color:rgba(244,201,94,0.5);background:rgba(244,201,94,0.1)}
+    .badge{width:44px;height:44px;border-radius:10px;background:#082736;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
   </style>
 </head>
 <body>
-  <div class="space" aria-hidden></div>
   <div class="wrap">
     <header>
-      <div class="logo">Т
-      </div>
+      <div class="logo">Т</div>
       <div>
         <h1>ТИТАН — Этапы исследования</h1>
-        <p class="lead">10 ключевых этапов от орбиты до первой человеческой ступни на Титане. Нажимай шаги, чтобы отмечать выполнение.</p>
+        <p class="lead">10 ключевых этапов от орбиты до первой человеческой ступни на Титане.</p>
       </div>
     </header>
-
     <section class="card">
-      <div class="progress-wrap">
-        <div class="radial" id="radial" style="--pct:0deg">
-          <div class="num" id="radial-num">0 / 10</div>
-        </div>
-        <div class="progress-info">
-          <strong id="currentTitle">Готово 0 этапов</strong>
-          <div class="progress-bar" aria-hidden>
-            <i id="bar"></i>
-          </div>
-          <div style="margin-top:10px;color:var(--muted);font-size:13px">Прогресс кампании — от разведки к пилотируемой миссии.</div>
-        </div>
-      </div>
-
-      <div class="steps" id="steps">
-        <!-- Steps will be injected by JS -->
-      </div>
-
-      <footer>
-        <button class="btn" id="reset">Сбросить</button>
-        <button class="btn primary" id="completeAll">Отметить все как выполненные</button>
-      </footer>
+      <div class="steps" id="steps"></div>
     </section>
   </div>
-
-  <script>
-    const stages = [
-      {title: '1. Спутник на орбите Титана', desc: 'Запуск и удержание орбитального аппарата для наблюдения и ретрансляции.'},
-      {title: '2. Сондирование атмосферы', desc: 'Анализ состава, плотности и метеорологии атмосферы.'},
-      {title: '3. Исследование метановых озёр', desc: 'Детальное картографирование и сбор образцов.'},
-      {title: '4. Орбитальный ретранслятор', desc: 'Установка мощного ретрансляционного узла для связи.'},
-      {title: '5. Мягкая посадка зонда', desc: 'Осуществление контролируемой посадки на поверхность.'},
-      {title: '6. Развёртывание ровера с ИИ', desc: 'Ровер с автономным ИИ для разведки и анализа.'},
-      {title: '7. Подключение ИИ-анализа', desc: 'Онлайн-обработка данных и автономное принятие задач.'},
-      {title: '8. Долгосрочное картографирование', desc: 'Создание подробной геологической карты Титана.'},
-      {title: '9. Подготовка пилотируемой миссии', desc: 'Синтез инфраструктуры и безопасность для людей.'},
-      {title: '10. Первая ступня человека на Титане', desc: 'Историческое высадка — человечество на Титане.'}
-    ];
-
-    const stepsContainer = document.getElementById('steps');
-    const radialNum = document.getElementById('radial-num');
-    const bar = document.getElementById('bar');
-    const radial = document.getElementById('radial');
-    const currentTitle = document.getElementById('currentTitle');
-
-    // Load saved state from localStorage (optional)
-    const STORAGE_KEY = 'titan_stages_v1';
-    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
-    function renderSteps(){
-      stepsContainer.innerHTML = '';
-      stages.forEach((s, i) => {
-        const el = document.createElement('button');
-        el.className = 'step' + (state[i] ? ' completed' : '');
-        el.setAttribute('data-index', i);
-        el.innerHTML = `
-          <div class="badge">${i+1}</div>
-          <div style="flex:1;text-align:left">
-            <h3>${s.title}</h3>
-            <p>${s.desc}</p>
-          </div>
-        `;
-        el.addEventListener('click', () => toggle(i));
-        stepsContainer.appendChild(el);
-      });
-      updateProgress();
-    }
-
-    function toggle(i){
-      state[i] = !state[i];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      renderSteps();
-    }
-
-    function updateProgress(){
-      const done = state.reduce((a,b)=>a+(b?1:0),0);
-      const pct = Math.round((done / stages.length) * 100);
-      radialNum.textContent = `${done} / ${stages.length}`;
-      bar.style.width = pct + '%';
-      // set conic gradient angle for visual radial fill
-      const deg = (done / stages.length) * 360;
-      radial.style.setProperty('--pct', deg + 'deg');
-      currentTitle.textContent = done === 0 ? `Готово ${done} этапов` : `Последний отмеченный: ${stages[state.lastIndexOf(true)] ? stages[state.lastIndexOf(true)].title : ''}`;
-    }
-
-    document.getElementById('reset').addEventListener('click', ()=>{state = [];localStorage.setItem(STORAGE_KEY, JSON.stringify(state));renderSteps();});
-    document.getElementById('completeAll').addEventListener('click', ()=>{state = Array(stages.length).fill(true);localStorage.setItem(STORAGE_KEY, JSON.stringify(state));renderSteps();});
-
-    // initialize
-    if(!Array.isArray(state) || state.length !== stages.length) state = Array(stages.length).fill(false);
-    renderSteps();
-  </script>
+<script>
+const stages = [
+  'Спутник на орбите Титана',
+  'Сондирование атмосферы',
+  'Исследование метановых озёр',
+  'Орбитальный ретранслятор',
+  'Мягкая посадка зонда',
+  'Развёртывание ровера с ИИ',
+  'Подключение ИИ-анализа',
+  'Долгосрочное картографирование',
+  'Подготовка пилотируемой миссии',
+  'Первая ступня человека на Титане'
+];
+let state = Array(stages.length).fill(false);
+const container = document.getElementById('steps');
+function render(){
+  container.innerHTML = '';
+  stages.forEach((title,i)=>{
+    const el = document.createElement('div');
+    el.className = 'step'+(state[i]?' completed':'');
+    el.innerHTML = `<div class='badge'>${i+1}</div><div>${title}</div>`;
+    el.onclick = ()=>{state[i]=!state[i];render();};
+    container.appendChild(el);
+  });
+}
+render();
+</script>
 </body>
 </html>
