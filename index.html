@@ -1,86 +1,398 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Новогодняя копилка</title>
-  <style>
-    :root{--bg:#08121a;--card:#06232d;--accent:#ffd166;--glass:rgba(255,255,255,0.06)}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, Arial, sans-serif;background:linear-gradient(180deg,#031018 0%, #032431 60%);color:#fff}
-    .scene{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
-    .card{width:420px;max-width:95%;background:linear-gradient(180deg,rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:18px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03);position:relative;overflow:hidden}
-    h1{margin:0 0 6px;font-size:20px;letter-spacing:0.6px}
-    .subtitle{font-size:12px;color:#bfe8ff;margin-bottom:18px}
-    .amount{font-size:40px;font-weight:700;margin:10px 0;display:flex;align-items:flex-end;gap:10px;cursor:pointer}
-    .currency{font-size:18px;opacity:0.9}
-    button{background:linear-gradient(180deg,var(--accent),#ffb84d);border:0;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(255,160,40,0.18)}
-    .btn-sec{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:10px;color:#dff6ff}
-    .small{font-size:13px;color:#cbeffd;margin-top:12px}
-    .tree{position:absolute;right:-60px;bottom:-80px;transform:rotate(12deg);opacity:0.16;width:380px}
-    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-    .muted{opacity:0.75;font-size:13px}
-    .snow{pointer-events:none;position:absolute;inset:0;z-index:0}
-    .flake{position:absolute;top:-10px;width:8px;height:8px;border-radius:50%;background:white;opacity:0.9;filter:blur(0.6px)}
-    .danger{background:#ff6b6b}
-    #addInput{width:100%;margin-top:14px;padding:10px;border-radius:10px;border:none;text-align:center;font-size:18px;background:rgba(255,255,255,0.08);color:#fff;outline:none;}
-    #addInput:focus{background:rgba(255,255,255,0.15)}
-    @media (max-width:420px){.card{padding:16px}}
-  </style>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Копилка - Трекер накоплений</title>
+    <meta name="description" content="Виртуальная копилка для отслеживания ваших накоплений">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#F59E0B",
+                        success: "#10B981",
+                        background: "#F8FAFC"
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-  <div class="scene">
-    <div class="card" id="app" aria-live="polite">
-      <h1>🎄 Новогодняя копилка</h1>
-      <div class="subtitle">Личная копилка — только для тебя. Деньги сохраняются в браузере.</div>
-      <div class="amount" id="amountDisplay"><span id="amountValue">0</span><span class="currency">₴</span></div>
-      <div class="small">Кликни по сумме, чтобы изменить её с клавиатуры.</div>
-      <input type="number" id="addInput" placeholder="Введите сумму для добавления..." />
-      <div class="footer">
-        <div class="muted">Последнее изменение: <span id="lastChange">—</span></div>
-        <div>
-          <button id="export" class="btn-sec">Экспорт</button>
-          <button id="reset" class="btn-sec danger">Сброс</button>
+<body class="min-h-screen bg-background">
+    <header class="bg-white shadow-sm">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-piggy-bank text-2xl text-accent"></i>
+                    <h1 class="text-xl font-bold text-gray-800">Моя Копилка</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-moon text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Current Balance Section -->
+        <section class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-2">Текущий баланс</h2>
+                <div class="text-4xl font-bold text-primary mb-4" id="currentBalance">0 ₽</div>
+                <div class="flex justify-center space-x-4">
+                    <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Добавить
+                    </button>
+                    <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors">
+                        <i class="fas fa-minus mr-2"></i>Снять
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="100">
+                <div class="text-2xl font-bold text-primary">100 ₽</div>
+                <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+            </button>
+            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="500">
+                <div class="text-2xl font-bold text-primary">500 ₽</div>
+                <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+            </button>
+            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="1000">
+                <div class="text-2xl font-bold text-primary">1000 ₽</div>
+                <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+            </button>
+            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="5000">
+                <div class="text-2xl font-bold text-primary">5000 ₽</div>
+                <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+            </button>
+        </section>
+
+        <!-- Goals Section -->
+        <section class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-800">Мои цели</h2>
+                <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-secondary transition-colors">
+                    <i class="fas fa-plus mr-1"></i>Новая цель
+                </button>
+            </div>
+            <div id="goalsList" class="space-y-4">
+                <!-- Goals will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Transaction History -->
+        <section class="bg-white rounded-2xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">История операций</h2>
+            <div id="transactionsList" class="space-y-3">
+                <!-- Transactions will be dynamically added here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="addMoneyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Добавить деньги</h3>
+            <input type="number" id="addAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <textarea id="addDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <div class="flex space-x-3">
+                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">Добавить</button>
+                <button id="cancelAdd" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
         </div>
-      </div>
-      <svg class="tree" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <g>
-          <ellipse cx="100" cy="180" rx="50" ry="8" fill="#0b3a2b" opacity="0.3"/>
-          <path d="M100 12 L60 90 L140 90 Z" fill="#0f7b4f"/>
-          <path d="M100 50 L50 140 L150 140 Z" fill="#0f8f5e"/>
-          <path d="M100 90 L40 180 L160 180 Z" fill="#0fb071"/>
-          <rect x="88" y="180" width="24" height="18" rx="4" fill="#67402a"/>
-        </g>
-      </svg>
-      <div class="snow" id="snow"></div>
     </div>
-  </div>
-  <script>
-    const K_AMOUNT = 'piggy_amount_v1';
-    const K_HISTORY = 'piggy_history_v1';
-    const $ = id => document.getElementById(id);
-    function formatAmount(n){return Number(n).toLocaleString('ru-RU')}
-    function nowISO(){return new Date().toISOString()}
-    function readAmount(){return Number(localStorage.getItem(K_AMOUNT)||0)}
-    function writeAmount(n){localStorage.setItem(K_AMOUNT,String(n))}
-    function readHistory(){try{return JSON.parse(localStorage.getItem(K_HISTORY)||'[]')}catch(e){return []}}
-    function writeHistory(h){localStorage.setItem(K_HISTORY,JSON.stringify(h))}
-    function pushHistory(type,delta,before,after){const h=readHistory();h.unshift({t:nowISO(),type,delta,before,after});if(h.length>200)h.pop();writeHistory(h);$('lastChange').textContent=(new Date()).toLocaleString();}
-    function updateUI(){$('amountValue').textContent=formatAmount(readAmount());}
-    function setAmount(newAmount){const before=readAmount();const after=Math.max(0,Math.round(Number(newAmount)*100)/100||0);writeAmount(after);pushHistory('set',after-before,before,after);updateUI();}
-    function addAmount(delta){const before=readAmount();const after=Math.max(0,before+Number(delta));writeAmount(after);pushHistory('add',delta,before,after);updateUI();}
-    function showApp(){updateUI();
-      $('amountDisplay').onclick=()=>{const span=$('amountValue');const oldVal=readAmount();const input=document.createElement('input');input.type='number';input.value=oldVal;input.style.fontSize='40px';input.style.width='150px';input.style.border='none';input.style.background='transparent';input.style.color='white';input.style.textAlign='center';input.onkeydown=e=>{if(e.key==='Enter'){setAmount(input.value);input.replaceWith(span);}if(e.key==='Escape'){input.replaceWith(span);}};span.replaceWith(input);input.focus();input.select();};
-      const addInput=$('addInput');
-      addInput.addEventListener('keydown',e=>{
-        if(e.key==='Enter'){addAmount(addInput.value);addInput.value='';}
-        if(e.key==='ArrowUp'){addInput.stepUp(1);} 
-        if(e.key==='ArrowDown'){addInput.stepDown(1);} 
-      });
-      $('export').onclick=()=>{const data={amount:readAmount(),history:readHistory(),exportedAt:nowISO()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kopilka_backup_'+(new Date()).toISOString()+'.json';a.click();URL.revokeObjectURL(url);};
-      $('reset').onclick=()=>{if(confirm('Сбросить баланс? Это удалит все данные.')){localStorage.removeItem(K_AMOUNT);localStorage.removeItem(K_HISTORY);location.reload();}};
-      const hist=readHistory();$('lastChange').textContent=hist.length?(new Date(hist[0].t)).toLocaleString():'—';}
-    function makeSnow(){const c=$('snow');for(let i=0;i<25;i++){const s=document.createElement('div');s.className='flake';s.style.left=(Math.random()*100)+'%';s.style.opacity=0.6+Math.random()*0.6;const size=4+Math.random()*8;s.style.width=size+'px';s.style.height=size+'px';s.animate([{transform:'translateY(-10vh)'},{transform:'translateY(120vh)'}],{duration:(6+Math.random()*8)*1000,iterations:Infinity,delay:Math.random()*-6000});c.appendChild(s);}}
-    (function(){makeSnow();showApp();})();
-  </script>
+
+    <div id="withdrawMoneyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Снять деньги</h3>
+            <input type="number" id="withdrawAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <textarea id="withdrawDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <div class="flex space-x-3">
+                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors">Снять</button>
+                <button id="cancelWithdraw" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addGoalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Новая цель</h3>
+            <input type="text" id="goalName" placeholder="Название цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <input type="number" id="goalAmount" placeholder="Сумма цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <div class="flex space-x-3">
+                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-secondary transition-colors">Создать</button>
+                <button id="cancelGoal" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="text-center text-gray-600">
+                <p>© 2024 Моя Копилка. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Data storage
+        let currentBalance = 0;
+        let goals = [];
+        let transactions = [];
+
+        // DOM Elements
+        const currentBalanceElement = document.getElementById("currentBalance");
+        const goalsListElement = document.getElementById("goalsList");
+        const transactionsListElement = document.getElementById("transactionsList");
+
+        // Modal Elements
+        const addMoneyModal = document.getElementById("addMoneyModal");
+        const withdrawMoneyModal = document.getElementById("withdrawMoneyModal");
+        const addGoalModal = document.getElementById("addGoalModal");
+
+        // Initialize from localStorage
+        function initializeFromStorage() {
+            const savedBalance = localStorage.getItem("piggyBankBalance");
+            const savedGoals = localStorage.getItem("piggyBankGoals");
+            const savedTransactions = localStorage.getItem("piggyBankTransactions");
+
+            if (savedBalance) currentBalance = parseFloat(savedBalance);
+            if (savedGoals) goals = JSON.parse(savedGoals);
+            if (savedTransactions) transactions = JSON.parse(savedTransactions);
+
+            updateUI();
+        }
+
+        // Save to localStorage
+        function saveToStorage() {
+            localStorage.setItem("piggyBankBalance", currentBalance.toString());
+            localStorage.setItem("piggyBankGoals", JSON.stringify(goals));
+            localStorage.setItem("piggyBankTransactions", JSON.stringify(transactions));
+        }
+
+        // Update UI
+        function updateUI() {
+            currentBalanceElement.textContent = `${currentBalance.toLocaleString("ru-RU")} ₽`;
+            renderGoals();
+            renderTransactions();
+            saveToStorage();
+        }
+
+        // Render Goals
+        function renderGoals() {
+            goalsListElement.innerHTML = "";
+            
+            if (goals.length === 0) {
+                goalsListElement.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-bullseye text-4xl mb-4"></i>
+                        <p>У вас пока нет целей</p>
+                    </div>
+                `;
+                return;
+            }
+
+            goals.forEach((goal, index) => {
+                const progress = Math.min((currentBalance / goal.amount) * 100, 100);
+                const goalElement = document.createElement("div");
+                goalElement.className = "bg-gray-50 rounded-lg p-4";
+                goalElement.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-gray-800">${goal.name}</h3>
+                        <span class="text-sm font-bold text-primary">${goal.amount.toLocaleString("ru-RU")} ₽</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div class="bg-accent h-2 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Прогресс: ${progress.toFixed(1)}%</span>
+                        <span>Осталось: ${Math.max(0, goal.amount - currentBalance).toLocaleString("ru-RU")} ₽</span>
+                    </div>
+                `;
+                goalsListElement.appendChild(goalElement);
+            });
+        }
+
+        // Render Transactions
+        function renderTransactions() {
+            transactionsListElement.innerHTML = "";
+            
+            if (transactions.length === 0) {
+                transactionsListElement.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-receipt text-4xl mb-4"></i>
+                        <p>Операций пока нет</p>
+                    </div>
+                `;
+                return;
+            }
+
+            transactions.slice().reverse().forEach(transaction => {
+                const transactionElement = document.createElement("div");
+                transactionElement.className = "flex justify-between items-center py-3 border-b border-gray-100";
+                
+                const isPositive = transaction.amount > 0;
+                const amountClass = isPositive ? "text-success" : "text-red-500";
+                const icon = isPositive ? "fa-plus-circle" : "fa-minus-circle";
+                const sign = isPositive ? "+" : "";
+
+                transactionElement.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas ${icon} ${amountClass}"></i>
+                        <div>
+                            <div class="font-medium text-gray-800">${transaction.description || "Без описания"}</div>
+                            <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString("ru-RU")}</div>
+                        </div>
+                    </div>
+                    <div class="${amountClass} font-semibold">${sign}${transaction.amount.toLocaleString("ru-RU")} ₽</div>
+                `;
+                transactionsListElement.appendChild(transactionElement);
+            });
+        }
+
+        // Add Transaction
+        function addTransaction(amount, description) {
+            const transaction = {
+                id: Date.now(),
+                amount: amount,
+                description: description || "Без описания",
+                date: new Date().toISOString()
+            };
+            
+            transactions.push(transaction);
+            currentBalance += amount;
+            updateUI();
+        }
+
+        // Event Listeners
+        document.getElementById("addMoney").addEventListener("click", () => {
+            addMoneyModal.classList.remove("hidden");
+            addMoneyModal.classList.add("flex");
+            document.getElementById("addAmount").focus();
+        });
+
+        document.getElementById("withdrawMoney").addEventListener("click", () => {
+            withdrawMoneyModal.classList.remove("hidden");
+            withdrawMoneyModal.classList.add("flex");
+            document.getElementById("withdrawAmount").focus();
+        });
+
+        document.getElementById("addGoal").addEventListener("click", () => {
+            addGoalModal.classList.remove("hidden");
+            addGoalModal.classList.add("flex");
+            document.getElementById("goalName").focus();
+        });
+
+        // Quick Actions
+        document.querySelectorAll(".quick-action").forEach(button => {
+            button.addEventListener("click", () => {
+                const amount = parseInt(button.getAttribute("data-amount"));
+                addTransaction(amount, "Быстрое пополнение");
+            });
+        });
+
+        // Modal Confirmations
+        document.getElementById("confirmAdd").addEventListener("click", () => {
+            const amount = parseFloat(document.getElementById("addAmount").value);
+            const description = document.getElementById("addDescription").value;
+            
+            if (amount && amount > 0) {
+                addTransaction(amount, description);
+                addMoneyModal.classList.remove("flex");
+                addMoneyModal.classList.add("hidden");
+                document.getElementById("addAmount").value = "";
+                document.getElementById("addDescription").value = "";
+            }
+        });
+
+        document.getElementById("confirmWithdraw").addEventListener("click", () => {
+            const amount = parseFloat(document.getElementById("withdrawAmount").value);
+            const description = document.getElementById("withdrawDescription").value;
+            
+            if (amount && amount > 0 && amount <= currentBalance) {
+                addTransaction(-amount, description);
+                withdrawMoneyModal.classList.remove("flex");
+                withdrawMoneyModal.classList.add("hidden");
+                document.getElementById("withdrawAmount").value = "";
+                document.getElementById("withdrawDescription").value = "";
+            } else if (amount > currentBalance) {
+                alert("Недостаточно средств на счете!");
+            }
+        });
+
+        document.getElementById("confirmGoal").addEventListener("click", () => {
+            const name = document.getElementById("goalName").value;
+            const amount = parseFloat(document.getElementById("goalAmount").value);
+            
+            if (name && amount && amount > 0) {
+                goals.push({
+                    id: Date.now(),
+                    name: name,
+                    amount: amount
+                });
+                addGoalModal.classList.remove("flex");
+                addGoalModal.classList.add("hidden");
+                document.getElementById("goalName").value = "";
+                document.getElementById("goalAmount").value = "";
+                updateUI();
+            }
+        });
+
+        // Modal Cancellations
+        document.getElementById("cancelAdd").addEventListener("click", () => {
+            addMoneyModal.classList.remove("flex");
+            addMoneyModal.classList.add("hidden");
+        });
+
+        document.getElementById("cancelWithdraw").addEventListener("click", () => {
+            withdrawMoneyModal.classList.remove("flex");
+            withdrawMoneyModal.classList.add("hidden");
+        });
+
+        document.getElementById("cancelGoal").addEventListener("click", () => {
+            addGoalModal.classList.remove("flex");
+            addGoalModal.classList.add("hidden");
+        });
+
+        // Theme Toggle
+        document.getElementById("themeToggle").addEventListener("click", () => {
+            document.body.classList.toggle("bg-gray-900");
+            document.body.classList.toggle("bg-background");
+            document.body.classList.toggle("text-white");
+            
+            const icon = document.querySelector("#themeToggle i");
+            if (document.body.classList.contains("bg-gray-900")) {
+                icon.classList.remove("fa-moon");
+                icon.classList.add("fa-sun");
+            } else {
+                icon.classList.remove("fa-sun");
+                icon.classList.add("fa-moon");
+            }
+        });
+
+        // Close modals on outside click
+        [addMoneyModal, withdrawMoneyModal, addGoalModal].forEach(modal => {
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove("flex");
+                    modal.classList.add("hidden");
+                }
+            });
+        });
+
+        // Initialize
+        initializeFromStorage();
+    </script>
 </body>
 </html>
