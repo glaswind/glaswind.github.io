@@ -22,6 +22,8 @@
     .snow{pointer-events:none;position:absolute;inset:0;z-index:0}
     .flake{position:absolute;top:-10px;width:8px;height:8px;border-radius:50%;background:white;opacity:0.9;filter:blur(0.6px)}
     .danger{background:#ff6b6b}
+    #addInput{width:100%;margin-top:14px;padding:10px;border-radius:10px;border:none;text-align:center;font-size:18px;background:rgba(255,255,255,0.08);color:#fff;outline:none;}
+    #addInput:focus{background:rgba(255,255,255,0.15)}
     @media (max-width:420px){.card{padding:16px}}
   </style>
 </head>
@@ -32,6 +34,7 @@
       <div class="subtitle">Личная копилка — только для тебя. Деньги сохраняются в браузере.</div>
       <div class="amount" id="amountDisplay"><span id="amountValue">0</span><span class="currency">₴</span></div>
       <div class="small">Кликни по сумме, чтобы изменить её с клавиатуры.</div>
+      <input type="number" id="addInput" placeholder="Введите сумму для добавления..." />
       <div class="footer">
         <div class="muted">Последнее изменение: <span id="lastChange">—</span></div>
         <div>
@@ -64,7 +67,18 @@
     function pushHistory(type,delta,before,after){const h=readHistory();h.unshift({t:nowISO(),type,delta,before,after});if(h.length>200)h.pop();writeHistory(h);$('lastChange').textContent=(new Date()).toLocaleString();}
     function updateUI(){$('amountValue').textContent=formatAmount(readAmount());}
     function setAmount(newAmount){const before=readAmount();const after=Math.max(0,Math.round(Number(newAmount)*100)/100||0);writeAmount(after);pushHistory('set',after-before,before,after);updateUI();}
-    function showApp(){updateUI();$('amountDisplay').onclick=()=>{const span=$('amountValue');const oldVal=readAmount();const input=document.createElement('input');input.type='number';input.value=oldVal;input.style.fontSize='40px';input.style.width='150px';input.style.border='none';input.style.background='transparent';input.style.color='white';input.style.textAlign='center';input.onkeydown=e=>{if(e.key==='Enter'){setAmount(input.value);input.replaceWith(span);}if(e.key==='Escape'){input.replaceWith(span);}};span.replaceWith(input);input.focus();input.select();};$('export').onclick=()=>{const data={amount:readAmount(),history:readHistory(),exportedAt:nowISO()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kopilka_backup_'+(new Date()).toISOString()+'.json';a.click();URL.revokeObjectURL(url);};$('reset').onclick=()=>{if(confirm('Сбросить баланс? Это удалит все данные.')){localStorage.removeItem(K_AMOUNT);localStorage.removeItem(K_HISTORY);location.reload();}};const hist=readHistory();$('lastChange').textContent=hist.length?(new Date(hist[0].t)).toLocaleString():'—';}
+    function addAmount(delta){const before=readAmount();const after=Math.max(0,before+Number(delta));writeAmount(after);pushHistory('add',delta,before,after);updateUI();}
+    function showApp(){updateUI();
+      $('amountDisplay').onclick=()=>{const span=$('amountValue');const oldVal=readAmount();const input=document.createElement('input');input.type='number';input.value=oldVal;input.style.fontSize='40px';input.style.width='150px';input.style.border='none';input.style.background='transparent';input.style.color='white';input.style.textAlign='center';input.onkeydown=e=>{if(e.key==='Enter'){setAmount(input.value);input.replaceWith(span);}if(e.key==='Escape'){input.replaceWith(span);}};span.replaceWith(input);input.focus();input.select();};
+      const addInput=$('addInput');
+      addInput.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){addAmount(addInput.value);addInput.value='';}
+        if(e.key==='ArrowUp'){addInput.stepUp(1);} 
+        if(e.key==='ArrowDown'){addInput.stepDown(1);} 
+      });
+      $('export').onclick=()=>{const data={amount:readAmount(),history:readHistory(),exportedAt:nowISO()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kopilka_backup_'+(new Date()).toISOString()+'.json';a.click();URL.revokeObjectURL(url);};
+      $('reset').onclick=()=>{if(confirm('Сбросить баланс? Это удалит все данные.')){localStorage.removeItem(K_AMOUNT);localStorage.removeItem(K_HISTORY);location.reload();}};
+      const hist=readHistory();$('lastChange').textContent=hist.length?(new Date(hist[0].t)).toLocaleString():'—';}
     function makeSnow(){const c=$('snow');for(let i=0;i<25;i++){const s=document.createElement('div');s.className='flake';s.style.left=(Math.random()*100)+'%';s.style.opacity=0.6+Math.random()*0.6;const size=4+Math.random()*8;s.style.width=size+'px';s.style.height=size+'px';s.animate([{transform:'translateY(-10vh)'},{transform:'translateY(120vh)'}],{duration:(6+Math.random()*8)*1000,iterations:Infinity,delay:Math.random()*-6000});c.appendChild(s);}}
     (function(){makeSnow();showApp();})();
   </script>
