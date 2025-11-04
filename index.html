@@ -11,23 +11,17 @@
     .card{width:420px;max-width:95%;background:linear-gradient(180deg,rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:18px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03);position:relative;overflow:hidden}
     h1{margin:0 0 6px;font-size:20px;letter-spacing:0.6px}
     .subtitle{font-size:12px;color:#bfe8ff;margin-bottom:18px}
-    .amount{font-size:40px;font-weight:700;margin:10px 0;display:flex;align-items:flex-end;gap:10px}
+    .amount{font-size:40px;font-weight:700;margin:10px 0;display:flex;align-items:flex-end;gap:10px;cursor:pointer}
     .currency{font-size:18px;opacity:0.9}
-    .controls{display:flex;gap:10px;flex-wrap:wrap}
     button{background:linear-gradient(180deg,var(--accent),#ffb84d);border:0;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(255,160,40,0.18)}
     .btn-sec{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:10px;color:#dff6ff}
-    input[type=number]{width:120px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
     .small{font-size:13px;color:#cbeffd;margin-top:12px}
     .tree{position:absolute;right:-60px;bottom:-80px;transform:rotate(12deg);opacity:0.16;width:380px}
     .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-    .link{font-size:12px;color:#cbeffd;opacity:0.85}
+    .muted{opacity:0.75;font-size:13px}
     .snow{pointer-events:none;position:absolute;inset:0;z-index:0}
     .flake{position:absolute;top:-10px;width:8px;height:8px;border-radius:50%;background:white;opacity:0.9;filter:blur(0.6px)}
-    .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.75));display:flex;align-items:center;justify-content:center}
-    .modal{background:var(--card);padding:20px;border-radius:12px;width:360px;box-shadow:0 10px 40px rgba(0,0,0,0.7)}
-    .row{display:flex;gap:8px;align-items:center;margin-top:10px}
     .danger{background:#ff6b6b}
-    .muted{opacity:0.75;font-size:13px}
     @media (max-width:420px){.card{padding:16px}}
   </style>
 </head>
@@ -37,14 +31,7 @@
       <h1>🎄 Новогодняя копилка</h1>
       <div class="subtitle">Личная копилка — только для тебя. Деньги сохраняются в браузере.</div>
       <div class="amount" id="amountDisplay"><span id="amountValue">0</span><span class="currency">₴</span></div>
-      <div class="controls">
-        <button id="add100">+100</button>
-        <button id="sub100" class="btn-sec">−100</button>
-        <input type="number" id="customInput" placeholder="Сумма" />
-        <button id="addCustom" class="btn-sec">Добавить</button>
-        <button id="subCustom" class="btn-sec">Снять</button>
-      </div>
-      <div class="small">Можно вводить сумму и нажать Enter, чтобы добавить, или Ctrl+Enter — чтобы снять.</div>
+      <div class="small">Кликни по сумме, чтобы изменить её с клавиатуры.</div>
       <div class="footer">
         <div class="muted">Последнее изменение: <span id="lastChange">—</span></div>
         <div>
@@ -69,15 +56,15 @@
     const K_HISTORY = 'piggy_history_v1';
     const $ = id => document.getElementById(id);
     function formatAmount(n){return Number(n).toLocaleString('ru-RU')}
-    function nowISO(){ return new Date().toISOString() }
-    function readAmount(){return Number(localStorage.getItem(K_AMOUNT) || 0)}
-    function writeAmount(n){localStorage.setItem(K_AMOUNT, String(n))}
-    function readHistory(){try{return JSON.parse(localStorage.getItem(K_HISTORY) || '[]')}catch(e){return []}}
-    function writeHistory(h){localStorage.setItem(K_HISTORY, JSON.stringify(h))}
-    function pushHistory(type, delta, before, after){const h=readHistory();h.unshift({t:nowISO(),type,delta,before,after});if(h.length>200)h.pop();writeHistory(h);$('lastChange').textContent=(new Date()).toLocaleString();}
+    function nowISO(){return new Date().toISOString()}
+    function readAmount(){return Number(localStorage.getItem(K_AMOUNT)||0)}
+    function writeAmount(n){localStorage.setItem(K_AMOUNT,String(n))}
+    function readHistory(){try{return JSON.parse(localStorage.getItem(K_HISTORY)||'[]')}catch(e){return []}}
+    function writeHistory(h){localStorage.setItem(K_HISTORY,JSON.stringify(h))}
+    function pushHistory(type,delta,before,after){const h=readHistory();h.unshift({t:nowISO(),type,delta,before,after});if(h.length>200)h.pop();writeHistory(h);$('lastChange').textContent=(new Date()).toLocaleString();}
     function updateUI(){$('amountValue').textContent=formatAmount(readAmount());}
-    function changeBy(delta){const before=readAmount();const after=Math.round((before+delta)*100)/100;writeAmount(after);pushHistory(delta>0?'add':'sub',delta,before,after);updateUI();}
-    function showApp(){updateUI();$('add100').onclick=()=>changeBy(100);$('sub100').onclick=()=>changeBy(-100);$('addCustom').onclick=()=>{const v=Number($('customInput').value||0);if(!v){alert('Введи сумму');return}changeBy(Math.abs(v));$('customInput').value='';};$('subCustom').onclick=()=>{const v=Number($('customInput').value||0);if(!v){alert('Введи сумму');return}changeBy(-Math.abs(v));$('customInput').value='';};$('customInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.ctrlKey){const v=Number(e.target.value||0);if(!v)return;changeBy(Math.abs(v));e.target.value='';}if(e.key==='Enter'&&e.ctrlKey){const v=Number(e.target.value||0);if(!v)return;changeBy(-Math.abs(v));e.target.value='';}});$('export').onclick=()=>{const data={amount:readAmount(),history:readHistory(),exportedAt:nowISO()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kopilka_backup_'+(new Date()).toISOString()+'.json';a.click();URL.revokeObjectURL(url);};$('reset').onclick=()=>{if(confirm('Сбросить баланс? Это удалит все данные.')){localStorage.removeItem(K_AMOUNT);localStorage.removeItem(K_HISTORY);location.reload();}};const hist=readHistory();if(hist.length)$('lastChange').textContent=(new Date(hist[0].t)).toLocaleString();else $('lastChange').textContent='—';}
+    function setAmount(newAmount){const before=readAmount();const after=Math.max(0,Math.round(Number(newAmount)*100)/100||0);writeAmount(after);pushHistory('set',after-before,before,after);updateUI();}
+    function showApp(){updateUI();$('amountDisplay').onclick=()=>{const span=$('amountValue');const oldVal=readAmount();const input=document.createElement('input');input.type='number';input.value=oldVal;input.style.fontSize='40px';input.style.width='150px';input.style.border='none';input.style.background='transparent';input.style.color='white';input.style.textAlign='center';input.onkeydown=e=>{if(e.key==='Enter'){setAmount(input.value);input.replaceWith(span);}if(e.key==='Escape'){input.replaceWith(span);}};span.replaceWith(input);input.focus();input.select();};$('export').onclick=()=>{const data={amount:readAmount(),history:readHistory(),exportedAt:nowISO()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kopilka_backup_'+(new Date()).toISOString()+'.json';a.click();URL.revokeObjectURL(url);};$('reset').onclick=()=>{if(confirm('Сбросить баланс? Это удалит все данные.')){localStorage.removeItem(K_AMOUNT);localStorage.removeItem(K_HISTORY);location.reload();}};const hist=readHistory();$('lastChange').textContent=hist.length?(new Date(hist[0].t)).toLocaleString():'—';}
     function makeSnow(){const c=$('snow');for(let i=0;i<25;i++){const s=document.createElement('div');s.className='flake';s.style.left=(Math.random()*100)+'%';s.style.opacity=0.6+Math.random()*0.6;const size=4+Math.random()*8;s.style.width=size+'px';s.style.height=size+'px';s.animate([{transform:'translateY(-10vh)'},{transform:'translateY(120vh)'}],{duration:(6+Math.random()*8)*1000,iterations:Infinity,delay:Math.random()*-6000});c.appendChild(s);}}
     (function(){makeSnow();showApp();})();
   </script>
