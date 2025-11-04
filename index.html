@@ -3,79 +3,246 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Этапы исследования — ТИТАН</title>
+  <title>Новогодняя копилка</title>
   <style>
-    :root{
-      --card:#0b2333;
-      --accent:#f4c95e;
-      --muted:#9fb1c0;
-      --radius:14px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter, Roboto, "Segoe UI", Arial, sans-serif;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/5/57/Titan_in_true_color.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color:#e6f0ff;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:36px;
-      backdrop-filter: blur(4px);
-    }
-    .wrap{width:100%;max-width:980px;background:rgba(7,18,38,0.85);padding:20px;border-radius:var(--radius)}
-    header{display:flex;gap:16px;align-items:center;margin-bottom:22px}
-    .logo{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#f6d58a,#d48b2a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#071226}
-    h1{font-size:20px;margin:0}
-    p.lead{margin:0;color:var(--muted);font-size:13px}
-    .card{background:rgba(255,255,255,0.05);border-radius:var(--radius);padding:18px}
-    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:18px}
-    .step{background:rgba(255,255,255,0.08);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);cursor:pointer}
-    .step.completed{border-color:rgba(244,201,94,0.5);background:rgba(244,201,94,0.1)}
-    .badge{width:44px;height:44px;border-radius:10px;background:#082736;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
+    /* --- New Year design --- */
+    :root{--bg:#08121a;--card:#06232d;--accent:#ffd166;--glass:rgba(255,255,255,0.06)}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, Arial, sans-serif;background:linear-gradient(180deg,#031018 0%, #032431 60%);color:#fff}
+    .scene{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
+    .card{width:420px;max-width:95%;background:linear-gradient(180deg,rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:18px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03);position:relative;overflow:hidden}
+    h1{margin:0 0 6px;font-size:20px;letter-spacing:0.6px}
+    .subtitle{font-size:12px;color:#bfe8ff;margin-bottom:18px}
+    .amount{font-size:40px;font-weight:700;margin:10px 0;display:flex;align-items:flex-end;gap:10px}
+    .currency{font-size:18px;opacity:0.9}
+    .controls{display:flex;gap:10px;flex-wrap:wrap}
+    button{background:linear-gradient(180deg,var(--accent),#ffb84d);border:0;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(255,160,40,0.18)}
+    .btn-sec{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:10px;color:#dff6ff}
+    input[type=number]{width:120px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
+    .small{font-size:13px;color:#cbeffd;margin-top:12px}
+
+    /* decorative santa tree */
+    .tree{position:absolute;right:-60px;bottom:-80px;transform:rotate(12deg);opacity:0.16;width:380px}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+    .link{font-size:12px;color:#cbeffd;opacity:0.85}
+
+    /* snow animation */
+    .snow{pointer-events:none;position:absolute;inset:0;z-index:0}
+    .flake{position:absolute;top:-10px;width:8px;height:8px;border-radius:50%;background:white;opacity:0.9;filter:blur(0.6px)}
+
+    /* modal */
+    .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.75));display:flex;align-items:center;justify-content:center}
+    .modal{background:var(--card);padding:20px;border-radius:12px;width:360px;box-shadow:0 10px 40px rgba(0,0,0,0.7)}
+    .row{display:flex;gap:8px;align-items:center;margin-top:10px}
+    .danger{background:#ff6b6b}
+
+    /* small helpers */
+    .muted{opacity:0.75;font-size:13px}
+
+    @media (max-width:420px){.card{padding:16px}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">Т</div>
-      <div>
-        <h1>ТИТАН — Этапы исследования</h1>
-        <p class="lead">10 ключевых этапов от орбиты до первой человеческой ступни на Титане.</p>
+  <div class="scene">
+    <div class="card" id="app" aria-live="polite">
+      <h1>🎄 Новогодняя копилка</h1>
+      <div class="subtitle">Личная копилка — только для тебя. Деньги сохраняются в браузере.</div>
+
+      <div class="amount" id="amountDisplay"><span id="amountValue">0</span><span class="currency">₴</span></div>
+
+      <div class="controls">
+        <button id="add100">+100</button>
+        <button id="sub100" class="btn-sec">−100</button>
+        <input type="number" id="customInput" placeholder="Сумма" />
+        <button id="addCustom" class="btn-sec">Добавить</button>
+        <button id="subCustom" class="btn-sec">Снять</button>
       </div>
-    </header>
-    <section class="card">
-      <div class="steps" id="steps"></div>
-    </section>
+
+      <div class="small">Баланс и история сохраняются локально в этом браузере. Если хочешь — экспортируй резервную копию.</div>
+
+      <div class="footer">
+        <div class="muted">Последнее изменение: <span id="lastChange">—</span></div>
+        <div>
+          <button id="export" class="btn-sec">Экспорт</button>
+          <button id="reset" class="btn-sec danger">Сброс</button>
+        </div>
+      </div>
+
+      <svg class="tree" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <ellipse cx="100" cy="180" rx="50" ry="8" fill="#0b3a2b" opacity="0.3"/>
+          <path d="M100 12 L60 90 L140 90 Z" fill="#0f7b4f"/>
+          <path d="M100 50 L50 140 L150 140 Z" fill="#0f8f5e"/>
+          <path d="M100 90 L40 180 L160 180 Z" fill="#0fb071"/>
+          <rect x="88" y="180" width="24" height="18" rx="4" fill="#67402a"/>
+        </g>
+      </svg>
+
+      <div class="snow" id="snow"></div>
+    </div>
   </div>
-<script>
-const stages = [
-  'Спутник на орбите Титана',
-  'Сондирование атмосферы',
-  'Исследование метановых озёр',
-  'Орбитальный ретранслятор',
-  'Мягкая посадка зонда',
-  'Развёртывание ровера с ИИ',
-  'Подключение ИИ-анализа',
-  'Долгосрочное картографирование',
-  'Подготовка пилотируемой миссии',
-  'Первая ступня человека на Титане'
-];
-let state = Array(stages.length).fill(false);
-const container = document.getElementById('steps');
-function render(){
-  container.innerHTML = '';
-  stages.forEach((title,i)=>{
-    const el = document.createElement('div');
-    el.className = 'step'+(state[i]?' completed':'');
-    el.innerHTML = `<div class='badge'>${i+1}</div><div>${title}</div>`;
-    el.onclick = ()=>{state[i]=!state[i];render();};
-    container.appendChild(el);
-  });
-}
-render();
-</script>
+
+  <!-- modal templates -->
+  <template id="setPinTpl">
+    <div class="overlay" id="setPinModal">
+      <div class="modal">
+        <h3>Настрой PIN</h3>
+        <div class="subtitle">Установи PIN — только с ним можно открыть копилку на этом устройстве.</div>
+        <div class="row"><input id="newPin" type="password" placeholder="Новый PIN (4-8 цифр)" /></div>
+        <div class="row"><input id="newPin2" type="password" placeholder="Повтор PIN" /></div>
+        <div class="row"><button id="savePin">Сохранить PIN</button><button id="skipPin" class="btn-sec">Пропустить</button></div>
+        <div class="small">PIN хранится как хеш в локальном хранилище. Это не абсолютная безопасность — служит для личного удобства.</div>
+      </div>
+    </div>
+  </template>
+
+  <template id="enterPinTpl">
+    <div class="overlay" id="enterPinModal">
+      <div class="modal">
+        <h3>Введите PIN</h3>
+        <div class="row"><input id="pinInput" type="password" placeholder="PIN" /></div>
+        <div class="row"><button id="unlockBtn">Открыть</button><button id="forgotBtn" class="btn-sec">Забыли PIN?</button></div>
+        <div class="small">Если забудешь PIN — можно сбросить копилку (удалит баланс и PIN).</div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    // Simple local piggy-bank app. Data stored in localStorage under keys:
+    // piggy_amount (number), piggy_history (array), piggy_pin_hash (hex)
+
+    const K_AMOUNT = 'piggy_amount_v1';
+    const K_HISTORY = 'piggy_history_v1';
+    const K_PIN = 'piggy_pin_hash_v1';
+
+    // helpers
+    const $ = id => document.getElementById(id);
+    function formatAmount(n){return Number(n).toLocaleString('ru-RU')}
+    function nowISO(){ return new Date().toISOString() }
+
+    async function hashPin(pin){
+      const enc = new TextEncoder().encode(pin);
+      const digest = await crypto.subtle.digest('SHA-256', enc);
+      const arr = Array.from(new Uint8Array(digest));
+      return arr.map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    // PIN flow
+    function showTemplate(tpl){
+      const node = tpl.content.cloneNode(true);
+      document.body.appendChild(node);
+    }
+
+    async function requireUnlock(){
+      const stored = localStorage.getItem(K_PIN);
+      if(!stored){
+        // set PIN
+        showTemplate($('setPinTpl'));
+        $('savePin').onclick = async ()=>{
+          const a = $('newPin').value.trim();
+          const b = $('newPin2').value.trim();
+          if(!/^[0-9]{4,8}$/.test(a)){alert('PIN должен быть 4-8 цифр');return}
+          if(a!==b){alert('PIN не совпадает');return}
+          const h = await hashPin(a);
+          localStorage.setItem(K_PIN, h);
+          document.getElementById('setPinModal').remove();
+          showApp();
+        };
+        $('skipPin').onclick = ()=>{document.getElementById('setPinModal').remove();showApp()};
+      } else {
+        // ask PIN
+        showTemplate($('enterPinTpl'));
+        $('unlockBtn').onclick = async ()=>{
+          const p = $('pinInput').value.trim();
+          const h = await hashPin(p);
+          if(h === localStorage.getItem(K_PIN)){
+            document.getElementById('enterPinModal').remove();
+            showApp();
+          } else alert('Неверный PIN');
+        };
+        $('forgotBtn').onclick = ()=>{
+          if(confirm('Сбросить копилку и PIN? Это удалит все данные.')){
+            localStorage.removeItem(K_PIN);localStorage.removeItem(K_AMOUNT);localStorage.removeItem(K_HISTORY);
+            document.getElementById('enterPinModal').remove();
+            // start fresh
+            requireUnlock();
+          }
+        };
+      }
+    }
+
+    // main logic
+    function readAmount(){return Number(localStorage.getItem(K_AMOUNT) || 0)}
+    function writeAmount(n){localStorage.setItem(K_AMOUNT, String(n))}
+    function readHistory(){try{return JSON.parse(localStorage.getItem(K_HISTORY) || '[]')}catch(e){return []}}
+    function writeHistory(h){localStorage.setItem(K_HISTORY, JSON.stringify(h))}
+
+    function pushHistory(type, delta, before, after){
+      const h = readHistory();
+      h.unshift({t: nowISO(), type, delta, before, after});
+      if(h.length>200) h.pop();
+      writeHistory(h);
+      $('lastChange').textContent = (new Date()).toLocaleString();
+    }
+
+    function updateUI(){
+      $('amountValue').textContent = formatAmount(readAmount());
+    }
+
+    function changeBy(delta){
+      const before = readAmount();
+      const after = Math.round((before + delta)*100)/100;
+      writeAmount(after);
+      pushHistory(delta>0? 'add' :'sub', delta, before, after);
+      updateUI();
+    }
+
+    function showApp(){
+      updateUI();
+      $('add100').onclick = ()=>changeBy(100);
+      $('sub100').onclick = ()=>changeBy(-100);
+      $('addCustom').onclick = ()=>{
+        const v = Number($('customInput').value || 0); if(!v){alert('Введи сумму');return} changeBy(Math.abs(v)); $('customInput').value='';
+      };
+      $('subCustom').onclick = ()=>{
+        const v = Number($('customInput').value || 0); if(!v){alert('Введи сумму');return} changeBy(-Math.abs(v)); $('customInput').value='';
+      };
+
+      $('export').onclick = ()=>{
+        const data = {amount: readAmount(), history: readHistory(), exportedAt: nowISO()};
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='kopilka_backup_'+(new Date()).toISOString()+'.json'; a.click(); URL.revokeObjectURL(url);
+      };
+
+      $('reset').onclick = ()=>{
+        if(confirm('Сбросить баланс и PIN? Это удалит все данные.')){
+          localStorage.removeItem(K_AMOUNT); localStorage.removeItem(K_HISTORY); localStorage.removeItem(K_PIN);
+          location.reload();
+        }
+      };
+
+      // show last change
+      const hist = readHistory(); if(hist.length) $('lastChange').textContent = (new Date(hist[0].t)).toLocaleString(); else $('lastChange').textContent='—';
+
+      // unlock UI elements (they are visible but blocked until PIN entered)
+    }
+
+    // init snow
+    function makeSnow(){
+      const container = $('snow');
+      for(let i=0;i<25;i++){const s=document.createElement('div');s.className='flake';s.style.left=(Math.random()*100)+'%';s.style.opacity=0.6+Math.random()*0.6;const size=4+Math.random()*8;s.style.width=size+'px';s.style.height=size+'px';s.style.animationDuration=(6+Math.random()*8)+'s';s.style.transform='translateY(0)';container.appendChild(s);
+        const dur=6+Math.random()*8; s.animate([
+          {transform:'translateY(-10vh) translateX(0)', opacity: s.style.opacity},
+          {transform:'translateY(120vh) translateX(30vw)', opacity:0.6}
+        ],{duration: (dur*1000), iterations: Infinity, delay: Math.random()*-6000});
+      }
+    }
+
+    // start
+    (function(){
+      makeSnow();
+      requireUnlock();
+    })();
+  </script>
 </body>
 </html>
