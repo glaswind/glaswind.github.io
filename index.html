@@ -7,17 +7,43 @@
     <title>Копилка - Трекер накоплений</title>
     <meta name="description" content="Виртуальная копилка для отслеживания ваших накоплений">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- Новогодний фон -->
+    <style>
+        body {
+            background: url("https://i.imgur.com/3N1y7aY.png");
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        /* Снег */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 9999;
+            color: white;
+            font-size: 1rem;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(110vh); }
+        }
+    </style>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: "#3B82F6",
-                        secondary: "#1E40AF",
-                        accent: "#F59E0B",
-                        success: "#10B981",
-                        background: "#F8FAFC"
+                        primary: "#d91e18",        // Новогодний красный
+                        secondary: "#0b6623",      // Зелёный
+                        accent: "#e8b923",         // Золотой
+                        success: "#0b6623",
+                        background: "#ffffffaa"
                     }
                 }
             }
@@ -25,90 +51,97 @@
     </script>
 </head>
 <body class="min-h-screen bg-background">
-    <header class="bg-white shadow-sm">
+
+    <!-- Генерация снега -->
+    <script>
+        for (let i = 0; i < 40; i++) {
+            let snow = document.createElement("div");
+            snow.className = "snowflake";
+            snow.textContent = "❄";
+            snow.style.left = Math.random() * 100 + "vw";
+            snow.style.fontSize = (Math.random() * 20 + 10) + "px";
+            snow.style.animationDuration = (Math.random() * 5 + 5) + "s";
+            document.body.appendChild(snow);
+        }
+    </script>
+
+    <header class="bg-white shadow-xl rounded-b-3xl border-b-4 border-accent">
         <nav class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-2">
-                    <i class="fas fa-piggy-bank text-2xl text-accent"></i>
-                    <h1 class="text-xl font-bold text-gray-800">Моя Копилка</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100">
-                        <i class="fas fa-moon text-gray-600"></i>
-                    </button>
+                    <i class="fas fa-holly-berry text-3xl text-accent"></i>
+                    <h1 class="text-2xl font-bold text-primary">🎄 Моя Копилка 🎁</h1>
                 </div>
             </div>
         </nav>
     </header>
 
     <main class="container mx-auto px-4 py-8">
-        <!-- Current Balance Section -->
-        <section class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+
+        <!-- Баланс -->
+        <section class="bg-white/90 rounded-2xl shadow-lg p-6 mb-8 backdrop-blur">
             <div class="text-center">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-2">Текущий баланс</h2>
-                <div class="text-4xl font-bold text-primary mb-4" id="currentBalance">0 ₽</div>
+                <div class="text-4xl font-bold text-primary mb-4" id="currentBalance">0</div>
+
                 <div class="flex justify-center space-x-4">
-                    <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                    <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
                         <i class="fas fa-plus mr-2"></i>Добавить
                     </button>
-                    <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors">
+                    <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
                         <i class="fas fa-minus mr-2"></i>Снять
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Quick Actions -->
+        <!-- Быстрые кнопки -->
         <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="100">
-                <div class="text-2xl font-bold text-primary">100 ₽</div>
+            <button class="quick-action bg-white/90 rounded-xl shadow-lg p-4 text-center hover:shadow-xl transition-shadow" data-amount="100">
+                <div class="text-2xl font-bold text-primary">100</div>
                 <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
             </button>
-            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="500">
-                <div class="text-2xl font-bold text-primary">500 ₽</div>
+            <button class="quick-action bg-white/90 rounded-xl shadow-lg p-4 text-center hover:shadow-xl transition-shadow" data-amount="500">
+                <div class="text-2xl font-bold text-primary">500</div>
                 <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
             </button>
-            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="1000">
-                <div class="text-2xl font-bold text-primary">1000 ₽</div>
+            <button class="quick-action bg-white/90 rounded-xl shadow-lg p-4 text-center hover:shadow-xl transition-shadow" data-amount="1000">
+                <div class="text-2xl font-bold text-primary">1000</div>
                 <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
             </button>
-            <button class="quick-action bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow" data-amount="5000">
-                <div class="text-2xl font-bold text-primary">5000 ₽</div>
+            <button class="quick-action bg-white/90 rounded-xl shadow-lg p-4 text-center hover:shadow-xl transition-shadow" data-amount="5000">
+                <div class="text-2xl font-bold text-primary">5000</div>
                 <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
             </button>
         </section>
 
-        <!-- Goals Section -->
-        <section class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <!-- Цели -->
+        <section class="bg-white/90 rounded-2xl shadow-lg p-6 mb-8 backdrop-blur">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-semibold text-gray-800">Мои цели</h2>
                 <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-secondary transition-colors">
                     <i class="fas fa-plus mr-1"></i>Новая цель
                 </button>
             </div>
-            <div id="goalsList" class="space-y-4">
-                <!-- Goals will be dynamically added here -->
-            </div>
+            <div id="goalsList" class="space-y-4"></div>
         </section>
 
-        <!-- Transaction History -->
-        <section class="bg-white rounded-2xl shadow-lg p-6">
+        <!-- История -->
+        <section class="bg-white/90 rounded-2xl shadow-lg p-6 backdrop-blur">
             <h2 class="text-xl font-semibold text-gray-800 mb-6">История операций</h2>
-            <div id="transactionsList" class="space-y-3">
-                <!-- Transactions will be dynamically added here -->
-            </div>
+            <div id="transactionsList" class="space-y-3"></div>
         </section>
     </main>
 
-    <!-- Modals -->
+    <!-- Модальные окна (оставлены без изменений кроме валюты) -->
     <div id="addMoneyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full">
             <h3 class="text-xl font-semibold mb-4">Добавить деньги</h3>
-            <input type="number" id="addAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
-            <textarea id="addDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <input type="number" id="addAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <textarea id="addDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4"></textarea>
             <div class="flex space-x-3">
-                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">Добавить</button>
-                <button id="cancelAdd" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold">Добавить</button>
+                <button id="cancelAdd" class="flex-1 bg-gray-300">Отмена</button>
             </div>
         </div>
     </div>
@@ -116,11 +149,11 @@
     <div id="withdrawMoneyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full">
             <h3 class="text-xl font-semibold mb-4">Снять деньги</h3>
-            <input type="number" id="withdrawAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
-            <textarea id="withdrawDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <input type="number" id="withdrawAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <textarea id="withdrawDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4"></textarea>
             <div class="flex space-x-3">
-                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors">Снять</button>
-                <button id="cancelWithdraw" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold">Снять</button>
+                <button id="cancelWithdraw" class="flex-1 bg-gray-300">Отмена</button>
             </div>
         </div>
     </div>
@@ -129,39 +162,27 @@
         <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full">
             <h3 class="text-xl font-semibold mb-4">Новая цель</h3>
             <input type="text" id="goalName" placeholder="Название цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
-            <input type="number" id="goalAmount" placeholder="Сумма цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <input type="number" id="goalAmount" placeholder="Сумма цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
             <div class="flex space-x-3">
-                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-secondary transition-colors">Создать</button>
-                <button id="cancelGoal" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold">Создать</button>
+                <button id="cancelGoal" class="flex-1 bg-gray-300">Отмена</button>
             </div>
         </div>
     </div>
 
-    <footer class="bg-white border-t mt-12">
-        <div class="container mx-auto px-4 py-6">
-            <div class="text-center text-gray-600">
-                <p>© 2024 Моя Копилка. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
-    
     <script>
-        // Data storage
         let currentBalance = 0;
         let goals = [];
         let transactions = [];
 
-        // DOM Elements
         const currentBalanceElement = document.getElementById("currentBalance");
         const goalsListElement = document.getElementById("goalsList");
         const transactionsListElement = document.getElementById("transactionsList");
 
-        // Modal Elements
         const addMoneyModal = document.getElementById("addMoneyModal");
         const withdrawMoneyModal = document.getElementById("withdrawMoneyModal");
         const addGoalModal = document.getElementById("addGoalModal");
 
-        // Initialize from localStorage
         function initializeFromStorage() {
             const savedBalance = localStorage.getItem("piggyBankBalance");
             const savedGoals = localStorage.getItem("piggyBankGoals");
@@ -174,225 +195,176 @@
             updateUI();
         }
 
-        // Save to localStorage
         function saveToStorage() {
             localStorage.setItem("piggyBankBalance", currentBalance.toString());
             localStorage.setItem("piggyBankGoals", JSON.stringify(goals));
             localStorage.setItem("piggyBankTransactions", JSON.stringify(transactions));
         }
 
-        // Update UI
         function updateUI() {
-            currentBalanceElement.textContent = `${currentBalance.toLocaleString("ru-RU")} ₽`;
+            currentBalanceElement.textContent = `${currentBalance.toLocaleString("ru-RU")}`;
             renderGoals();
             renderTransactions();
             saveToStorage();
         }
 
-        // Render Goals
         function renderGoals() {
             goalsListElement.innerHTML = "";
-            
+
             if (goals.length === 0) {
                 goalsListElement.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
-                        <i class="fas fa-bullseye text-4xl mb-4"></i>
+                        <i class="fas fa-gifts text-4xl mb-4 text-accent"></i>
                         <p>У вас пока нет целей</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
-            goals.forEach((goal, index) => {
+            goals.forEach(goal => {
                 const progress = Math.min((currentBalance / goal.amount) * 100, 100);
                 const goalElement = document.createElement("div");
                 goalElement.className = "bg-gray-50 rounded-lg p-4";
+
                 goalElement.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
+                    <div class="flex justify-between mb-2">
                         <h3 class="font-semibold text-gray-800">${goal.name}</h3>
-                        <span class="text-sm font-bold text-primary">${goal.amount.toLocaleString("ru-RU")} ₽</span>
+                        <span class="text-sm font-bold text-primary">${goal.amount.toLocaleString("ru-RU")}</span>
                     </div>
+
                     <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                        <div class="bg-accent h-2 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                        <div class="bg-accent h-2 rounded-full" style="width: ${progress}%"></div>
                     </div>
+
                     <div class="flex justify-between text-sm text-gray-600">
                         <span>Прогресс: ${progress.toFixed(1)}%</span>
-                        <span>Осталось: ${Math.max(0, goal.amount - currentBalance).toLocaleString("ru-RU")} ₽</span>
+                        <span>Осталось: ${(goal.amount - currentBalance > 0 ? goal.amount - currentBalance : 0).toLocaleString("ru-RU")}</span>
                     </div>
                 `;
+
                 goalsListElement.appendChild(goalElement);
             });
         }
 
-        // Render Transactions
         function renderTransactions() {
             transactionsListElement.innerHTML = "";
-            
+
             if (transactions.length === 0) {
                 transactionsListElement.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
-                        <i class="fas fa-receipt text-4xl mb-4"></i>
+                        <i class="fas fa-scroll text-4xl mb-4"></i>
                         <p>Операций пока нет</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
             transactions.slice().reverse().forEach(transaction => {
-                const transactionElement = document.createElement("div");
-                transactionElement.className = "flex justify-between items-center py-3 border-b border-gray-100";
-                
                 const isPositive = transaction.amount > 0;
-                const amountClass = isPositive ? "text-success" : "text-red-500";
-                const icon = isPositive ? "fa-plus-circle" : "fa-minus-circle";
-                const sign = isPositive ? "+" : "";
 
-                transactionElement.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <i class="fas ${icon} ${amountClass}"></i>
-                        <div>
-                            <div class="font-medium text-gray-800">${transaction.description || "Без описания"}</div>
-                            <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString("ru-RU")}</div>
+                const item = document.createElement("div");
+                item.className = "flex justify-between py-3 border-b";
+
+                item.innerHTML = `
+                    <div>
+                        <div class="font-medium">${transaction.description || "Без описания"}</div>
+                        <div class="text-sm text-gray-500">
+                            ${new Date(transaction.date).toLocaleDateString("ru-RU")}
                         </div>
                     </div>
-                    <div class="${amountClass} font-semibold">${sign}${transaction.amount.toLocaleString("ru-RU")} ₽</div>
+
+                    <div class="${isPositive ? "text-success" : "text-red-500"} font-bold">
+                        ${transaction.amount > 0 ? "+" : ""}${transaction.amount.toLocaleString("ru-RU")}
+                    </div>
                 `;
-                transactionsListElement.appendChild(transactionElement);
+
+                transactionsListElement.appendChild(item);
             });
         }
 
-        // Add Transaction
         function addTransaction(amount, description) {
-            const transaction = {
+            transactions.push({
                 id: Date.now(),
-                amount: amount,
+                amount,
                 description: description || "Без описания",
                 date: new Date().toISOString()
-            };
-            
-            transactions.push(transaction);
+            });
+
             currentBalance += amount;
             updateUI();
         }
 
-        // Event Listeners
-        document.getElementById("addMoney").addEventListener("click", () => {
+        // кнопки
+        document.getElementById("addMoney").onclick = () => {
             addMoneyModal.classList.remove("hidden");
             addMoneyModal.classList.add("flex");
-            document.getElementById("addAmount").focus();
-        });
+        };
 
-        document.getElementById("withdrawMoney").addEventListener("click", () => {
+        document.getElementById("withdrawMoney").onclick = () => {
             withdrawMoneyModal.classList.remove("hidden");
             withdrawMoneyModal.classList.add("flex");
-            document.getElementById("withdrawAmount").focus();
-        });
+        };
 
-        document.getElementById("addGoal").addEventListener("click", () => {
+        document.getElementById("addGoal").onclick = () => {
             addGoalModal.classList.remove("hidden");
             addGoalModal.classList.add("flex");
-            document.getElementById("goalName").focus();
-        });
+        };
 
-        // Quick Actions
-        document.querySelectorAll(".quick-action").forEach(button => {
-            button.addEventListener("click", () => {
-                const amount = parseInt(button.getAttribute("data-amount"));
-                addTransaction(amount, "Быстрое пополнение");
+        // Быстрые кнопки
+        document.querySelectorAll(".quick-action").forEach(btn => {
+            btn.addEventListener("click", () => {
+                addTransaction(parseInt(btn.dataset.amount), "Быстрое пополнение");
             });
         });
 
-        // Modal Confirmations
-        document.getElementById("confirmAdd").addEventListener("click", () => {
-            const amount = parseFloat(document.getElementById("addAmount").value);
-            const description = document.getElementById("addDescription").value;
-            
-            if (amount && amount > 0) {
-                addTransaction(amount, description);
-                addMoneyModal.classList.remove("flex");
+        // Подтверждение пополнения
+        document.getElementById("confirmAdd").onclick = () => {
+            let amount = parseFloat(document.getElementById("addAmount").value);
+            let desc = document.getElementById("addDescription").value;
+
+            if (amount > 0) {
+                addTransaction(amount, desc);
                 addMoneyModal.classList.add("hidden");
-                document.getElementById("addAmount").value = "";
-                document.getElementById("addDescription").value = "";
             }
-        });
+        };
 
-        document.getElementById("confirmWithdraw").addEventListener("click", () => {
-            const amount = parseFloat(document.getElementById("withdrawAmount").value);
-            const description = document.getElementById("withdrawDescription").value;
-            
-            if (amount && amount > 0 && amount <= currentBalance) {
-                addTransaction(-amount, description);
-                withdrawMoneyModal.classList.remove("flex");
+        // Подтверждение снятия
+        document.getElementById("confirmWithdraw").onclick = () => {
+            let amount = parseFloat(document.getElementById("withdrawAmount").value);
+            let desc = document.getElementById("withdrawDescription").value;
+
+            if (amount > 0 && amount <= currentBalance) {
+                addTransaction(-amount, desc);
                 withdrawMoneyModal.classList.add("hidden");
-                document.getElementById("withdrawAmount").value = "";
-                document.getElementById("withdrawDescription").value = "";
-            } else if (amount > currentBalance) {
-                alert("Недостаточно средств на счете!");
+            } else {
+                alert("Недостаточно средств!");
             }
-        });
+        };
 
-        document.getElementById("confirmGoal").addEventListener("click", () => {
-            const name = document.getElementById("goalName").value;
-            const amount = parseFloat(document.getElementById("goalAmount").value);
-            
-            if (name && amount && amount > 0) {
-                goals.push({
-                    id: Date.now(),
-                    name: name,
-                    amount: amount
-                });
-                addGoalModal.classList.remove("flex");
+        // Создание цели
+        document.getElementById("confirmGoal").onclick = () => {
+            let name = document.getElementById("goalName").value;
+            let amount = parseFloat(document.getElementById("goalAmount").value);
+
+            if (name && amount > 0) {
+                goals.push({ id: Date.now(), name, amount });
                 addGoalModal.classList.add("hidden");
-                document.getElementById("goalName").value = "";
-                document.getElementById("goalAmount").value = "";
                 updateUI();
             }
-        });
+        };
 
-        // Modal Cancellations
-        document.getElementById("cancelAdd").addEventListener("click", () => {
-            addMoneyModal.classList.remove("flex");
-            addMoneyModal.classList.add("hidden");
-        });
+        // Закрытие модалок
+        document.getElementById("cancelAdd").onclick = () => addMoneyModal.classList.add("hidden");
+        document.getElementById("cancelWithdraw").onclick = () => withdrawMoneyModal.classList.add("hidden");
+        document.getElementById("cancelGoal").onclick = () => addGoalModal.classList.add("hidden");
 
-        document.getElementById("cancelWithdraw").addEventListener("click", () => {
-            withdrawMoneyModal.classList.remove("flex");
-            withdrawMoneyModal.classList.add("hidden");
-        });
-
-        document.getElementById("cancelGoal").addEventListener("click", () => {
-            addGoalModal.classList.remove("flex");
-            addGoalModal.classList.add("hidden");
-        });
-
-        // Theme Toggle
-        document.getElementById("themeToggle").addEventListener("click", () => {
-            document.body.classList.toggle("bg-gray-900");
-            document.body.classList.toggle("bg-background");
-            document.body.classList.toggle("text-white");
-            
-            const icon = document.querySelector("#themeToggle i");
-            if (document.body.classList.contains("bg-gray-900")) {
-                icon.classList.remove("fa-moon");
-                icon.classList.add("fa-sun");
-            } else {
-                icon.classList.remove("fa-sun");
-                icon.classList.add("fa-moon");
-            }
-        });
-
-        // Close modals on outside click
-        [addMoneyModal, withdrawMoneyModal, addGoalModal].forEach(modal => {
-            modal.addEventListener("click", (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove("flex");
-                    modal.classList.add("hidden");
-                }
+        // Закрытие по клику вне окна
+        [addMoneyModal, withdrawMoneyModal, addGoalModal].forEach(m => {
+            m.addEventListener("click", e => {
+                if (e.target === m) m.classList.add("hidden");
             });
         });
 
-        // Initialize
         initializeFromStorage();
     </script>
+
 </body>
 </html>
