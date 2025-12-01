@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Копилка - Трекер накоплений</title>
     <meta name="description" content="Виртуальная копилка для отслеживания ваших накоплений">
-    
-    <!-- PWA метатеги -->
-    <meta name="theme-color" content="#d91e18">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     
     <!-- Внешние ресурсы -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,10 +14,11 @@
     <!-- Стили -->
     <style>
         body {
+            background: url("https://i.imgur.com/6IMSAtv_lq.mp4");
             background: url("https://i.imgur.com/3N1y7aY.png") no-repeat center center fixed;
             background-size: cover;
+            background-attachment: fixed;
             min-height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* Снегопад */
@@ -32,15 +27,36 @@
             top: -10px;
             z-index: 9999;
             color: white;
+            font-size: 1rem;
             user-select: none;
             pointer-events: none;
             animation: fall linear infinite;
         }
 
         @keyframes fall {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(110vh); }
             to { transform: translateY(110vh); }
         }
 
+        /* Виджет справа */
+        #steamWidget {
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            z-index: 9999;
+            background: rgba(255,255,255,0.85);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+        }
+        #newYearCountdown {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #d91e18;
         /* Кастомные стили */
         .modal {
             transition: opacity 0.3s ease;
@@ -59,26 +75,6 @@
             width: 100%;
         }
         
-        /* Анимации */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
-        
-        /* Для PWA установки */
-        .install-button {
-            transition: all 0.3s ease;
-        }
-        
-        .install-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
         @media (max-width: 768px) {
             .steam-widget-container {
                 max-width: 100%;
@@ -88,29 +84,6 @@
                 width: 100% !important;
                 max-width: 100%;
             }
-            
-            .hide-on-mobile {
-                display: none;
-            }
-        }
-        
-        /* Улучшенная прокрутка */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #d91e18;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #b31813;
         }
     </style>
 
@@ -130,6 +103,7 @@
         }
     </script>
 </head>
+<body class="min-h-screen bg-background">
 <body class="min-h-screen">
     <!-- Снегопад -->
     <script>
@@ -154,18 +128,9 @@
                     <i class="fas fa-holly-berry text-3xl text-accent"></i>
                     <h1 class="text-2xl font-bold text-primary">🎄 Моя Копилка 🎁</h1>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <!-- Кнопка установки PWA -->
-                    <button id="installButton" class="hidden install-button bg-gradient-to-r from-primary to-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all">
-                        <i class="fas fa-download mr-2"></i>
-                        <span class="hide-on-mobile">Установить приложение</span>
-                        <span class="md:hidden">Установить</span>
-                    </button>
-                    
-                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                        <i class="fas fa-moon text-gray-600"></i>
-                    </button>
-                </div>
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
             </div>
         </nav>
     </header>
@@ -181,10 +146,10 @@
                         <h2 class="text-2xl font-semibold text-gray-700 mb-2">Текущий баланс</h2>
                         <div class="text-4xl font-bold text-primary mb-6" id="currentBalance">0</div>
                         <div class="flex justify-center space-x-4">
-                            <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors hover:scale-105">
+                            <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
                                 <i class="fas fa-plus mr-2"></i>Добавить
                             </button>
-                            <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors hover:scale-105">
+                            <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
                                 <i class="fas fa-minus mr-2"></i>Снять
                             </button>
                         </div>
@@ -217,17 +182,17 @@
                     <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-semibold text-gray-800">Мои цели</h2>
-                            <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors hover:scale-105">
+                            <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
                                 <i class="fas fa-plus mr-1"></i>Новая цель
                             </button>
                         </div>
-                        <div id="goalsList" class="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                        <div id="goalsList" class="space-y-4 max-h-[300px] overflow-y-auto pr-2"></div>
                     </section>
 
                     <!-- История операций -->
                     <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
                         <h2 class="text-xl font-semibold text-gray-800 mb-6">История операций</h2>
-                        <div id="transactionsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                        <div id="transactionsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
                     </section>
                 </div>
             </div>
@@ -260,78 +225,39 @@
 
                 <!-- Таймер до Нового 2026 года -->
                 <section class="bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur rounded-2xl shadow-lg p-6 border border-white/30">
-                    <h2 class="text-xl font-semibold text-red-600 mb-6 text-center">⏳ До Нового 2026 года</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">⏳ До Нового 2026 года</h2>
                     
                     <div class="grid grid-cols-4 gap-3 mb-6">
                         <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="days" class="text-3xl font-bold text-red-600">00</div>
-                            <div class="text-sm text-red-700 mt-1 font-medium">Дней</div>
+                            <div id="days" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Дней</div>
                         </div>
                         <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="hours" class="text-3xl font-bold text-red-600">00</div>
-                            <div class="text-sm text-red-700 mt-1 font-medium">Часов</div>
+                            <div id="hours" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Часов</div>
                         </div>
                         <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="minutes" class="text-3xl font-bold text-red-600">00</div>
-                            <div class="text-sm text-red-700 mt-1 font-medium">Минут</div>
+                            <div id="minutes" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Минут</div>
                         </div>
                         <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="seconds" class="text-3xl font-bold text-red-600">00</div>
-                            <div class="text-sm text-red-700 mt-1 font-medium">Секунд</div>
+                            <div id="seconds" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Секунд</div>
                         </div>
                     </div>
                     
                     <div class="text-center">
-                        <div class="text-lg font-semibold text-red-700 mb-2" id="newYearMessage">
+                        <div class="text-lg font-semibold text-gray-800 mb-2" id="newYearMessage">
                             До Нового 2026 года осталось:
                         </div>
-                        <div class="text-sm text-red-600 font-medium">
-                            <i class="fas fa-calendar-alt mr-2 text-red-600"></i>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-calendar-alt mr-2"></i>
                             Цель: 1 января 2026 года
                         </div>
-                        <div class="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
-                            <p class="text-sm text-red-800 font-medium">
-                                <i class="fas fa-lightbulb text-red-600 mr-2"></i>
+                        <div class="mt-4 p-3 bg-white/50 rounded-lg">
+                            <p class="text-sm text-gray-700">
+                                <i class="fas fa-lightbulb text-accent mr-2"></i>
                                 Успеете накопить на подарки к Новому году!
-                            </p>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- Инструкция по установке -->
-                <section class="bg-gradient-to-br from-blue-50 to-indigo-50 backdrop-blur rounded-2xl shadow-lg p-6 border border-blue-200">
-                    <h2 class="text-xl font-semibold text-blue-800 mb-4 text-center">
-                        <i class="fas fa-mobile-alt mr-2"></i>Установить приложение
-                    </h2>
-                    
-                    <div class="space-y-4">
-                        <!-- Кнопка установки (дублирующая кнопку в хедере) -->
-                        <button id="installButton2" class="w-full install-button bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-lg font-semibold hover:shadow-lg transition-all pulse-animation">
-                            <i class="fas fa-download mr-2"></i>Добавить на рабочий стол
-                        </button>
-                        
-                        <div class="bg-white/70 p-4 rounded-lg">
-                            <h3 class="font-semibold text-blue-700 mb-2">📱 Как установить:</h3>
-                            <ul class="text-sm text-blue-800 space-y-2">
-                                <li class="flex items-start">
-                                    <i class="fas fa-chrome text-blue-600 mt-1 mr-2"></i>
-                                    <span><strong>Chrome/Edge:</strong> Нажмите "Установить" или ⋮ → "Установить приложение"</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fab fa-safari text-blue-600 mt-1 mr-2"></i>
-                                    <span><strong>Safari:</strong> Нажмите Поделиться → "На экран «Домой»"</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fab fa-firefox text-blue-600 mt-1 mr-2"></i>
-                                    <span><strong>Firefox:</strong> Добавьте закладку или установите как PWA</span>
-                                </li>
-                            </ul>
-                        </div>
-                        
-                        <div class="text-center">
-                            <p class="text-sm text-blue-600">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                После установки приложение работает оффлайн!
                             </p>
                         </div>
                     </div>
@@ -364,12 +290,16 @@
             <input type="number" id="addAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
             <textarea id="addDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
             <div class="flex space-x-3">
-                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors hover:scale-105">Добавить</button>
-                <button id="cancelAdd" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors hover:scale-105">Отмена</button>
+                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">Добавить</button>
+                <button id="cancelAdd" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
             </div>
         </div>
     </div>
 
+<div id="steamWidget">
+    <iframe src="https://store.steampowered.com/widget/4164420/" frameborder="0" width="300" height="190"></iframe>
+    <div id="newYearCountdown"></div>
+</div>
     <!-- Снятие -->
     <div id="withdrawMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full">
@@ -377,12 +307,17 @@
             <input type="number" id="withdrawAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
             <textarea id="withdrawDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
             <div class="flex space-x-3">
-                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors hover:scale-105">Снять</button>
-                <button id="cancelWithdraw" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors hover:scale-105">Отмена</button>
+                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">Снять</button>
+                <button id="cancelWithdraw" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
             </div>
         </div>
     </div>
 
+<script>
+function updateCountdown() {
+    const now = new Date();
+    const target = new Date("January 1, 2026 00:00:00");
+    const diff = target - now;
     <!-- Новая цель -->
     <div id="addGoalModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full">
@@ -390,26 +325,23 @@
             <input type="text" id="goalName" placeholder="Название цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
             <input type="number" id="goalAmount" placeholder="Сумма цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
             <div class="flex space-x-3">
-                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-secondary transition-colors hover:scale-105">Создать</button>
-                <button id="cancelGoal" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors hover:scale-105">Отмена</button>
+                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-secondary transition-colors">Создать</button>
+                <button id="cancelGoal" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
             </div>
         </div>
     </div>
 
-    <!-- Футер -->
-    <footer class="mt-12 py-6 text-center text-gray-600 text-sm">
-        <p>© 2024 Моя Копилка. Все права защищены.</p>
-        <p class="mt-1">Работает оффлайн • Сохраняет данные в браузере</p>
-    </footer>
-
+    if (diff <= 0) {
+        document.getElementById("newYearCountdown").textContent = "🎉 С Новым 2026 годом!";
+        return;
+    }
     <script>
         // Глобальные переменные
         let currentBalance = 0;
         let goals = [];
         let transactions = [];
         let newYearTimer;
-        let deferredPrompt;
-        
+
         // Мотивационные цитаты
         const motivationQuotes = [
             "Маленькие ежедневные накопления приводят к большим результатам!",
@@ -428,8 +360,6 @@
             transactionsList: document.getElementById('transactionsList'),
             motivationQuote: document.getElementById('motivationQuote'),
             nextGoalAmount: document.getElementById('nextGoalAmount'),
-            installButton: document.getElementById('installButton'),
-            installButton2: document.getElementById('installButton2'),
             modals: {
                 addMoney: document.getElementById('addMoneyModal'),
                 withdrawMoney: document.getElementById('withdrawMoneyModal'),
@@ -442,132 +372,6 @@
                 seconds: document.getElementById('seconds')
             }
         };
-
-        // === PWA УСТАНОВКА ===
-        function setupPWA() {
-            // Создаем манифест динамически
-            if ('serviceWorker' in navigator) {
-                const manifest = {
-                    "name": "Моя Копилка",
-                    "short_name": "Копилка",
-                    "description": "Виртуальная копилка для отслеживания накоплений",
-                    "start_url": "/",
-                    "display": "standalone",
-                    "background_color": "#ffffff",
-                    "theme_color": "#d91e18",
-                    "icons": [
-                        {
-                            "src": "https://cdn-icons-png.flaticon.com/192/3446/3446956.png",
-                            "sizes": "192x192",
-                            "type": "image/png"
-                        },
-                        {
-                            "src": "https://cdn-icons-png.flaticon.com/512/3446/3446956.png",
-                            "sizes": "512x512",
-                            "type": "image/png"
-                        }
-                    ]
-                };
-                
-                // Создаем и добавляем manifest.json
-                const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-                const manifestURL = URL.createObjectURL(blob);
-                const link = document.createElement('link');
-                link.rel = 'manifest';
-                link.href = manifestURL;
-                document.head.appendChild(link);
-                
-                // Регистрируем Service Worker
-                navigator.serviceWorker.register('/sw.js').catch(error => {
-                    console.log('Service Worker registration failed:', error);
-                });
-            }
-            
-            // Отслеживаем событие beforeinstallprompt
-            window.addEventListener('beforeinstallprompt', (e) => {
-                // Предотвращаем автоматическое отображение подсказки
-                e.preventDefault();
-                // Сохраняем событие для последующего использования
-                deferredPrompt = e;
-                // Показываем кнопку установки
-                elements.installButton.classList.remove('hidden');
-                elements.installButton2.classList.remove('hidden');
-            });
-            
-            // Событие после успешной установки
-            window.addEventListener('appinstalled', () => {
-                deferredPrompt = null;
-                elements.installButton.classList.add('hidden');
-                elements.installButton2.classList.add('hidden');
-                showNotification('Приложение успешно установлено!', 'success');
-            });
-            
-            // Проверяем, установлено ли уже приложение
-            if (window.matchMedia('(display-mode: standalone)').matches || 
-                window.navigator.standalone === true) {
-                elements.installButton.classList.add('hidden');
-                elements.installButton2.classList.add('hidden');
-            }
-        }
-        
-        // Обработчик установки приложения
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Пользователь принял установку');
-                    } else {
-                        console.log('Пользователь отклонил установку');
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                showNotification('Используйте меню браузера для установки', 'info');
-                showInstallInstructions();
-            }
-        }
-        
-        // Показать инструкции по установке
-        function showInstallInstructions() {
-            const instructions = `
-                <div class="bg-white rounded-2xl p-6 max-w-md">
-                    <h3 class="text-xl font-semibold mb-4">Как установить приложение:</h3>
-                    <div class="space-y-3">
-                        <p><strong>Chrome/Edge на компьютере:</strong><br>
-                        • Нажмите на иконку ⚙️ или ⋮ в адресной строке<br>
-                        • Выберите "Установить Моя Копилка"</p>
-                        
-                        <p><strong>Chrome на Android:</strong><br>
-                        • Нажмите ⋮ → "Добавить на главный экран"</p>
-                        
-                        <p><strong>Safari на iOS:</strong><br>
-                        • Нажмите кнопку "Поделиться"<br>
-                        • Прокрутите вниз и выберите "На экран «Домой»"</p>
-                        
-                        <p class="text-sm text-gray-500 mt-4">
-                            После установки приложение будет работать как обычное приложение!
-                        </p>
-                    </div>
-                    <button id="closeInstructions" class="mt-4 w-full bg-gray-300 py-2 rounded-lg">Закрыть</button>
-                </div>
-            `;
-            
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = instructions;
-            document.body.appendChild(modal);
-            
-            modal.querySelector('#closeInstructions').onclick = () => {
-                document.body.removeChild(modal);
-            };
-            
-            modal.onclick = (e) => {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            };
-        }
 
         // Инициализация из localStorage
         function initializeApp() {
@@ -582,7 +386,6 @@
             updateUI();
             startNewYearTimer();
             updateMotivationQuote();
-            setupPWA();
         }
 
         // Таймер до Нового 2026 года
@@ -598,7 +401,6 @@
                     elements.timer.hours.textContent = '00';
                     elements.timer.minutes.textContent = '00';
                     elements.timer.seconds.textContent = '00';
-                    document.getElementById('newYearMessage').textContent = 'С Новым 2026 годом! 🎉';
                     return;
                 }
                 
@@ -663,11 +465,20 @@
             saveData();
         }
 
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff / (1000*60*60)) % 24);
+    const minutes = Math.floor((diff / (1000*60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
         // Рендер целей
         function renderGoals() {
             const goalsList = elements.goalsList;
             goalsList.innerHTML = '';
 
+    document.getElementById("newYearCountdown").textContent = `До 2026 года: ${days}д ${hours}ч ${minutes}м ${seconds}с`;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
             if (goals.length === 0) {
                 goalsList.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
@@ -679,6 +490,7 @@
                 return;
             }
 
+<!-- ОСТАЛЬНОЙ ТВОЙ КОД СТРАНИЦЫ ТУТ (не менял) -->
             goals.forEach(goal => {
                 const progress = Math.min((currentBalance / goal.amount) * 100, 100);
                 const remaining = Math.max(0, goal.amount - currentBalance);
@@ -732,4 +544,208 @@
                         <i class="fas ${isPositive ? 'fa-plus-circle text-success' : 'fa-minus-circle text-red-500'}"></i>
                         <div>
                             <div class="font-medium text-gray-800 truncate max-w-[150px]">${transaction.description || 'Без описания'}</div>
-                            <
+                            <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString('ru-RU')}</div>
+                        </div>
+                    </div>
+                    <div class="${isPositive ? 'text-success' : 'text-red-500'} font-semibold whitespace-nowrap">
+                        ${isPositive ? '+' : ''}${transaction.amount.toLocaleString('ru-RU')}
+                    </div>
+                `;
+                transactionsList.appendChild(transactionElement);
+            });
+        }
+
+        // Добавление транзакции
+        function addTransaction(amount, description) {
+            const transaction = {
+                id: Date.now(),
+                amount,
+                description: description || 'Без описания',
+                date: new Date().toISOString()
+            };
+            
+            transactions.push(transaction);
+            currentBalance += amount;
+            
+            // Ограничиваем историю 50 записями
+            if (transactions.length > 50) {
+                transactions = transactions.slice(-50);
+            }
+            
+            updateUI();
+            
+            // Показываем уведомление
+            showNotification(`${amount > 0 ? 'Пополнено' : 'Снято'} ${Math.abs(amount).toLocaleString('ru-RU')}`, amount > 0 ? 'success' : 'error');
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-success' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-primary'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Анимация появления
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Автоматическое скрытие
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Управление модальными окнами
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideModal(modal) {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // Очистка полей формы
+        function clearForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) form.reset();
+        }
+
+        // Обработчики событий
+        function setupEventListeners() {
+            // Кнопки действий
+            document.getElementById('addMoney').onclick = () => {
+                showModal(elements.modals.addMoney);
+                document.getElementById('addAmount').focus();
+            };
+
+            document.getElementById('withdrawMoney').onclick = () => {
+                showModal(elements.modals.withdrawMoney);
+                document.getElementById('withdrawAmount').focus();
+            };
+
+            document.getElementById('addGoal').onclick = () => {
+                showModal(elements.modals.addGoal);
+                document.getElementById('goalName').focus();
+            };
+
+            // Быстрые кнопки
+            document.querySelectorAll('.quick-action').forEach(btn => {
+                btn.onclick = () => {
+                    addTransaction(parseInt(btn.dataset.amount), 'Быстрое пополнение');
+                };
+            });
+
+            // Подтверждение действий
+            document.getElementById('confirmAdd').onclick = () => {
+                const amount = parseFloat(document.getElementById('addAmount').value);
+                const description = document.getElementById('addDescription').value;
+                
+                if (amount > 0) {
+                    addTransaction(amount, description);
+                    hideModal(elements.modals.addMoney);
+                    clearForm('addAmount');
+                } else {
+                    showNotification('Введите корректную сумму!', 'error');
+                }
+            };
+
+            document.getElementById('confirmWithdraw').onclick = () => {
+                const amount = parseFloat(document.getElementById('withdrawAmount').value);
+                const description = document.getElementById('withdrawDescription').value;
+                
+                if (amount > 0 && amount <= currentBalance) {
+                    addTransaction(-amount, description);
+                    hideModal(elements.modals.withdrawMoney);
+                    clearForm('withdrawAmount');
+                } else if (amount > currentBalance) {
+                    showNotification('Недостаточно средств на счете!', 'error');
+                } else {
+                    showNotification('Введите корректную сумму!', 'error');
+                }
+            };
+
+            document.getElementById('confirmGoal').onclick = () => {
+                const name = document.getElementById('goalName').value.trim();
+                const amount = parseFloat(document.getElementById('goalAmount').value);
+                
+                if (name && amount > 0) {
+                    goals.push({ 
+                        id: Date.now(), 
+                        name, 
+                        amount 
+                    });
+                    hideModal(elements.modals.addGoal);
+                    clearForm('goalName');
+                    showNotification(`Цель "${name}" создана!`, 'success');
+                    updateUI();
+                } else {
+                    showNotification('Заполните все поля корректно!', 'error');
+                }
+            };
+
+            // Отмена действий
+            document.getElementById('cancelAdd').onclick = () => {
+                hideModal(elements.modals.addMoney);
+                clearForm('addAmount');
+            };
+            
+            document.getElementById('cancelWithdraw').onclick = () => {
+                hideModal(elements.modals.withdrawMoney);
+                clearForm('withdrawAmount');
+            };
+            
+            document.getElementById('cancelGoal').onclick = () => {
+                hideModal(elements.modals.addGoal);
+                clearForm('goalName');
+            };
+
+            // Закрытие модальных окон по клику вне
+            Object.values(elements.modals).forEach(modal => {
+                modal.onclick = (e) => {
+                    if (e.target === modal) hideModal(modal);
+                };
+            });
+
+            // Переключение темы
+            document.getElementById('themeToggle').onclick = () => {
+                const isDark = document.body.classList.toggle('bg-gray-900');
+                document.body.classList.toggle('text-white', isDark);
+                
+                const icon = document.querySelector('#themeToggle i');
+                icon.classList.toggle('fa-moon', !isDark);
+                icon.classList.toggle('fa-sun', isDark);
+                icon.classList.toggle('text-gray-600', !isDark);
+                icon.classList.toggle('text-yellow-400', isDark);
+                
+                showNotification(isDark ? 'Тёмная тема включена' : 'Светлая тема включена');
+            };
+
+            // Закрытие по клавише Escape
+            document.onkeydown = (e) => {
+                if (e.key === 'Escape') {
+                    Object.values(elements.modals).forEach(hideModal);
+                }
+            };
+
+            // Смена мотивационной цитаты при клике
+            elements.motivationQuote.parentElement.onclick = updateMotivationQuote;
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>
