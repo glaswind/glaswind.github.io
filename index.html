@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Копилка - Трекер накоплений</title>
@@ -14,10 +13,8 @@
     <!-- Стили -->
     <style>
         body {
-            background: url("https://i.imgur.com/6IMSAtv_lq.mp4");
-            background: url("https://i.imgur.com/3N1y7aY.png") no-repeat center center fixed;
+            background: url("https://img1.akspic.ru/crops/0/4/8/0/7/170840/170840-novyj_god-rozhdestvo-elka-detrojt-rozhdestvenskaya_muzyka-1920x1080.jpg") no-repeat center center fixed;
             background-size: cover;
-            background-attachment: fixed;
             min-height: 100vh;
         }
 
@@ -27,36 +24,15 @@
             top: -10px;
             z-index: 9999;
             color: white;
-            font-size: 1rem;
             user-select: none;
             pointer-events: none;
             animation: fall linear infinite;
         }
 
         @keyframes fall {
-            0% { transform: translateY(-10px); }
-            100% { transform: translateY(110vh); }
             to { transform: translateY(110vh); }
         }
 
-        /* Виджет справа */
-        #steamWidget {
-            position: fixed;
-            right: 10px;
-            bottom: 10px;
-            z-index: 9999;
-            background: rgba(255,255,255,0.85);
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            backdrop-filter: blur(6px);
-        }
-        #newYearCountdown {
-            text-align: center;
-            margin-top: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #d91e18;
         /* Кастомные стили */
         .modal {
             transition: opacity 0.3s ease;
@@ -103,7 +79,6 @@
         }
     </script>
 </head>
-<body class="min-h-screen bg-background">
 <body class="min-h-screen">
     <!-- Снегопад -->
     <script>
@@ -222,46 +197,46 @@
                         </p>
                     </div>
                 </section>
-
+                
                 <!-- Таймер до Нового 2026 года -->
-                <section class="bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur rounded-2xl shadow-lg p-6 border border-white/30">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">⏳ До Нового 2026 года</h2>
-                    
-                    <div class="grid grid-cols-4 gap-3 mb-6">
-                        <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="days" class="text-3xl font-bold text-primary">00</div>
-                            <div class="text-sm text-gray-700 mt-1">Дней</div>
-                        </div>
-                        <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="hours" class="text-3xl font-bold text-primary">00</div>
-                            <div class="text-sm text-gray-700 mt-1">Часов</div>
-                        </div>
-                        <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="minutes" class="text-3xl font-bold text-primary">00</div>
-                            <div class="text-sm text-gray-700 mt-1">Минут</div>
-                        </div>
-                        <div class="timer-unit text-center p-3 rounded-xl">
-                            <div id="seconds" class="text-3xl font-bold text-primary">00</div>
-                            <div class="text-sm text-gray-700 mt-1">Секунд</div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-800 mb-2" id="newYearMessage">
-                            До Нового 2026 года осталось:
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <i class="fas fa-calendar-alt mr-2"></i>
-                            Цель: 1 января 2026 года
-                        </div>
-                        <div class="mt-4 p-3 bg-white/50 rounded-lg">
-                            <p class="text-sm text-gray-700">
-                                <i class="fas fa-lightbulb text-accent mr-2"></i>
-                                Успеете накопить на подарки к Новому году!
-                            </p>
-                        </div>
-                    </div>
-                </section>
+<section class="bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur rounded-2xl shadow-lg p-6 border border-white/30">
+    <h2 class="text-xl font-semibold text-red-600 mb-6 text-center">⏳ До Нового 2026 года</h2>
+    
+    <div class="grid grid-cols-4 gap-3 mb-6">
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="days" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Дней</div>
+        </div>
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="hours" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Часов</div>
+        </div>
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="minutes" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Минут</div>
+        </div>
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="seconds" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Секунд</div>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <div class="text-lg font-semibold text-red-700 mb-2" id="newYearMessage">
+            До Нового 2026 года осталось:
+        </div>
+        <div class="text-sm text-red-600 font-medium">
+            <i class="fas fa-calendar-alt mr-2 text-red-600"></i>
+            Цель: 1 января 2026 года
+        </div>
+        <div class="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+            <p class="text-sm text-red-800 font-medium">
+                <i class="fas fa-lightbulb text-red-600 mr-2"></i>
+                Успеете накопить на подарки к Новому году!
+            </p>
+        </div>
+    </div>
+</section>
                 
                 <!-- Мотивационная цитата -->
                 <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
@@ -296,10 +271,6 @@
         </div>
     </div>
 
-<div id="steamWidget">
-    <iframe src="https://store.steampowered.com/widget/4164420/" frameborder="0" width="300" height="190"></iframe>
-    <div id="newYearCountdown"></div>
-</div>
     <!-- Снятие -->
     <div id="withdrawMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full">
@@ -313,11 +284,6 @@
         </div>
     </div>
 
-<script>
-function updateCountdown() {
-    const now = new Date();
-    const target = new Date("January 1, 2026 00:00:00");
-    const diff = target - now;
     <!-- Новая цель -->
     <div id="addGoalModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full">
@@ -331,10 +297,6 @@ function updateCountdown() {
         </div>
     </div>
 
-    if (diff <= 0) {
-        document.getElementById("newYearCountdown").textContent = "🎉 С Новым 2026 годом!";
-        return;
-    }
     <script>
         // Глобальные переменные
         let currentBalance = 0;
@@ -465,20 +427,11 @@ function updateCountdown() {
             saveData();
         }
 
-    const days = Math.floor(diff / (1000*60*60*24));
-    const hours = Math.floor((diff / (1000*60*60)) % 24);
-    const minutes = Math.floor((diff / (1000*60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
         // Рендер целей
         function renderGoals() {
             const goalsList = elements.goalsList;
             goalsList.innerHTML = '';
 
-    document.getElementById("newYearCountdown").textContent = `До 2026 года: ${days}д ${hours}ч ${minutes}м ${seconds}с`;
-}
-setInterval(updateCountdown, 1000);
-updateCountdown();
-</script>
             if (goals.length === 0) {
                 goalsList.innerHTML = `
                     <div class="text-center text-gray-500 py-8">
@@ -490,7 +443,6 @@ updateCountdown();
                 return;
             }
 
-<!-- ОСТАЛЬНОЙ ТВОЙ КОД СТРАНИЦЫ ТУТ (не менял) -->
             goals.forEach(goal => {
                 const progress = Math.min((currentBalance / goal.amount) * 100, 100);
                 const remaining = Math.max(0, goal.amount - currentBalance);
