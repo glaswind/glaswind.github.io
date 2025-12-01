@@ -1,87 +1,703 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Копилка - Трекер накоплений</title>
     <meta name="description" content="Виртуальная копилка для отслеживания ваших накоплений">
+    
+    <!-- Внешние ресурсы -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
+    <!-- Стили -->
     <style>
         body {
-            background: url("https://i.imgur.com/6IMSAtv_lq.mp4");
+            background: url("https://i.imgur.com/3N1y7aY.png") no-repeat center center fixed;
             background-size: cover;
-            background-attachment: fixed;
+            min-height: 100vh;
         }
 
+        /* Снегопад */
         .snowflake {
             position: fixed;
             top: -10px;
             z-index: 9999;
             color: white;
-            font-size: 1rem;
             user-select: none;
             pointer-events: none;
             animation: fall linear infinite;
         }
 
         @keyframes fall {
-            0% { transform: translateY(-10px); }
-            100% { transform: translateY(110vh); }
+            to { transform: translateY(110vh); }
         }
 
-        /* Виджет справа */
-        #steamWidget {
-            position: fixed;
-            right: 10px;
-            bottom: 10px;
-            z-index: 9999;
-            background: rgba(255,255,255,0.85);
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            backdrop-filter: blur(6px);
+        /* Кастомные стили */
+        .modal {
+            transition: opacity 0.3s ease;
         }
-        #newYearCountdown {
-            text-align: center;
-            margin-top: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #d91e18;
+        
+        /* Стили для таймера */
+        .timer-unit {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Адаптивность виджета Steam */
+        .steam-widget-container {
+            max-width: 646px;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .steam-widget-container {
+                max-width: 100%;
+            }
+            
+            .steam-widget-container iframe {
+                width: 100% !important;
+                max-width: 100%;
+            }
         }
     </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d91e18",
+                        secondary: "#0b6623",
+                        accent: "#e8b923",
+                        success: "#0b6623",
+                        background: "#ffffffaa"
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="min-h-screen bg-background">
+<body class="min-h-screen">
+    <!-- Снегопад -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            for (let i = 0; i < 40; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = '❄';
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                document.body.appendChild(snowflake);
+            }
+        });
+    </script>
 
-<div id="steamWidget">
-    <iframe src="https://store.steampowered.com/widget/4164420/" frameborder="0" width="300" height="190"></iframe>
-    <div id="newYearCountdown"></div>
-</div>
+    <!-- Шапка -->
+    <header class="bg-white shadow-xl rounded-b-3xl border-b-4 border-accent sticky top-0 z-40">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-holly-berry text-3xl text-accent"></i>
+                    <h1 class="text-2xl font-bold text-primary">🎄 Моя Копилка 🎁</h1>
+                </div>
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
 
-<script>
-function updateCountdown() {
-    const now = new Date();
-    const target = new Date("January 1, 2026 00:00:00");
-    const diff = target - now;
+    <!-- Основной контент -->
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Основная колонка (2/3 ширины) -->
+            <div class="lg:col-span-2">
+                <!-- Баланс -->
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-semibold text-gray-700 mb-2">Текущий баланс</h2>
+                        <div class="text-4xl font-bold text-primary mb-6" id="currentBalance">0</div>
+                        <div class="flex justify-center space-x-4">
+                            <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Добавить
+                            </button>
+                            <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                                <i class="fas fa-minus mr-2"></i>Снять
+                            </button>
+                        </div>
+                    </div>
+                </section>
 
-    if (diff <= 0) {
-        document.getElementById("newYearCountdown").textContent = "🎉 С Новым 2026 годом!";
-        return;
-    }
+                <!-- Быстрые действия -->
+                <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="100">
+                        <div class="text-2xl font-bold text-primary">100</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="500">
+                        <div class="text-2xl font-bold text-primary">500</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="1000">
+                        <div class="text-2xl font-bold text-primary">1000</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="5000">
+                        <div class="text-2xl font-bold text-primary">5000</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                </section>
 
-    const days = Math.floor(diff / (1000*60*60*24));
-    const hours = Math.floor((diff / (1000*60*60)) % 24);
-    const minutes = Math.floor((diff / (1000*60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
+                <!-- Цели и история -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Цели -->
+                    <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-semibold text-gray-800">Мои цели</h2>
+                            <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                                <i class="fas fa-plus mr-1"></i>Новая цель
+                            </button>
+                        </div>
+                        <div id="goalsList" class="space-y-4 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </section>
 
-    document.getElementById("newYearCountdown").textContent = `До 2026 года: ${days}д ${hours}ч ${minutes}м ${seconds}с`;
-}
-setInterval(updateCountdown, 1000);
-updateCountdown();
-</script>
+                    <!-- История операций -->
+                    <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-6">История операций</h2>
+                        <div id="transactionsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </section>
+                </div>
+            </div>
 
-<!-- ОСТАЛЬНОЙ ТВОЙ КОД СТРАНИЦЫ ТУТ (не менял) -->
+            <!-- Правая колонка (1/3 ширины) -->
+            <div class="space-y-8">
+                <!-- Виджет Steam -->
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">🎮 Игра для накоплений</h2>
+                    <p class="text-gray-600 mb-4 text-center text-sm">
+                        Откладывайте деньги на эту игру в Steam!
+                    </p>
+                    <div class="steam-widget-container mx-auto">
+                        <iframe 
+                            src="https://store.steampowered.com/widget/4164420/" 
+                            frameborder="0" 
+                            width="646" 
+                            height="190"
+                            class="w-full rounded-lg"
+                            title="Steam Widget"
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p class="text-sm text-gray-500">
+                            Каждая сохранённая сумма приближает вас к цели!
+                        </p>
+                    </div>
+                </section>
 
+                <!-- Таймер до Нового 2026 года -->
+                <section class="bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur rounded-2xl shadow-lg p-6 border border-white/30">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">⏳ До Нового 2026 года</h2>
+                    
+                    <div class="grid grid-cols-4 gap-3 mb-6">
+                        <div class="timer-unit text-center p-3 rounded-xl">
+                            <div id="days" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Дней</div>
+                        </div>
+                        <div class="timer-unit text-center p-3 rounded-xl">
+                            <div id="hours" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Часов</div>
+                        </div>
+                        <div class="timer-unit text-center p-3 rounded-xl">
+                            <div id="minutes" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Минут</div>
+                        </div>
+                        <div class="timer-unit text-center p-3 rounded-xl">
+                            <div id="seconds" class="text-3xl font-bold text-primary">00</div>
+                            <div class="text-sm text-gray-700 mt-1">Секунд</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-lg font-semibold text-gray-800 mb-2" id="newYearMessage">
+                            До Нового 2026 года осталось:
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Цель: 1 января 2026 года
+                        </div>
+                        <div class="mt-4 p-3 bg-white/50 rounded-lg">
+                            <p class="text-sm text-gray-700">
+                                <i class="fas fa-lightbulb text-accent mr-2"></i>
+                                Успеете накопить на подарки к Новому году!
+                            </p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Мотивационная цитата -->
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">💡 Мотивация</h2>
+                    <div class="text-center">
+                        <div class="text-accent text-4xl mb-3">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <p class="text-gray-700 italic mb-3" id="motivationQuote">
+                            "Маленькие ежедневные накопления приводят к большим результатам!"
+                        </p>
+                        <div class="text-sm text-gray-500">
+                            Текущая цель: <span id="nextGoalAmount">0</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальные окна -->
+    <!-- Пополнение -->
+    <div id="addMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Добавить деньги</h3>
+            <input type="number" id="addAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <textarea id="addDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <div class="flex space-x-3">
+                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">Добавить</button>
+                <button id="cancelAdd" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Снятие -->
+    <div id="withdrawMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Снять деньги</h3>
+            <input type="number" id="withdrawAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <textarea id="withdrawDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <div class="flex space-x-3">
+                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">Снять</button>
+                <button id="cancelWithdraw" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новая цель -->
+    <div id="addGoalModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Новая цель</h3>
+            <input type="text" id="goalName" placeholder="Название цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <input type="number" id="goalAmount" placeholder="Сумма цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <div class="flex space-x-3">
+                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-secondary transition-colors">Создать</button>
+                <button id="cancelGoal" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let currentBalance = 0;
+        let goals = [];
+        let transactions = [];
+        let newYearTimer;
+
+        // Мотивационные цитаты
+        const motivationQuotes = [
+            "Маленькие ежедневные накопления приводят к большим результатам!",
+            "Каждая сохранённая копейка приближает вас к цели!",
+            "Дисциплина в финансах - свобода в жизни!",
+            "Копейка рубль бережёт, а рубль - тысячу стережёт!",
+            "Финансовая цель без плана - просто мечта!",
+            "Успех - это сумма небольших усилий, повторяемых изо дня в день!",
+            "Не откладывай на завтра то, что можешь отложить сегодня!"
+        ];
+
+        // DOM элементы
+        const elements = {
+            currentBalance: document.getElementById('currentBalance'),
+            goalsList: document.getElementById('goalsList'),
+            transactionsList: document.getElementById('transactionsList'),
+            motivationQuote: document.getElementById('motivationQuote'),
+            nextGoalAmount: document.getElementById('nextGoalAmount'),
+            modals: {
+                addMoney: document.getElementById('addMoneyModal'),
+                withdrawMoney: document.getElementById('withdrawMoneyModal'),
+                addGoal: document.getElementById('addGoalModal')
+            },
+            timer: {
+                days: document.getElementById('days'),
+                hours: document.getElementById('hours'),
+                minutes: document.getElementById('minutes'),
+                seconds: document.getElementById('seconds')
+            }
+        };
+
+        // Инициализация из localStorage
+        function initializeApp() {
+            const savedBalance = localStorage.getItem('piggyBankBalance');
+            const savedGoals = localStorage.getItem('piggyBankGoals');
+            const savedTransactions = localStorage.getItem('piggyBankTransactions');
+
+            if (savedBalance) currentBalance = parseFloat(savedBalance);
+            if (savedGoals) goals = JSON.parse(savedGoals);
+            if (savedTransactions) transactions = JSON.parse(savedTransactions);
+
+            updateUI();
+            startNewYearTimer();
+            updateMotivationQuote();
+        }
+
+        // Таймер до Нового 2026 года
+        function startNewYearTimer() {
+            function updateTimer() {
+                const now = new Date();
+                const newYear2026 = new Date('January 1, 2026 00:00:00');
+                const diff = newYear2026 - now;
+                
+                if (diff <= 0) {
+                    clearInterval(newYearTimer);
+                    elements.timer.days.textContent = '00';
+                    elements.timer.hours.textContent = '00';
+                    elements.timer.minutes.textContent = '00';
+                    elements.timer.seconds.textContent = '00';
+                    return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                elements.timer.days.textContent = days.toString().padStart(2, '0');
+                elements.timer.hours.textContent = hours.toString().padStart(2, '0');
+                elements.timer.minutes.textContent = minutes.toString().padStart(2, '0');
+                elements.timer.seconds.textContent = seconds.toString().padStart(2, '0');
+            }
+            
+            updateTimer();
+            newYearTimer = setInterval(updateTimer, 1000);
+        }
+
+        // Обновление мотивационной цитаты
+        function updateMotivationQuote() {
+            const randomQuote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
+            elements.motivationQuote.textContent = `"${randomQuote}"`;
+            
+            // Обновляем ближайшую цель
+            if (goals.length > 0) {
+                const nextGoal = goals.reduce((prev, curr) => 
+                    (curr.amount > currentBalance && curr.amount < prev.amount) ? curr : prev
+                , { amount: Infinity });
+                
+                if (nextGoal.amount !== Infinity) {
+                    elements.nextGoalAmount.textContent = nextGoal.amount.toLocaleString('ru-RU');
+                } else {
+                    elements.nextGoalAmount.textContent = 'Установите первую цель!';
+                }
+            } else {
+                elements.nextGoalAmount.textContent = 'Установите первую цель!';
+            }
+        }
+
+        // Сохранение в localStorage
+        function saveData() {
+            localStorage.setItem('piggyBankBalance', currentBalance.toString());
+            localStorage.setItem('piggyBankGoals', JSON.stringify(goals));
+            localStorage.setItem('piggyBankTransactions', JSON.stringify(transactions));
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            // Обновление баланса
+            elements.currentBalance.textContent = currentBalance.toLocaleString('ru-RU');
+            
+            // Рендер целей
+            renderGoals();
+            
+            // Рендер транзакций
+            renderTransactions();
+            
+            // Обновление мотивации
+            updateMotivationQuote();
+            
+            // Сохранение данных
+            saveData();
+        }
+
+        // Рендер целей
+        function renderGoals() {
+            const goalsList = elements.goalsList;
+            goalsList.innerHTML = '';
+
+            if (goals.length === 0) {
+                goalsList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-gifts text-4xl mb-4 text-accent"></i>
+                        <p>У вас пока нет целей</p>
+                        <p class="text-sm mt-2">Создайте первую цель для мотивации!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            goals.forEach(goal => {
+                const progress = Math.min((currentBalance / goal.amount) * 100, 100);
+                const remaining = Math.max(0, goal.amount - currentBalance);
+                const isAchieved = currentBalance >= goal.amount;
+                
+                const goalElement = document.createElement('div');
+                goalElement.className = `bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors ${isAchieved ? 'border-2 border-success' : ''}`;
+                goalElement.innerHTML = `
+                    <div class="flex justify-between mb-2">
+                        <div class="flex items-center">
+                            <h3 class="font-semibold text-gray-800 truncate">${goal.name}</h3>
+                            ${isAchieved ? '<span class="ml-2 text-xs bg-success text-white px-2 py-1 rounded">Достигнуто!</span>' : ''}
+                        </div>
+                        <span class="text-sm font-bold ${isAchieved ? 'text-success' : 'text-primary'} whitespace-nowrap">${goal.amount.toLocaleString('ru-RU')}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div class="h-2 rounded-full transition-all duration-500 ${isAchieved ? 'bg-success' : 'bg-accent'}" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm ${isAchieved ? 'text-success' : 'text-gray-600'}">
+                        <span>Прогресс: ${progress.toFixed(1)}%</span>
+                        <span>${isAchieved ? 'Цель достигнута!' : `Осталось: ${remaining.toLocaleString('ru-RU')}`}</span>
+                    </div>
+                `;
+                goalsList.appendChild(goalElement);
+            });
+        }
+
+        // Рендер транзакций
+        function renderTransactions() {
+            const transactionsList = elements.transactionsList;
+            transactionsList.innerHTML = '';
+
+            if (transactions.length === 0) {
+                transactionsList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-scroll text-4xl mb-4"></i>
+                        <p>Операций пока нет</p>
+                        <p class="text-sm mt-2">Начните пополнять копилку!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Показываем последние 15 транзакций
+            transactions.slice().reverse().slice(0, 15).forEach(transaction => {
+                const isPositive = transaction.amount > 0;
+                const transactionElement = document.createElement('div');
+                transactionElement.className = 'flex justify-between items-center py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 rounded px-2';
+                transactionElement.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas ${isPositive ? 'fa-plus-circle text-success' : 'fa-minus-circle text-red-500'}"></i>
+                        <div>
+                            <div class="font-medium text-gray-800 truncate max-w-[150px]">${transaction.description || 'Без описания'}</div>
+                            <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString('ru-RU')}</div>
+                        </div>
+                    </div>
+                    <div class="${isPositive ? 'text-success' : 'text-red-500'} font-semibold whitespace-nowrap">
+                        ${isPositive ? '+' : ''}${transaction.amount.toLocaleString('ru-RU')}
+                    </div>
+                `;
+                transactionsList.appendChild(transactionElement);
+            });
+        }
+
+        // Добавление транзакции
+        function addTransaction(amount, description) {
+            const transaction = {
+                id: Date.now(),
+                amount,
+                description: description || 'Без описания',
+                date: new Date().toISOString()
+            };
+            
+            transactions.push(transaction);
+            currentBalance += amount;
+            
+            // Ограничиваем историю 50 записями
+            if (transactions.length > 50) {
+                transactions = transactions.slice(-50);
+            }
+            
+            updateUI();
+            
+            // Показываем уведомление
+            showNotification(`${amount > 0 ? 'Пополнено' : 'Снято'} ${Math.abs(amount).toLocaleString('ru-RU')}`, amount > 0 ? 'success' : 'error');
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-success' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-primary'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Анимация появления
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Автоматическое скрытие
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Управление модальными окнами
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideModal(modal) {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // Очистка полей формы
+        function clearForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) form.reset();
+        }
+
+        // Обработчики событий
+        function setupEventListeners() {
+            // Кнопки действий
+            document.getElementById('addMoney').onclick = () => {
+                showModal(elements.modals.addMoney);
+                document.getElementById('addAmount').focus();
+            };
+
+            document.getElementById('withdrawMoney').onclick = () => {
+                showModal(elements.modals.withdrawMoney);
+                document.getElementById('withdrawAmount').focus();
+            };
+
+            document.getElementById('addGoal').onclick = () => {
+                showModal(elements.modals.addGoal);
+                document.getElementById('goalName').focus();
+            };
+
+            // Быстрые кнопки
+            document.querySelectorAll('.quick-action').forEach(btn => {
+                btn.onclick = () => {
+                    addTransaction(parseInt(btn.dataset.amount), 'Быстрое пополнение');
+                };
+            });
+
+            // Подтверждение действий
+            document.getElementById('confirmAdd').onclick = () => {
+                const amount = parseFloat(document.getElementById('addAmount').value);
+                const description = document.getElementById('addDescription').value;
+                
+                if (amount > 0) {
+                    addTransaction(amount, description);
+                    hideModal(elements.modals.addMoney);
+                    clearForm('addAmount');
+                } else {
+                    showNotification('Введите корректную сумму!', 'error');
+                }
+            };
+
+            document.getElementById('confirmWithdraw').onclick = () => {
+                const amount = parseFloat(document.getElementById('withdrawAmount').value);
+                const description = document.getElementById('withdrawDescription').value;
+                
+                if (amount > 0 && amount <= currentBalance) {
+                    addTransaction(-amount, description);
+                    hideModal(elements.modals.withdrawMoney);
+                    clearForm('withdrawAmount');
+                } else if (amount > currentBalance) {
+                    showNotification('Недостаточно средств на счете!', 'error');
+                } else {
+                    showNotification('Введите корректную сумму!', 'error');
+                }
+            };
+
+            document.getElementById('confirmGoal').onclick = () => {
+                const name = document.getElementById('goalName').value.trim();
+                const amount = parseFloat(document.getElementById('goalAmount').value);
+                
+                if (name && amount > 0) {
+                    goals.push({ 
+                        id: Date.now(), 
+                        name, 
+                        amount 
+                    });
+                    hideModal(elements.modals.addGoal);
+                    clearForm('goalName');
+                    showNotification(`Цель "${name}" создана!`, 'success');
+                    updateUI();
+                } else {
+                    showNotification('Заполните все поля корректно!', 'error');
+                }
+            };
+
+            // Отмена действий
+            document.getElementById('cancelAdd').onclick = () => {
+                hideModal(elements.modals.addMoney);
+                clearForm('addAmount');
+            };
+            
+            document.getElementById('cancelWithdraw').onclick = () => {
+                hideModal(elements.modals.withdrawMoney);
+                clearForm('withdrawAmount');
+            };
+            
+            document.getElementById('cancelGoal').onclick = () => {
+                hideModal(elements.modals.addGoal);
+                clearForm('goalName');
+            };
+
+            // Закрытие модальных окон по клику вне
+            Object.values(elements.modals).forEach(modal => {
+                modal.onclick = (e) => {
+                    if (e.target === modal) hideModal(modal);
+                };
+            });
+
+            // Переключение темы
+            document.getElementById('themeToggle').onclick = () => {
+                const isDark = document.body.classList.toggle('bg-gray-900');
+                document.body.classList.toggle('text-white', isDark);
+                
+                const icon = document.querySelector('#themeToggle i');
+                icon.classList.toggle('fa-moon', !isDark);
+                icon.classList.toggle('fa-sun', isDark);
+                icon.classList.toggle('text-gray-600', !isDark);
+                icon.classList.toggle('text-yellow-400', isDark);
+                
+                showNotification(isDark ? 'Тёмная тема включена' : 'Светлая тема включена');
+            };
+
+            // Закрытие по клавише Escape
+            document.onkeydown = (e) => {
+                if (e.key === 'Escape') {
+                    Object.values(elements.modals).forEach(hideModal);
+                }
+            };
+
+            // Смена мотивационной цитаты при клике
+            elements.motivationQuote.parentElement.onclick = updateMotivationQuote;
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            setupEventListeners();
+        });
+    </script>
 </body>
 </html>
