@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Финансовый трекер - Управление накоплениями</title>
-    <meta name="description" content="Виртуальная копилка для отслеживания ваших накоплений и финансовых целей">
+    <title>Копилка - Трекер накоплений</title>
+    <meta name="description" content="Виртуальная копилка для отслеживания ваших накоплений">
     
     <!-- Внешние ресурсы -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,8 +13,24 @@
     <!-- Стили -->
     <style>
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: url("https://img1.akspic.ru/crops/0/4/8/0/7/170840/170840-novyj_god-rozhdestvo-elka-detrojt-rozhdestvenskaya_muzyka-1920x1080.jpg") no-repeat center center fixed;
+            background-size: cover;
             min-height: 100vh;
+        }
+
+        /* Снегопад */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 9999;
+            color: white;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh); }
         }
 
         /* Кастомные стили */
@@ -22,98 +38,27 @@
             transition: opacity 0.3s ease;
         }
         
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Стили для таймера */
+        .timer-unit {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-slideIn {
-            animation: slideIn 0.2s ease-out;
-        }
-        
-        /* Progress bar */
-        .progress-bar {
-            transition: width 0.5s ease-in-out;
-        }
-        
-        /* Кастомный скроллбар */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4f46e5;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #4338ca;
-        }
-        
-        /* Градиентные тексты */
-        .gradient-text {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Эффекты теней */
-        .shadow-soft {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
-        
-        .shadow-hover:hover {
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
-        
-        /* Кнопка установки */
-        .install-button {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .install-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
-        }
-        
-        /* Конфетти эффект */
-        .confetti {
-            position: fixed;
-            width: 15px;
-            height: 15px;
-            background-color: #f59e0b;
-            opacity: 0.8;
-            border-radius: 50%;
-            z-index: 1000;
-            pointer-events: none;
+        /* Адаптивность виджета Steam */
+        .steam-widget-container {
+            max-width: 646px;
+            width: 100%;
         }
         
         @media (max-width: 768px) {
-            .hide-on-mobile {
-                display: none;
+            .steam-widget-container {
+                max-width: 100%;
             }
             
-            .mobile-full-width {
-                width: 100%;
+            .steam-widget-container iframe {
+                width: 100% !important;
+                max-width: 100%;
             }
         }
     </style>
@@ -123,12 +68,11 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#4f46e5",
-                        secondary: "#7c3aed",
-                        accent: "#f59e0b",
-                        success: "#10b981",
-                        danger: "#ef4444",
-                        background: "#ffffff"
+                        primary: "#d91e18",
+                        secondary: "#0b6623",
+                        accent: "#e8b923",
+                        success: "#0b6623",
+                        background: "#ffffffaa"
                     }
                 }
             }
@@ -136,1430 +80,623 @@
     </script>
 </head>
 <body class="min-h-screen">
-    <!-- Confetti container -->
-    <div id="confettiContainer"></div>
-    
-    <!-- Главный контейнер -->
-    <div class="min-h-screen flex flex-col">
-        <!-- Шапка -->
-        <header class="bg-white shadow-soft sticky top-0 z-40">
-            <nav class="container mx-auto px-4 py-3">
-                <div class="flex justify-between items-center">
-                    <!-- Логотип -->
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-md">
-                            <i class="fas fa-piggy-bank text-white text-lg"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-xl font-bold gradient-text">Финансовый трекер</h1>
-                            <p class="text-xs text-gray-500">Управляйте накоплениями</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Действия -->
-                    <div class="flex items-center space-x-3">
-                        <!-- Уведомления -->
-                        <div class="relative">
-                            <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors relative">
-                                <i class="fas fa-bell text-gray-600"></i>
-                                <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                                    2
-                                </span>
-                            </button>
-                        </div>
-                        
-                        <!-- Переключение темы -->
-                        <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <i class="fas fa-moon text-gray-600"></i>
-                        </button>
-                        
-                        <!-- Профиль -->
-                        <div class="relative">
-                            <button id="userMenuBtn" class="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                                <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-medium">
-                                    U
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </header>
-        
-        <!-- Основной контент -->
-        <main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Основная колонка (2/3 ширины) -->
-                <div class="lg:col-span-2">
-                    <!-- Баланс -->
-                    <section class="bg-white rounded-2xl shadow-soft p-6 mb-8 shadow-hover transition-all">
-                        <div class="text-center">
-                            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Текущий баланс</h2>
-                            <div class="text-4xl font-bold text-primary mb-6" id="currentBalance">0 ₽</div>
-                            <div class="flex justify-center space-x-4">
-                                <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-600 transition-all hover:scale-105 shadow-md">
-                                    <i class="fas fa-plus mr-2"></i>Добавить
-                                </button>
-                                <button id="withdrawMoney" class="bg-danger text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-all hover:scale-105 shadow-md">
-                                    <i class="fas fa-minus mr-2"></i>Снять
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Быстрые действия -->
-                    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <button class="quick-action bg-white rounded-xl shadow-soft p-4 hover:shadow-hover transition-all" data-amount="100">
-                            <div class="text-2xl font-bold text-primary">100 ₽</div>
-                            <div class="text-sm text-gray-600 mt-1">Быстрое пополнение</div>
-                        </button>
-                        <button class="quick-action bg-white rounded-xl shadow-soft p-4 hover:shadow-hover transition-all" data-amount="500">
-                            <div class="text-2xl font-bold text-primary">500 ₽</div>
-                            <div class="text-sm text-gray-600 mt-1">Быстрое пополнение</div>
-                        </button>
-                        <button class="quick-action bg-white rounded-xl shadow-soft p-4 hover:shadow-hover transition-all" data-amount="1000">
-                            <div class="text-2xl font-bold text-primary">1 000 ₽</div>
-                            <div class="text-sm text-gray-600 mt-1">Быстрое пополнение</div>
-                        </button>
-                        <button class="quick-action bg-white rounded-xl shadow-soft p-4 hover:shadow-hover transition-all" data-amount="5000">
-                            <div class="text-2xl font-bold text-primary">5 000 ₽</div>
-                            <div class="text-sm text-gray-600 mt-1">Быстрое пополнение</div>
-                        </button>
-                    </section>
-
-                    <!-- Цели и история -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Цели -->
-                        <section class="bg-white rounded-2xl shadow-soft p-6 shadow-hover transition-all">
-                            <div class="flex justify-between items-center mb-6">
-                                <h2 class="text-xl font-semibold text-gray-800">Мои цели</h2>
-                                <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-all hover:scale-105">
-                                    <i class="fas fa-plus mr-1"></i>Новая цель
-                                </button>
-                            </div>
-                            <div id="goalsList" class="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                <!-- Цели будут загружаться динамически -->
-                            </div>
-                        </section>
-
-                        <!-- История операций -->
-                        <section class="bg-white rounded-2xl shadow-soft p-6 shadow-hover transition-all">
-                            <div class="flex justify-between items-center mb-6">
-                                <h2 class="text-xl font-semibold text-gray-800">История операций</h2>
-                                <button id="clearHistory" class="text-sm text-gray-500 hover:text-danger">
-                                    <i class="fas fa-trash-alt mr-1"></i>Очистить
-                                </button>
-                            </div>
-                            <div id="transactionsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                <!-- Транзакции будут загружаться динамически -->
-                            </div>
-                        </section>
-                    </div>
-                </div>
-
-                <!-- Правая колонка (1/3 ширины) -->
-                <div class="space-y-8">
-                    <!-- Статистика -->
-                    <section class="bg-white rounded-2xl shadow-soft p-6 shadow-hover transition-all">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">📊 Статистика</h2>
-                        
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-wallet text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm text-gray-600">Общий баланс</div>
-                                        <div class="font-bold" id="totalBalance">0 ₽</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-bullseye text-green-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm text-gray-600">Активных целей</div>
-                                        <div class="font-bold" id="activeGoals">0</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-chart-line text-purple-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm text-gray-600">Среднее за месяц</div>
-                                        <div class="font-bold" id="monthlyAverage">0 ₽</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-trophy text-yellow-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm text-gray-600">Достигнуто целей</div>
-                                        <div class="font-bold" id="completedGoals">0</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <!-- Прогресс по целям -->
-                    <section class="bg-white rounded-2xl shadow-soft p-6 shadow-hover transition-all">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">🎯 Прогресс целей</h2>
-                        
-                        <div id="goalsProgress" class="space-y-4">
-                            <!-- Прогресс целей будет загружаться динамически -->
-                            <div class="text-center py-4 text-gray-500">
-                                <i class="fas fa-bullseye text-3xl mb-2 opacity-50"></i>
-                                <p class="text-sm">Нет активных целей</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                            <p class="text-sm text-blue-800 text-center">
-                                <i class="fas fa-lightbulb text-blue-600 mr-1"></i>
-                                Ставьте реалистичные цели и отслеживайте прогресс
-                            </p>
-                        </div>
-                    </section>
-                    
-                    <!-- Мотивационная цитата -->
-                    <section class="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl shadow-soft p-6 border border-primary/20">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">💡 Финансовая мудрость</h2>
-                        <div class="text-center">
-                            <div class="text-primary text-4xl mb-3">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <p class="text-gray-700 italic mb-3" id="motivationQuote">
-                                "Бережливость - лучшее богатство."
-                            </p>
-                            <div class="text-sm text-gray-500">
-                                — Цицерон
-                            </div>
-                            <button id="newQuoteBtn" class="mt-4 text-sm text-primary hover:text-secondary">
-                                <i class="fas fa-redo mr-1"></i> Новая цитата
-                            </button>
-                        </div>
-                    </section>
-                    
-                    <!-- Установка приложения -->
-                    <section class="bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-soft p-6 text-white">
-                        <h2 class="text-xl font-semibold mb-4 text-center">📱 Установите приложение</h2>
-                        
-                        <div class="space-y-4">
-                            <div class="text-center mb-4">
-                                <i class="fas fa-mobile-alt text-3xl mb-3"></i>
-                                <p class="text-sm opacity-90">Добавьте приложение на рабочий стол для быстрого доступа</p>
-                            </div>
-                            
-                            <button id="installPWA" class="w-full install-button text-white px-4 py-3 rounded-lg font-semibold">
-                                <i class="fas fa-download mr-2"></i>Установить приложение
-                            </button>
-                            
-                            <div class="text-xs opacity-80 text-center mt-2">
-                                Работает оффлайн • Бесплатно • Без рекламы
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </main>
-
-        <!-- Футер -->
-        <footer class="mt-12 py-6 border-t border-gray-200">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between text-sm text-gray-600">
-                    <div class="mb-2 md:mb-0">
-                        <span class="font-medium text-primary">Финансовый трекер</span> • Управление накоплениями • v1.0.0
-                    </div>
-                    <div class="flex space-x-4">
-                        <a href="#" class="hover:text-primary">О приложении</a>
-                        <a href="#" class="hover:text-primary">Конфиденциальность</a>
-                        <a href="#" class="hover:text-primary">Контакты</a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    </div>
-    
-    <!-- Модальные окна -->
-    
-    <!-- Пополнение -->
-    <div id="addMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold">Пополнение баланса</h2>
-                    <button id="closeAddMoneyModal" class="p-2 rounded-lg hover:bg-gray-100">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form id="addMoneyForm">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Сумма пополнения (₽)</label>
-                            <input 
-                                type="number" 
-                                id="addAmount"
-                                required
-                                min="1"
-                                step="1"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Введите сумму"
-                                autofocus
-                            >
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Описание (необязательно)</label>
-                            <textarea 
-                                id="addDescription"
-                                rows="3"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Например: Зарплата за январь"
-                            ></textarea>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Категория</label>
-                            <select id="addCategory" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="income">Доход</option>
-                                <option value="salary">Зарплата</option>
-                                <option value="freelance">Фриланс</option>
-                                <option value="gift">Подарок</option>
-                                <option value="other">Другое</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3 mt-8">
-                        <button type="button" id="cancelAddMoney" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-all">
-                            Отмена
-                        </button>
-                        <button type="submit" class="px-6 py-3 bg-success hover:bg-emerald-600 text-white rounded-lg font-medium transition-all hover:scale-105">
-                            Пополнить
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Снятие -->
-    <div id="withdrawMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold">Снятие средств</h2>
-                    <button id="closeWithdrawMoneyModal" class="p-2 rounded-lg hover:bg-gray-100">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form id="withdrawMoneyForm">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Сумма снятия (₽)</label>
-                            <input 
-                                type="number" 
-                                id="withdrawAmount"
-                                required
-                                min="1"
-                                step="1"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Введите сумму"
-                                autofocus
-                            >
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Описание (необязательно)</label>
-                            <textarea 
-                                id="withdrawDescription"
-                                rows="3"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Например: Покупка продуктов"
-                            ></textarea>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Категория</label>
-                            <select id="withdrawCategory" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="food">Еда</option>
-                                <option value="transport">Транспорт</option>
-                                <option value="entertainment">Развлечения</option>
-                                <option value="shopping">Покупки</option>
-                                <option value="bills">Счета</option>
-                                <option value="other">Другое</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3 mt-8">
-                        <button type="button" id="cancelWithdrawMoney" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-all">
-                            Отмена
-                        </button>
-                        <button type="submit" class="px-6 py-3 bg-danger hover:bg-red-600 text-white rounded-lg font-medium transition-all hover:scale-105">
-                            Снять средства
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Новая цель -->
-    <div id="addGoalModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold">Новая финансовая цель</h2>
-                    <button id="closeAddGoalModal" class="p-2 rounded-lg hover:bg-gray-100">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form id="addGoalForm">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Название цели</label>
-                            <input 
-                                type="text" 
-                                id="goalName"
-                                required
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Например: Новый ноутбук"
-                                autofocus
-                            >
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Целевая сумма (₽)</label>
-                            <input 
-                                type="number" 
-                                id="goalAmount"
-                                required
-                                min="1"
-                                step="1"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Например: 100000"
-                            >
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Текущие накопления (₽)</label>
-                                <input 
-                                    type="number" 
-                                    id="goalCurrent"
-                                    min="0"
-                                    step="1"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="Например: 25000"
-                                >
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Срок (месяцев)</label>
-                                <input 
-                                    type="number" 
-                                    id="goalDeadline"
-                                    min="1"
-                                    step="1"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="Например: 12"
-                                >
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Описание (необязательно)</label>
-                            <textarea 
-                                id="goalDescription"
-                                rows="3"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Описание вашей финансовой цели..."
-                            ></textarea>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Категория</label>
-                            <select id="goalCategory" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="electronics">Электроника</option>
-                                <option value="travel">Путешествия</option>
-                                <option value="education">Образование</option>
-                                <option value="car">Автомобиль</option>
-                                <option value="real_estate">Недвижимость</option>
-                                <option value="other">Другое</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3 mt-8">
-                        <button type="button" id="cancelAddGoal" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-all">
-                            Отмена
-                        </button>
-                        <button type="submit" class="px-6 py-3 bg-primary hover:bg-indigo-600 text-white rounded-lg font-medium transition-all hover:scale-105">
-                            Создать цель
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Toast уведомления -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-3 w-full max-w-sm"></div>
-    
-    <!-- JavaScript приложение -->
+    <!-- Снегопад -->
     <script>
-        // =====================
-        // Финансовый трекер App
-        // =====================
-        class FinanceTrackerApp {
-            constructor() {
-                // Состояние приложения
-                this.state = {
-                    currentBalance: 0,
-                    goals: [],
-                    transactions: [],
-                    monthlyData: {},
-                    darkMode: localStorage.getItem('darkMode') === 'true' || 
-                              (window.matchMedia('(prefers-color-scheme: dark)').matches && localStorage.getItem('darkMode') === null),
-                    isLoading: false,
-                    deferredPrompt: null
-                };
-                
-                // Финансовые цитаты
-                this.financialQuotes = [
-                    { text: "Бережливость - лучшее богатство.", author: "Цицерон" },
-                    { text: "Деньги должны работать, а не лежать без дела.", author: "Роберт Кийосаки" },
-                    { text: "Маленькие ежедневные накопления приводят к большим результатам!", author: "Народная мудрость" },
-                    { text: "Не важно, сколько ты зарабатываешь, важно - сколько у тебя остается.", author: "Бенджамин Франклин" },
-                    { text: "Инвестируйте в знания - это приносит наибольшую прибыль.", author: "Бенджамин Франклин" },
-                    { text: "Богатство - это способность в полной мере ощущать жизнь.", author: "Генри Дэвид Торо" },
-                    { text: "Финансовая свобода начинается с осознанных трат.", author: "Стив Джобс" },
-                    { text: "Дисциплина в финансах - свобода в жизни.", author: "Современная мудрость" }
-                ];
-                
-                // Инициализация
-                this.init();
+        document.addEventListener('DOMContentLoaded', () => {
+            for (let i = 0; i < 40; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = '❄';
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                document.body.appendChild(snowflake);
             }
-            
-            // Инициализация приложения
-            init() {
-                // Загрузка сохраненных данных
-                this.loadFromLocalStorage();
-                
-                // Инициализация темы
-                this.initTheme();
-                
-                // Инициализация UI событий
-                this.initUIEvents();
-                
-                // Инициализация PWA
-                this.initPWA();
-                
-                // Инициализация данных (примеры, если нет своих)
-                this.initSampleData();
-                
-                // Рендер начального состояния
-                this.renderUI();
-                
-                // Установка горячих клавиш
-                this.setupKeyboardShortcuts();
-            }
-            
-            // Загрузка данных из LocalStorage
-            loadFromLocalStorage() {
-                try {
-                    const savedBalance = localStorage.getItem('finance_tracker_balance');
-                    const savedGoals = localStorage.getItem('finance_tracker_goals');
-                    const savedTransactions = localStorage.getItem('finance_tracker_transactions');
-                    const savedMonthlyData = localStorage.getItem('finance_tracker_monthly');
-                    
-                    if (savedBalance) {
-                        this.state.currentBalance = parseFloat(savedBalance);
-                    }
-                    
-                    if (savedGoals) {
-                        this.state.goals = JSON.parse(savedGoals);
-                    }
-                    
-                    if (savedTransactions) {
-                        this.state.transactions = JSON.parse(savedTransactions);
-                    }
-                    
-                    if (savedMonthlyData) {
-                        this.state.monthlyData = JSON.parse(savedMonthlyData);
-                    }
-                } catch (error) {
-                    console.error('Ошибка загрузки данных:', error);
-                }
-            }
-            
-            // Сохранение данных в LocalStorage
-            saveToLocalStorage() {
-                try {
-                    localStorage.setItem('finance_tracker_balance', this.state.currentBalance.toString());
-                    localStorage.setItem('finance_tracker_goals', JSON.stringify(this.state.goals));
-                    localStorage.setItem('finance_tracker_transactions', JSON.stringify(this.state.transactions));
-                    localStorage.setItem('finance_tracker_monthly', JSON.stringify(this.state.monthlyData));
-                } catch (error) {
-                    console.error('Ошибка сохранения данных:', error);
-                }
-            }
-            
-            // Инициализация темы
-            initTheme() {
-                if (this.state.darkMode) {
-                    document.documentElement.classList.add('dark');
-                    document.querySelector('#themeToggle i').classList.remove('fa-moon');
-                    document.querySelector('#themeToggle i').classList.add('fa-sun');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            }
-            
-            // Инициализация PWA
-            initPWA() {
-                // Отслеживаем событие beforeinstallprompt
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    this.state.deferredPrompt = e;
-                    
-                    // Показываем кнопку установки
-                    const installBtn = document.getElementById('installPWA');
-                    if (installBtn) {
-                        installBtn.style.display = 'block';
-                    }
-                });
-                
-                // Событие после успешной установки
-                window.addEventListener('appinstalled', () => {
-                    this.state.deferredPrompt = null;
-                    const installBtn = document.getElementById('installPWA');
-                    if (installBtn) {
-                        installBtn.style.display = 'none';
-                    }
-                    this.showToast('Приложение успешно установлено!', 'success');
-                });
-                
-                // Проверяем, установлено ли уже приложение
-                if (window.matchMedia('(display-mode: standalone)').matches || 
-                    window.navigator.standalone === true) {
-                    const installBtn = document.getElementById('installPWA');
-                    if (installBtn) {
-                        installBtn.style.display = 'none';
-                    }
-                }
-            }
-            
-            // Инициализация примеров данных
-            initSampleData() {
-                const currentMonth = new Date().toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
-                
-                if (this.state.goals.length === 0) {
-                    this.state.goals = [
-                        {
-                            id: '1',
-                            name: 'Новый ноутбук',
-                            targetAmount: 150000,
-                            currentAmount: 75000,
-                            description: 'MacBook Pro для работы',
-                            category: 'electronics',
-                            deadline: 6,
-                            createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                            isCompleted: false
-                        },
-                        {
-                            id: '2',
-                            name: 'Отпуск в Турции',
-                            targetAmount: 200000,
-                            currentAmount: 120000,
-                            description: 'Двухнедельный отдых на побережье',
-                            category: 'travel',
-                            deadline: 8,
-                            createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-                            isCompleted: false
-                        },
-                        {
-                            id: '3',
-                            name: 'Курсы английского',
-                            targetAmount: 80000,
-                            currentAmount: 80000,
-                            description: 'Годовой курс в языковой школе',
-                            category: 'education',
-                            deadline: 12,
-                            createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
-                            isCompleted: true
-                        }
-                    ];
-                }
-                
-                if (this.state.transactions.length === 0) {
-                    this.state.transactions = [
-                        { id: '1', type: 'income', amount: 75000, description: 'Зарплата', category: 'salary', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-                        { id: '2', type: 'expense', amount: 15000, description: 'Продукты', category: 'food', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
-                        { id: '3', type: 'expense', amount: 5000, description: 'Транспорт', category: 'transport', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
-                        { id: '4', type: 'income', amount: 20000, description: 'Фриланс', category: 'freelance', date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-                        { id: '5', type: 'expense', amount: 10000, description: 'Развлечения', category: 'entertainment', date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() }
-                    ];
-                    
-                    // Рассчитываем начальный баланс из транзакций
-                    this.state.currentBalance = this.state.transactions.reduce((sum, transaction) => {
-                        return transaction.type === 'income' ? sum + transaction.amount : sum - transaction.amount;
-                    }, 0);
-                }
-                
-                if (!this.state.monthlyData[currentMonth]) {
-                    this.state.monthlyData = {
-                        [currentMonth]: {
-                            income: 95000,
-                            expenses: 30000,
-                            savings: 65000
-                        }
-                    };
-                }
-                
-                this.saveToLocalStorage();
-            }
-            
-            // Расчет прогресса цели
-            calculateGoalProgress(goal) {
-                return Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100);
-            }
-            
-            // Расчет месячной статистики
-            calculateMonthlyStats() {
-                const currentMonth = new Date().toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
-                const currentDate = new Date();
-                const currentYear = currentDate.getFullYear();
-                const currentMonthNum = currentDate.getMonth();
-                
-                // Фильтруем транзакции текущего месяца
-                const monthlyTransactions = this.state.transactions.filter(transaction => {
-                    const transactionDate = new Date(transaction.date);
-                    return transactionDate.getFullYear() === currentYear && 
-                           transactionDate.getMonth() === currentMonthNum;
-                });
-                
-                const income = monthlyTransactions
-                    .filter(t => t.type === 'income')
-                    .reduce((sum, t) => sum + t.amount, 0);
-                
-                const expenses = monthlyTransactions
-                    .filter(t => t.type === 'expense')
-                    .reduce((sum, t) => sum + t.amount, 0);
-                
-                const savings = income - expenses;
-                
-                // Обновляем данные за месяц
-                this.state.monthlyData[currentMonth] = { income, expenses, savings };
-                
-                return { income, expenses, savings };
-            }
-            
-            // Форматирование суммы
-            formatAmount(amount) {
-                return new Intl.NumberFormat('ru-RU', { 
-                    style: 'currency', 
-                    currency: 'RUB',
-                    minimumFractionDigits: 0
-                }).format(amount);
-            }
-            
-            // Форматирование даты
-            formatDate(dateString) {
-                const date = new Date(dateString);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                
-                if (diffDays === 0) {
-                    return 'сегодня';
-                } else if (diffDays === 1) {
-                    return 'вчера';
-                } else if (diffDays < 7) {
-                    return `${diffDays} дня назад`;
-                } else {
-                    return date.toLocaleDateString('ru-RU');
-                }
-            }
-            
-            // Добавление транзакции
-            addTransaction(type, amount, description, category) {
-                const transaction = {
-                    id: Date.now().toString(),
-                    type: type,
-                    amount: parseFloat(amount),
-                    description: description || '',
-                    category: category || (type === 'income' ? 'income' : 'expense'),
-                    date: new Date().toISOString()
-                };
-                
-                this.state.transactions.unshift(transaction);
-                
-                // Обновляем баланс
-                if (type === 'income') {
-                    this.state.currentBalance += parseFloat(amount);
-                } else {
-                    this.state.currentBalance -= parseFloat(amount);
-                }
-                
-                // Обновляем месячную статистику
-                this.calculateMonthlyStats();
-                
-                // Сохраняем
-                this.saveToLocalStorage();
-                
-                // Показываем уведомление
-                const message = type === 'income' 
-                    ? `Баланс пополнен на ${this.formatAmount(amount)}` 
-                    : `Со счёта списано ${this.formatAmount(amount)}`;
-                
-                this.showToast(message, type === 'income' ? 'success' : 'warning');
-                
-                return transaction;
-            }
-            
-            // Добавление цели
-            addGoal(name, targetAmount, currentAmount, description, category, deadline) {
-                const goal = {
-                    id: Date.now().toString(),
-                    name: name,
-                    targetAmount: parseFloat(targetAmount),
-                    currentAmount: parseFloat(currentAmount) || 0,
-                    description: description || '',
-                    category: category || 'other',
-                    deadline: parseInt(deadline) || 12,
-                    createdAt: new Date().toISOString(),
-                    isCompleted: false
-                };
-                
-                this.state.goals.unshift(goal);
-                this.saveToLocalStorage();
-                
-                this.showToast(`Цель "${name}" создана!`, 'success');
-                
-                return goal;
-            }
-            
-            // Обновление цели
-            updateGoal(goalId, updates) {
-                const goalIndex = this.state.goals.findIndex(g => g.id === goalId);
-                
-                if (goalIndex !== -1) {
-                    this.state.goals[goalIndex] = {
-                        ...this.state.goals[goalIndex],
-                        ...updates
-                    };
-                    
-                    // Проверяем, достигнута ли цель
-                    if (this.state.goals[goalIndex].currentAmount >= this.state.goals[goalIndex].targetAmount) {
-                        this.state.goals[goalIndex].isCompleted = true;
-                        
-                        // Показываем конфетти
-                        this.showConfetti();
-                        this.showToast('Цель достигнута! 🎉', 'success');
-                    }
-                    
-                    this.saveToLocalStorage();
-                    return true;
-                }
-                
-                return false;
-            }
-            
-            // Удаление цели
-            deleteGoal(goalId) {
-                const goalIndex = this.state.goals.findIndex(g => g.id === goalId);
-                
-                if (goalIndex !== -1) {
-                    const goalName = this.state.goals[goalIndex].name;
-                    this.state.goals.splice(goalIndex, 1);
-                    this.saveToLocalStorage();
-                    
-                    this.showToast(`Цель "${goalName}" удалена`, 'warning');
-                    return true;
-                }
-                
-                return false;
-            }
-            
-            // Очистка истории транзакций
-            clearTransactions() {
-                if (this.state.transactions.length > 0) {
-                    this.state.transactions = [];
-                    this.saveToLocalStorage();
-                    
-                    this.showToast('История операций очищена', 'warning');
-                    return true;
-                }
-                
-                return false;
-            }
-            
-            // Получение случайной цитаты
-            getRandomQuote() {
-                return this.financialQuotes[Math.floor(Math.random() * this.financialQuotes.length)];
-            }
-            
-            // Показать конфетти эффект
-            showConfetti() {
-                const confettiContainer = document.getElementById('confettiContainer');
-                const colors = ['#f59e0b', '#10b981', '#4f46e5', '#7c3aed', '#ef4444'];
-                
-                for (let i = 0; i < 30; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
-                    
-                    confettiContainer.appendChild(confetti);
-                    
-                    // Удаление после анимации
-                    setTimeout(() => {
-                        confetti.remove();
-                    }, 5000);
-                }
-            }
-            
-            // Показать уведомление
-            showToast(message, type = 'info') {
-                const toastContainer = document.getElementById('toastContainer');
-                
-                const toast = document.createElement('div');
-                toast.className = `animate-slideIn p-4 rounded-lg shadow-lg ${
-                    type === 'success' ? 'bg-green-500 text-white' :
-                    type === 'warning' ? 'bg-yellow-500 text-white' :
-                    type === 'error' ? 'bg-red-500 text-white' :
-                    'bg-gray-800 text-white'
-                }`;
-                
-                toast.innerHTML = `
-                    <div class="flex items-center">
-                        <i class="fas ${
-                            type === 'success' ? 'fa-check-circle' :
-                            type === 'warning' ? 'fa-exclamation-triangle' :
-                            type === 'error' ? 'fa-times-circle' :
-                            'fa-info-circle'
-                        } mr-3"></i>
-                        <span>${message}</span>
+        });
+    </script>
+
+    <!-- Шапка -->
+    <header class="bg-white shadow-xl rounded-b-3xl border-b-4 border-accent sticky top-0 z-40">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-holly-berry text-3xl text-accent"></i>
+                    <h1 class="text-2xl font-bold text-primary">🎄 Моя Копилка 🎁</h1>
+                </div>
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Основная колонка (2/3 ширины) -->
+            <div class="lg:col-span-2">
+                <!-- Баланс -->
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-semibold text-gray-700 mb-2">Текущий баланс</h2>
+                        <div class="text-4xl font-bold text-primary mb-6" id="currentBalance">0</div>
+                        <div class="flex justify-center space-x-4">
+                            <button id="addMoney" class="bg-success text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Добавить
+                            </button>
+                            <button id="withdrawMoney" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                                <i class="fas fa-minus mr-2"></i>Снять
+                            </button>
+                        </div>
                     </div>
-                `;
-                
-                toastContainer.appendChild(toast);
-                
-                // Автоматическое удаление через 4 секунды
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.3s ease';
-                    
-                    setTimeout(() => {
-                        if (toastContainer.contains(toast)) {
-                            toastContainer.removeChild(toast);
-                        }
-                    }, 300);
-                }, 4000);
-            }
-            
-            // Рендер всего UI
-            renderUI() {
-                // Обновляем баланс
-                this.renderBalance();
-                
-                // Рендерим цели
-                this.renderGoals();
-                
-                // Рендерим транзакции
-                this.renderTransactions();
-                
-                // Обновляем статистику
-                this.renderStats();
-                
-                // Обновляем прогресс целей
-                this.renderGoalsProgress();
-                
-                // Обновляем цитату
-                this.renderQuote();
-            }
-            
-            // Рендер баланса
-            renderBalance() {
-                const balanceElement = document.getElementById('currentBalance');
-                if (balanceElement) {
-                    balanceElement.textContent = this.formatAmount(this.state.currentBalance);
-                }
-                
-                const totalBalanceElement = document.getElementById('totalBalance');
-                if (totalBalanceElement) {
-                    totalBalanceElement.textContent = this.formatAmount(this.state.currentBalance);
-                }
-            }
-            
-            // Рендер целей
-            renderGoals() {
-                const goalsList = document.getElementById('goalsList');
-                
-                if (!goalsList) return;
-                
-                if (this.state.goals.length === 0) {
-                    goalsList.innerHTML = `
-                        <div class="text-center text-gray-500 py-8">
-                            <i class="fas fa-bullseye text-4xl mb-4 opacity-50"></i>
-                            <p>У вас пока нет финансовых целей</p>
-                            <p class="text-sm mt-2">Создайте первую цель для мотивации!</p>
+                </section>
+
+                <!-- Быстрые действия -->
+                <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="100">
+                        <div class="text-2xl font-bold text-primary">100</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="500">
+                        <div class="text-2xl font-bold text-primary">500</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="1000">
+                        <div class="text-2xl font-bold text-primary">1000</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                    <button class="quick-action bg-white/90 backdrop-blur rounded-xl shadow-lg p-4 hover:shadow-xl transition-all hover:scale-[1.02]" data-amount="5000">
+                        <div class="text-2xl font-bold text-primary">5000</div>
+                        <div class="text-sm text-gray-600 mt-1">Быстро добавить</div>
+                    </button>
+                </section>
+
+                <!-- Цели и история -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Цели -->
+                    <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-semibold text-gray-800">Мои цели</h2>
+                            <button id="addGoal" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                                <i class="fas fa-plus mr-1"></i>Новая цель
+                            </button>
                         </div>
-                    `;
+                        <div id="goalsList" class="space-y-4 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </section>
+
+                    <!-- История операций -->
+                    <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-6">История операций</h2>
+                        <div id="transactionsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Правая колонка (1/3 ширины) -->
+            <div class="space-y-8">
+                <!-- Виджет Steam -->
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">🎮 Игра для накоплений</h2>
+                    <p class="text-gray-600 mb-4 text-center text-sm">
+                        Откладывайте деньги на эту игру в Steam!
+                    </p>
+                    <div class="steam-widget-container mx-auto">
+                        <iframe 
+                            src="https://store.steampowered.com/widget/4164420/" 
+                            frameborder="0" 
+                            width="646" 
+                            height="190"
+                            class="w-full rounded-lg"
+                            title="Steam Widget"
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p class="text-sm text-gray-500">
+                            Каждая сохранённая сумма приближает вас к цели!
+                        </p>
+                    </div>
+                </section>
+                
+                <!-- Таймер до Нового 2026 года -->
+<section class="bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur rounded-2xl shadow-lg p-6 border border-white/30">
+    <h2 class="text-xl font-semibold text-red-600 mb-6 text-center">⏳ До Нового 2026 года</h2>
+    
+    <div class="grid grid-cols-4 gap-3 mb-6">
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="days" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Дней</div>
+        </div>
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="hours" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Часов</div>
+        </div>
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="minutes" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Минут</div>
+        </div>
+        <div class="timer-unit text-center p-3 rounded-xl">
+            <div id="seconds" class="text-3xl font-bold text-red-600">00</div>
+            <div class="text-sm text-red-700 mt-1 font-medium">Секунд</div>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <div class="text-lg font-semibold text-red-700 mb-2" id="newYearMessage">
+            До Нового 2026 года осталось:
+        </div>
+        <div class="text-sm text-red-600 font-medium">
+            <i class="fas fa-calendar-alt mr-2 text-red-600"></i>
+            Цель: 1 января 2026 года
+        </div>
+        <div class="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+            <p class="text-sm text-red-800 font-medium">
+                <i class="fas fa-lightbulb text-red-600 mr-2"></i>
+                Успеете накопить на подарки к Новому году!
+            </p>
+        </div>
+    </div>
+</section>
+                
+                <!-- Мотивационная цитата -->
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">💡 Мотивация</h2>
+                    <div class="text-center">
+                        <div class="text-accent text-4xl mb-3">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <p class="text-gray-700 italic mb-3" id="motivationQuote">
+                            "Маленькие ежедневные накопления приводят к большим результатам!"
+                        </p>
+                        <div class="text-sm text-gray-500">
+                            Текущая цель: <span id="nextGoalAmount">0</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальные окна -->
+    <!-- Пополнение -->
+    <div id="addMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Добавить деньги</h3>
+            <input type="number" id="addAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <textarea id="addDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <div class="flex space-x-3">
+                <button id="confirmAdd" class="flex-1 bg-success text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">Добавить</button>
+                <button id="cancelAdd" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Снятие -->
+    <div id="withdrawMoneyModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Снять деньги</h3>
+            <input type="number" id="withdrawAmount" placeholder="Сумма" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <textarea id="withdrawDescription" placeholder="Описание (необязательно)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+            <div class="flex space-x-3">
+                <button id="confirmWithdraw" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">Снять</button>
+                <button id="cancelWithdraw" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новая цель -->
+    <div id="addGoalModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Новая цель</h3>
+            <input type="text" id="goalName" placeholder="Название цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <input type="number" id="goalAmount" placeholder="Сумма цели" class="w-full p-3 border border-gray-300 rounded-lg mb-4" min="1">
+            <div class="flex space-x-3">
+                <button id="confirmGoal" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-secondary transition-colors">Создать</button>
+                <button id="cancelGoal" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let currentBalance = 0;
+        let goals = [];
+        let transactions = [];
+        let newYearTimer;
+
+        // Мотивационные цитаты
+        const motivationQuotes = [
+            "Маленькие ежедневные накопления приводят к большим результатам!",
+            "Каждая сохранённая копейка приближает вас к цели!",
+            "Дисциплина в финансах - свобода в жизни!",
+            "Копейка рубль бережёт, а рубль - тысячу стережёт!",
+            "Финансовая цель без плана - просто мечта!",
+            "Успех - это сумма небольших усилий, повторяемых изо дня в день!",
+            "Не откладывай на завтра то, что можешь отложить сегодня!"
+        ];
+
+        // DOM элементы
+        const elements = {
+            currentBalance: document.getElementById('currentBalance'),
+            goalsList: document.getElementById('goalsList'),
+            transactionsList: document.getElementById('transactionsList'),
+            motivationQuote: document.getElementById('motivationQuote'),
+            nextGoalAmount: document.getElementById('nextGoalAmount'),
+            modals: {
+                addMoney: document.getElementById('addMoneyModal'),
+                withdrawMoney: document.getElementById('withdrawMoneyModal'),
+                addGoal: document.getElementById('addGoalModal')
+            },
+            timer: {
+                days: document.getElementById('days'),
+                hours: document.getElementById('hours'),
+                minutes: document.getElementById('minutes'),
+                seconds: document.getElementById('seconds')
+            }
+        };
+
+        // Инициализация из localStorage
+        function initializeApp() {
+            const savedBalance = localStorage.getItem('piggyBankBalance');
+            const savedGoals = localStorage.getItem('piggyBankGoals');
+            const savedTransactions = localStorage.getItem('piggyBankTransactions');
+
+            if (savedBalance) currentBalance = parseFloat(savedBalance);
+            if (savedGoals) goals = JSON.parse(savedGoals);
+            if (savedTransactions) transactions = JSON.parse(savedTransactions);
+
+            updateUI();
+            startNewYearTimer();
+            updateMotivationQuote();
+        }
+
+        // Таймер до Нового 2026 года
+        function startNewYearTimer() {
+            function updateTimer() {
+                const now = new Date();
+                const newYear2026 = new Date('January 1, 2026 00:00:00');
+                const diff = newYear2026 - now;
+                
+                if (diff <= 0) {
+                    clearInterval(newYearTimer);
+                    elements.timer.days.textContent = '00';
+                    elements.timer.hours.textContent = '00';
+                    elements.timer.minutes.textContent = '00';
+                    elements.timer.seconds.textContent = '00';
                     return;
                 }
                 
-                // Показываем только активные цели (до 3 штук)
-                const activeGoals = this.state.goals.filter(g => !g.isCompleted).slice(0, 3);
-                const completedGoals = this.state.goals.filter(g => g.isCompleted);
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                 
-                let goalsHTML = '';
-                
-                activeGoals.forEach(goal => {
-                    const progress = this.calculateGoalProgress(goal);
-                    const remaining = goal.targetAmount - goal.currentAmount;
-                    const monthlySaving = remaining / goal.deadline;
-                    
-                    goalsHTML += `
-                        <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                            <div class="flex justify-between mb-2">
-                                <div class="flex items-center">
-                                    <h3 class="font-semibold text-gray-800 truncate">${goal.name}</h3>
-                                    <span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${goal.category}</span>
-                                </div>
-                                <span class="text-sm font-bold text-primary whitespace-nowrap">${this.formatAmount(goal.targetAmount)}</span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-sm text-gray-600">Прогресс</span>
-                                    <span class="text-sm font-bold">${progress}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="progress-bar bg-primary h-2 rounded-full" style="width: ${progress}%"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex justify-between text-sm text-gray-600">
-                                <div>
-                                    <div>Собрано: ${this.formatAmount(goal.currentAmount)}</div>
-                                    <div class="text-xs">Осталось: ${this.formatAmount(remaining)}</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-xs">Ежемесячно:</div>
-                                    <div class="font-medium">${this.formatAmount(monthlySaving)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                // Если есть завершенные цели, добавляем счетчик
-                if (completedGoals.length > 0) {
-                    goalsHTML += `
-                        <div class="text-center text-sm text-gray-500 mt-4">
-                            <i class="fas fa-trophy text-yellow-500 mr-1"></i>
-                            Достигнуто целей: ${completedGoals.length}
-                        </div>
-                    `;
-                }
-                
-                goalsList.innerHTML = goalsHTML;
+                elements.timer.days.textContent = days.toString().padStart(2, '0');
+                elements.timer.hours.textContent = hours.toString().padStart(2, '0');
+                elements.timer.minutes.textContent = minutes.toString().padStart(2, '0');
+                elements.timer.seconds.textContent = seconds.toString().padStart(2, '0');
             }
             
-            // Рендер транзакций
-            renderTransactions() {
-                const transactionsList = document.getElementById('transactionsList');
-                
-                if (!transactionsList) return;
-                
-                if (this.state.transactions.length === 0) {
-                    transactionsList.innerHTML = `
-                        <div class="text-center text-gray-500 py-8">
-                            <i class="fas fa-exchange-alt text-3xl mb-3 opacity-50"></i>
-                            <p>Операций пока нет</p>
-                            <p class="text-sm mt-2">Начните отслеживать свои финансы!</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Показываем последние 10 транзакций
-                const recentTransactions = this.state.transactions.slice(0, 10);
-                
-                transactionsList.innerHTML = recentTransactions.map(transaction => {
-                    const isIncome = transaction.type === 'income';
-                    const categoryIcons = {
-                        salary: 'fa-money-check-alt',
-                        freelance: 'fa-laptop-code',
-                        gift: 'fa-gift',
-                        food: 'fa-utensils',
-                        transport: 'fa-bus',
-                        entertainment: 'fa-film',
-                        shopping: 'fa-shopping-bag',
-                        bills: 'fa-file-invoice-dollar',
-                        income: 'fa-arrow-down',
-                        expense: 'fa-arrow-up'
-                    };
-                    
-                    const icon = categoryIcons[transaction.category] || (isIncome ? 'fa-arrow-down' : 'fa-arrow-up');
-                    
-                    return `
-                        <div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 rounded px-2 transition-colors">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-lg ${isIncome ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center">
-                                    <i class="fas ${icon} ${isIncome ? 'text-green-600' : 'text-red-600'}"></i>
-                                </div>
-                                <div>
-                                    <div class="font-medium text-gray-800">${transaction.description || 'Без описания'}</div>
-                                    <div class="text-sm text-gray-500">${this.formatDate(transaction.date)} • ${transaction.category}</div>
-                                </div>
-                            </div>
-                            <div class="${isIncome ? 'text-green-600' : 'text-red-600'} font-semibold whitespace-nowrap">
-                                ${isIncome ? '+' : '-'}${this.formatAmount(transaction.amount)}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
+            updateTimer();
+            newYearTimer = setInterval(updateTimer, 1000);
+        }
+
+        // Обновление мотивационной цитаты
+        function updateMotivationQuote() {
+            const randomQuote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
+            elements.motivationQuote.textContent = `"${randomQuote}"`;
             
-            // Рендер статистики
-            renderStats() {
-                // Активные цели
-                const activeGoals = this.state.goals.filter(g => !g.isCompleted).length;
-                const completedGoals = this.state.goals.filter(g => g.isCompleted).length;
+            // Обновляем ближайшую цель
+            if (goals.length > 0) {
+                const nextGoal = goals.reduce((prev, curr) => 
+                    (curr.amount > currentBalance && curr.amount < prev.amount) ? curr : prev
+                , { amount: Infinity });
                 
-                document.getElementById('activeGoals').textContent = activeGoals;
-                document.getElementById('completedGoals').textContent = completedGoals;
-                
-                // Месячная статистика
-                const monthlyStats = this.calculateMonthlyStats();
-                document.getElementById('monthlyAverage').textContent = this.formatAmount(monthlyStats.savings);
-            }
-            
-            // Рендер прогресса целей
-            renderGoalsProgress() {
-                const goalsProgress = document.getElementById('goalsProgress');
-                
-                if (!goalsProgress) return;
-                
-                const activeGoals = this.state.goals.filter(g => !g.isCompleted);
-                
-                if (activeGoals.length === 0) {
-                    goalsProgress.innerHTML = `
-                        <div class="text-center py-4 text-gray-500">
-                            <i class="fas fa-bullseye text-3xl mb-2 opacity-50"></i>
-                            <p class="text-sm">Нет активных целей</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Показываем прогресс для 2 целей
-                const goalsToShow = activeGoals.slice(0, 2);
-                
-                goalsProgress.innerHTML = goalsToShow.map(goal => {
-                    const progress = this.calculateGoalProgress(goal);
-                    
-                    return `
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-sm">
-                                <span class="font-medium truncate">${goal.name}</span>
-                                <span class="font-bold">${progress}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="progress-bar bg-primary h-2 rounded-full" style="width: ${progress}%"></div>
-                            </div>
-                            <div class="text-xs text-gray-500 flex justify-between">
-                                <span>${this.formatAmount(goal.currentAmount)}</span>
-                                <span>${this.formatAmount(goal.targetAmount)}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            // Рендер цитаты
-            renderQuote() {
-                const quote = this.getRandomQuote();
-                document.getElementById('motivationQuote').textContent = `"${quote.text}"`;
-                
-                // Автора показываем в отдельном элементе
-                const quoteAuthor = document.querySelector('#motivationQuote + .text-sm');
-                if (quoteAuthor) {
-                    quoteAuthor.textContent = `— ${quote.author}`;
-                }
-            }
-            
-            // Управление модальными окнами
-            showModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    
-                    // Фокус на первое поле ввода
-                    const firstInput = modal.querySelector('input, textarea, select');
-                    if (firstInput) {
-                        setTimeout(() => firstInput.focus(), 100);
-                    }
-                }
-            }
-            
-            hideModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('flex');
-                    modal.classList.add('hidden');
-                    
-                    // Сброс формы
-                    const form = modal.querySelector('form');
-                    if (form) {
-                        form.reset();
-                    }
-                }
-            }
-            
-            // Переключение темы
-            toggleTheme() {
-                this.state.darkMode = !this.state.darkMode;
-                
-                if (this.state.darkMode) {
-                    document.documentElement.classList.add('dark');
-                    document.querySelector('#themeToggle i').classList.remove('fa-moon');
-                    document.querySelector('#themeToggle i').classList.add('fa-sun');
+                if (nextGoal.amount !== Infinity) {
+                    elements.nextGoalAmount.textContent = nextGoal.amount.toLocaleString('ru-RU');
                 } else {
-                    document.documentElement.classList.remove('dark');
-                    document.querySelector('#themeToggle i').classList.remove('fa-sun');
-                    document.querySelector('#themeToggle i').classList.add('fa-moon');
+                    elements.nextGoalAmount.textContent = 'Установите первую цель!';
                 }
-                
-                localStorage.setItem('darkMode', this.state.darkMode);
-                this.showToast(`Тема переключена на ${this.state.darkMode ? 'темную' : 'светлую'}`, 'success');
-            }
-            
-            // Установка PWA
-            installPWA() {
-                if (this.state.deferredPrompt) {
-                    this.state.deferredPrompt.prompt();
-                    this.state.deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('Пользователь принял установку');
-                        } else {
-                            console.log('Пользователь отклонил установку');
-                        }
-                        this.state.deferredPrompt = null;
-                    });
-                } else {
-                    this.showNotification('Используйте меню браузера для установки', 'info');
-                }
-            }
-            
-            // Установка горячих клавиш
-            setupKeyboardShortcuts() {
-                document.addEventListener('keydown', (e) => {
-                    // Ctrl+Enter для сохранения (в формах)
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        const activeModal = document.querySelector('.modal:not(.hidden)');
-                        if (activeModal) {
-                            const submitBtn = activeModal.querySelector('button[type="submit"]');
-                            if (submitBtn) {
-                                submitBtn.click();
-                            }
-                        }
-                    }
-                    
-                    // Escape для закрытия модалок
-                    if (e.key === 'Escape') {
-                        this.hideModal('addMoneyModal');
-                        this.hideModal('withdrawMoneyModal');
-                        this.hideModal('addGoalModal');
-                    }
-                    
-                    // Быстрые клавиши для добавления
-                    if (e.key === '+' && e.ctrlKey) {
-                        e.preventDefault();
-                        this.showModal('addMoneyModal');
-                    }
-                    
-                    if (e.key === '-' && e.ctrlKey) {
-                        e.preventDefault();
-                        this.showModal('withdrawMoneyModal');
-                    }
-                });
-            }
-            
-            // Инициализация UI событий
-            initUIEvents() {
-                const app = this;
-                
-                // Переключение темы
-                document.getElementById('themeToggle').addEventListener('click', () => {
-                    app.toggleTheme();
-                });
-                
-                // Пополнение баланса
-                document.getElementById('addMoney').addEventListener('click', () => {
-                    app.showModal('addMoneyModal');
-                });
-                
-                // Снятие средств
-                document.getElementById('withdrawMoney').addEventListener('click', () => {
-                    app.showModal('withdrawMoneyModal');
-                });
-                
-                // Новая цель
-                document.getElementById('addGoal').addEventListener('click', () => {
-                    app.showModal('addGoalModal');
-                });
-                
-                // Быстрые кнопки пополнения
-                document.querySelectorAll('.quick-action').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const amount = parseInt(btn.dataset.amount);
-                        if (amount > 0) {
-                            app.addTransaction('income', amount, 'Быстрое пополнение', 'income');
-                            app.renderUI();
-                        }
-                    });
-                });
-                
-                // Очистка истории
-                document.getElementById('clearHistory').addEventListener('click', () => {
-                    if (confirm('Вы уверены, что хотите очистить всю историю операций?')) {
-                        app.clearTransactions();
-                        app.renderUI();
-                    }
-                });
-                
-                // Новая цитата
-                document.getElementById('newQuoteBtn').addEventListener('click', () => {
-                    app.renderQuote();
-                    app.showToast('Новая финансовая мудрость!', 'info');
-                });
-                
-                // Установка PWA
-                document.getElementById('installPWA').addEventListener('click', () => {
-                    app.installPWA();
-                });
-                
-                // Закрытие модальных окон
-                document.getElementById('closeAddMoneyModal').addEventListener('click', () => {
-                    app.hideModal('addMoneyModal');
-                });
-                
-                document.getElementById('cancelAddMoney').addEventListener('click', () => {
-                    app.hideModal('addMoneyModal');
-                });
-                
-                document.getElementById('closeWithdrawMoneyModal').addEventListener('click', () => {
-                    app.hideModal('withdrawMoneyModal');
-                });
-                
-                document.getElementById('cancelWithdrawMoney').addEventListener('click', () => {
-                    app.hideModal('withdrawMoneyModal');
-                });
-                
-                document.getElementById('closeAddGoalModal').addEventListener('click', () => {
-                    app.hideModal('addGoalModal');
-                });
-                
-                document.getElementById('cancelAddGoal').addEventListener('click', () => {
-                    app.hideModal('addGoalModal');
-                });
-                
-                // Закрытие модальных окон по клику вне
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            app.hideModal(modal.id);
-                        }
-                    });
-                });
-                
-                // Форма пополнения
-                document.getElementById('addMoneyForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const amount = document.getElementById('addAmount').value;
-                    const description = document.getElementById('addDescription').value;
-                    const category = document.getElementById('addCategory').value;
-                    
-                    if (amount && parseFloat(amount) > 0) {
-                        app.addTransaction('income', amount, description, category);
-                        app.hideModal('addMoneyModal');
-                        app.renderUI();
-                    } else {
-                        app.showToast('Введите корректную сумму!', 'error');
-                    }
-                });
-                
-                // Форма снятия
-                document.getElementById('withdrawMoneyForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const amount = document.getElementById('withdrawAmount').value;
-                    const description = document.getElementById('withdrawDescription').value;
-                    const category = document.getElementById('withdrawCategory').value;
-                    
-                    if (amount && parseFloat(amount) > 0) {
-                        if (parseFloat(amount) <= app.state.currentBalance) {
-                            app.addTransaction('expense', amount, description, category);
-                            app.hideModal('withdrawMoneyModal');
-                            app.renderUI();
-                        } else {
-                            app.showToast('Недостаточно средств на балансе!', 'error');
-                        }
-                    } else {
-                        app.showToast('Введите корректную сумму!', 'error');
-                    }
-                });
-                
-                // Форма создания цели
-                document.getElementById('addGoalForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const name = document.getElementById('goalName').value;
-                    const targetAmount = document.getElementById('goalAmount').value;
-                    const currentAmount = document.getElementById('goalCurrent').value || 0;
-                    const description = document.getElementById('goalDescription').value;
-                    const category = document.getElementById('goalCategory').value;
-                    const deadline = document.getElementById('goalDeadline').value || 12;
-                    
-                    if (name && targetAmount && parseFloat(targetAmount) > 0) {
-                        app.addGoal(name, targetAmount, currentAmount, description, category, deadline);
-                        app.hideModal('addGoalModal');
-                        app.renderUI();
-                    } else {
-                        app.showToast('Заполните обязательные поля!', 'error');
-                    }
-                });
+            } else {
+                elements.nextGoalAmount.textContent = 'Установите первую цель!';
             }
         }
-        
-        // Инициализация приложения при загрузке страницы
+
+        // Сохранение в localStorage
+        function saveData() {
+            localStorage.setItem('piggyBankBalance', currentBalance.toString());
+            localStorage.setItem('piggyBankGoals', JSON.stringify(goals));
+            localStorage.setItem('piggyBankTransactions', JSON.stringify(transactions));
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            // Обновление баланса
+            elements.currentBalance.textContent = currentBalance.toLocaleString('ru-RU');
+            
+            // Рендер целей
+            renderGoals();
+            
+            // Рендер транзакций
+            renderTransactions();
+            
+            // Обновление мотивации
+            updateMotivationQuote();
+            
+            // Сохранение данных
+            saveData();
+        }
+
+        // Рендер целей
+        function renderGoals() {
+            const goalsList = elements.goalsList;
+            goalsList.innerHTML = '';
+
+            if (goals.length === 0) {
+                goalsList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-gifts text-4xl mb-4 text-accent"></i>
+                        <p>У вас пока нет целей</p>
+                        <p class="text-sm mt-2">Создайте первую цель для мотивации!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            goals.forEach(goal => {
+                const progress = Math.min((currentBalance / goal.amount) * 100, 100);
+                const remaining = Math.max(0, goal.amount - currentBalance);
+                const isAchieved = currentBalance >= goal.amount;
+                
+                const goalElement = document.createElement('div');
+                goalElement.className = `bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors ${isAchieved ? 'border-2 border-success' : ''}`;
+                goalElement.innerHTML = `
+                    <div class="flex justify-between mb-2">
+                        <div class="flex items-center">
+                            <h3 class="font-semibold text-gray-800 truncate">${goal.name}</h3>
+                            ${isAchieved ? '<span class="ml-2 text-xs bg-success text-white px-2 py-1 rounded">Достигнуто!</span>' : ''}
+                        </div>
+                        <span class="text-sm font-bold ${isAchieved ? 'text-success' : 'text-primary'} whitespace-nowrap">${goal.amount.toLocaleString('ru-RU')}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div class="h-2 rounded-full transition-all duration-500 ${isAchieved ? 'bg-success' : 'bg-accent'}" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm ${isAchieved ? 'text-success' : 'text-gray-600'}">
+                        <span>Прогресс: ${progress.toFixed(1)}%</span>
+                        <span>${isAchieved ? 'Цель достигнута!' : `Осталось: ${remaining.toLocaleString('ru-RU')}`}</span>
+                    </div>
+                `;
+                goalsList.appendChild(goalElement);
+            });
+        }
+
+        // Рендер транзакций
+        function renderTransactions() {
+            const transactionsList = elements.transactionsList;
+            transactionsList.innerHTML = '';
+
+            if (transactions.length === 0) {
+                transactionsList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-scroll text-4xl mb-4"></i>
+                        <p>Операций пока нет</p>
+                        <p class="text-sm mt-2">Начните пополнять копилку!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Показываем последние 15 транзакций
+            transactions.slice().reverse().slice(0, 15).forEach(transaction => {
+                const isPositive = transaction.amount > 0;
+                const transactionElement = document.createElement('div');
+                transactionElement.className = 'flex justify-between items-center py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 rounded px-2';
+                transactionElement.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas ${isPositive ? 'fa-plus-circle text-success' : 'fa-minus-circle text-red-500'}"></i>
+                        <div>
+                            <div class="font-medium text-gray-800 truncate max-w-[150px]">${transaction.description || 'Без описания'}</div>
+                            <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString('ru-RU')}</div>
+                        </div>
+                    </div>
+                    <div class="${isPositive ? 'text-success' : 'text-red-500'} font-semibold whitespace-nowrap">
+                        ${isPositive ? '+' : ''}${transaction.amount.toLocaleString('ru-RU')}
+                    </div>
+                `;
+                transactionsList.appendChild(transactionElement);
+            });
+        }
+
+        // Добавление транзакции
+        function addTransaction(amount, description) {
+            const transaction = {
+                id: Date.now(),
+                amount,
+                description: description || 'Без описания',
+                date: new Date().toISOString()
+            };
+            
+            transactions.push(transaction);
+            currentBalance += amount;
+            
+            // Ограничиваем историю 50 записями
+            if (transactions.length > 50) {
+                transactions = transactions.slice(-50);
+            }
+            
+            updateUI();
+            
+            // Показываем уведомление
+            showNotification(`${amount > 0 ? 'Пополнено' : 'Снято'} ${Math.abs(amount).toLocaleString('ru-RU')}`, amount > 0 ? 'success' : 'error');
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-success' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-primary'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Анимация появления
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Автоматическое скрытие
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Управление модальными окнами
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideModal(modal) {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // Очистка полей формы
+        function clearForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) form.reset();
+        }
+
+        // Обработчики событий
+        function setupEventListeners() {
+            // Кнопки действий
+            document.getElementById('addMoney').onclick = () => {
+                showModal(elements.modals.addMoney);
+                document.getElementById('addAmount').focus();
+            };
+
+            document.getElementById('withdrawMoney').onclick = () => {
+                showModal(elements.modals.withdrawMoney);
+                document.getElementById('withdrawAmount').focus();
+            };
+
+            document.getElementById('addGoal').onclick = () => {
+                showModal(elements.modals.addGoal);
+                document.getElementById('goalName').focus();
+            };
+
+            // Быстрые кнопки
+            document.querySelectorAll('.quick-action').forEach(btn => {
+                btn.onclick = () => {
+                    addTransaction(parseInt(btn.dataset.amount), 'Быстрое пополнение');
+                };
+            });
+
+            // Подтверждение действий
+            document.getElementById('confirmAdd').onclick = () => {
+                const amount = parseFloat(document.getElementById('addAmount').value);
+                const description = document.getElementById('addDescription').value;
+                
+                if (amount > 0) {
+                    addTransaction(amount, description);
+                    hideModal(elements.modals.addMoney);
+                    clearForm('addAmount');
+                } else {
+                    showNotification('Введите корректную сумму!', 'error');
+                }
+            };
+
+            document.getElementById('confirmWithdraw').onclick = () => {
+                const amount = parseFloat(document.getElementById('withdrawAmount').value);
+                const description = document.getElementById('withdrawDescription').value;
+                
+                if (amount > 0 && amount <= currentBalance) {
+                    addTransaction(-amount, description);
+                    hideModal(elements.modals.withdrawMoney);
+                    clearForm('withdrawAmount');
+                } else if (amount > currentBalance) {
+                    showNotification('Недостаточно средств на счете!', 'error');
+                } else {
+                    showNotification('Введите корректную сумму!', 'error');
+                }
+            };
+
+            document.getElementById('confirmGoal').onclick = () => {
+                const name = document.getElementById('goalName').value.trim();
+                const amount = parseFloat(document.getElementById('goalAmount').value);
+                
+                if (name && amount > 0) {
+                    goals.push({ 
+                        id: Date.now(), 
+                        name, 
+                        amount 
+                    });
+                    hideModal(elements.modals.addGoal);
+                    clearForm('goalName');
+                    showNotification(`Цель "${name}" создана!`, 'success');
+                    updateUI();
+                } else {
+                    showNotification('Заполните все поля корректно!', 'error');
+                }
+            };
+
+            // Отмена действий
+            document.getElementById('cancelAdd').onclick = () => {
+                hideModal(elements.modals.addMoney);
+                clearForm('addAmount');
+            };
+            
+            document.getElementById('cancelWithdraw').onclick = () => {
+                hideModal(elements.modals.withdrawMoney);
+                clearForm('withdrawAmount');
+            };
+            
+            document.getElementById('cancelGoal').onclick = () => {
+                hideModal(elements.modals.addGoal);
+                clearForm('goalName');
+            };
+
+            // Закрытие модальных окон по клику вне
+            Object.values(elements.modals).forEach(modal => {
+                modal.onclick = (e) => {
+                    if (e.target === modal) hideModal(modal);
+                };
+            });
+
+            // Переключение темы
+            document.getElementById('themeToggle').onclick = () => {
+                const isDark = document.body.classList.toggle('bg-gray-900');
+                document.body.classList.toggle('text-white', isDark);
+                
+                const icon = document.querySelector('#themeToggle i');
+                icon.classList.toggle('fa-moon', !isDark);
+                icon.classList.toggle('fa-sun', isDark);
+                icon.classList.toggle('text-gray-600', !isDark);
+                icon.classList.toggle('text-yellow-400', isDark);
+                
+                showNotification(isDark ? 'Тёмная тема включена' : 'Светлая тема включена');
+            };
+
+            // Закрытие по клавише Escape
+            document.onkeydown = (e) => {
+                if (e.key === 'Escape') {
+                    Object.values(elements.modals).forEach(hideModal);
+                }
+            };
+
+            // Смена мотивационной цитаты при клике
+            elements.motivationQuote.parentElement.onclick = updateMotivationQuote;
+        }
+
+        // Инициализация приложения
         document.addEventListener('DOMContentLoaded', () => {
-            window.financeTracker = new FinanceTrackerApp();
+            initializeApp();
+            setupEventListeners();
         });
     </script>
 </body>
